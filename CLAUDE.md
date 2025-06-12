@@ -182,6 +182,22 @@ cd backend && deno task build
 7. Request review and address feedback
 8. Merge after approval and CI passes
 
+#### Creating Pull Requests with Template (CLI)
+
+**For Claude Code CLI operations:**
+```bash
+# Create PR with template, then edit content
+gh pr create --title "Your PR Title" \
+  --label "appropriate,labels" \
+  --body-file ".github/pull_request_template.md"
+
+# Edit the PR to fill in template sections
+gh pr edit [PR_NUMBER] --body "$(cat <<'EOF'
+[Fill in the template content here with proper checkboxes, descriptions, etc.]
+EOF
+)"
+```
+
 **Note**: CHANGELOG.md is now automatically managed by tagpr - no manual updates needed!
 
 ### Labels
