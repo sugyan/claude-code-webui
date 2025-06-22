@@ -90,7 +90,7 @@ jobs:
       - name: Record demo videos
         run: |
           cd frontend
-          npm run record:demo codeGeneration -- --theme=both
+          npm run record-demo codeGeneration -- --theme=both
         continue-on-error: true
 
       - name: Download build artifacts
