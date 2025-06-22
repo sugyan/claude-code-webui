@@ -1,8 +1,10 @@
 name: Demo Comparison
 
 on:
-  release:
-    types: [published]
+  workflow_run:
+    workflows: ["Release"]
+    types: [completed]
+    branches: [main]
   workflow_dispatch:
     inputs:
       release_tag:
@@ -19,6 +21,8 @@ jobs:
   compare-demos:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # Only run if the triggering workflow was successful
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
 
     steps:
       - name: Checkout code
@@ -43,19 +47,26 @@ jobs:
       - name: Determine release tag
         id: release-tag
         run: |
-          if [ "${{ github.event_name }}" = "release" ]; then
-            RELEASE_TAG="${{ github.event.release.tag_name }}"
-          else
+          if [ "${{ github.event_name }}" = "workflow_run" ]; then
+            # Get the latest release tag from the completed workflow
+            RELEASE_TAG=$(gh release list --limit 1 --json tagName --jq '.[0].tagName')
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             RELEASE_TAG="${{ github.event.inputs.release_tag }}"
+          else
+            echo "❌ Unsupported event type: ${{ github.event_name }}"
+            exit 1
           fi
           echo "release_tag=$RELEASE_TAG" >> $GITHUB_OUTPUT
           echo "🏷️ Using release tag: $RELEASE_TAG"
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       - name: Extract README video URL
         id: extract-readme
         run: |
           # Extract the demo video URL from README.md (should be only one)
-          README_URL=$(grep -o 'https://[^)]*\.webm' README.md | head -1)
+          # Look for lines containing 'webm' and extract user-attachments URL
+          README_URL=$(grep 'webm' README.md | grep -o 'https://github.com/user-attachments/assets/[a-f0-9-]*' | head -1)
 
           if [ -z "$README_URL" ]; then
             echo "⚠️ No video URL found in README.md"
@@ -179,7 +190,7 @@ jobs:
             - **Release**: ${releaseTag}
             - **Repository**: ${repositoryUrl}
             - **Comparison threshold**: ${{ github.event.inputs.threshold || '95' }}%
-            - **Detected**: ${{ github.event_name == 'release' && 'Automatically after release' || 'Manual workflow trigger' }}
+            - **Detected**: ${{ github.event_name == 'workflow_run' && 'Automatically after release workflow' || 'Manual workflow trigger' }}
 
             ---
 
@@ -223,7 +234,7 @@ jobs:
           echo "| Item | Value |" >> $GITHUB_STEP_SUMMARY
           echo "|------|-------|" >> $GITHUB_STEP_SUMMARY
           echo "| Release Tag | ${{ steps.release-tag.outputs.release_tag }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Trigger | ${{ github.event_name == 'release' && 'Automatic (release published)' || 'Manual workflow dispatch' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Trigger | ${{ github.event_name == 'workflow_run' && 'Automatic (after release workflow)' || 'Manual workflow dispatch' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| README Video | ${{ steps.extract-readme.outputs.readme_found == 'true' && '✅ Found' || '❌ Not found' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Release Video | ${{ steps.download-release.outputs.release_found == 'true' && '✅ Found' || '❌ Not found' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Comparison Result | ${{ steps.compare.outputs.comparison_result == 'changes_detected' && '🔄 Changes detected' || steps.compare.outputs.comparison_result == 'no_changes' && '✅ No changes' || 'ℹ️ Skipped' }} |" >> $GITHUB_STEP_SUMMARY
