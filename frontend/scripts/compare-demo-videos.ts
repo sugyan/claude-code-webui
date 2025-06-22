@@ -1,29 +1,18 @@
 #!/usr/bin/env node
 
 import { spawn } from "child_process";
-import { existsSync, readdirSync, statSync } from "fs";
-import { join } from "path";
+import { existsSync, statSync } from "fs";
 
 /**
- * Demo video comparison script for CI/CD pipeline
- * Compares new demo videos with reference videos to determine if README needs updating
+ * Demo video comparison script
+ * Compares two demo videos using frame-by-frame analysis
  */
 
 interface VideoComparisonResult {
-  scenario: string;
-  theme: string;
-  hasSignificantChanges: boolean;
   similarityPercentage: number;
   frameCountDiff: number;
   sizeDiff: number;
   details: string;
-}
-
-interface ComparisonSummary {
-  overallChangesDetected: boolean;
-  changedScenarios: string[];
-  results: VideoComparisonResult[];
-  shouldUpdateReadme: boolean;
 }
 
 async function generateFrameHashes(videoPath: string): Promise<string[]> {
@@ -60,11 +49,7 @@ async function generateFrameHashes(videoPath: string): Promise<string[]> {
   }
 }
 
-async function compareVideoFrames(video1Path: string, video2Path: string): Promise<{
-  similarityPercentage: number;
-  frameCountDiff: number;
-  details: string;
-}> {
+async function compareVideoFrames(video1Path: string, video2Path: string): Promise<VideoComparisonResult> {
   const [hashes1, hashes2] = await Promise.all([
     generateFrameHashes(video1Path),
     generateFrameHashes(video2Path)
@@ -74,13 +59,13 @@ async function compareVideoFrames(video1Path: string, video2Path: string): Promi
     return {
       similarityPercentage: 0,
       frameCountDiff: Math.abs(hashes1.length - hashes2.length),
+      sizeDiff: 0,
       details: "Could not generate frame hashes for comparison"
     };
   }
   
   const minFrames = Math.min(hashes1.length, hashes2.length);
-  const maxFrames = Math.max(hashes1.length, hashes2.length);
-  const frameCountDiff = maxFrames - minFrames;
+  const frameCountDiff = Math.abs(hashes1.length - hashes2.length);
   
   let identicalFrames = 0;
   
@@ -99,186 +84,122 @@ async function compareVideoFrames(video1Path: string, video2Path: string): Promi
     details += `, Frame count difference: ${frameCountDiff}`;
   }
   
-  return { similarityPercentage, frameCountDiff, details };
-}
-
-function getVideoFiles(dir: string, pattern?: string): string[] {
-  if (!existsSync(dir)) {
-    return [];
-  }
+  // Get file sizes
+  const size1 = statSync(video1Path).size;
+  const size2 = statSync(video2Path).size;
+  const sizeDiff = Math.abs(size1 - size2);
   
-  return readdirSync(dir)
-    .filter(file => file.endsWith('.webm'))
-    .filter(file => !pattern || file.includes(pattern))
-    .map(file => join(dir, file));
-}
-
-function parseVideoFilename(filename: string): { scenario: string; theme: string; timestamp: string } | null {
-  // Expected format: scenario-theme-timestamp.webm or scenario-timestamp.webm
-  const match = filename.match(/^([^-]+)(?:-([^-]+))?-(\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2})\.webm$/);
-  if (!match) {
-    return null;
-  }
-  
-  const [, scenario, theme, timestamp] = match;
-  return {
-    scenario,
-    theme: theme || 'light',
-    timestamp
+  return { 
+    similarityPercentage, 
+    frameCountDiff, 
+    sizeDiff,
+    details 
   };
 }
 
-async function compareVideos(
-  currentVideosDir: string,
-  referenceVideosDir: string,
-  threshold: number = 95 // Similarity threshold percentage
-): Promise<ComparisonSummary> {
-  const currentVideos = getVideoFiles(currentVideosDir);
-  const referenceVideos = getVideoFiles(referenceVideosDir);
+async function compareVideos(video1Path: string, video2Path: string, threshold: number = 95): Promise<boolean> {
+  console.log('🎬 Demo Video Comparison Tool');
+  console.log('==============================');
+  console.log(`Video 1: ${video1Path}`);
+  console.log(`Video 2: ${video2Path}`);
+  console.log(`Similarity threshold: ${threshold}%`);
+  console.log('');
+
+  // Check if files exist
+  if (!existsSync(video1Path)) {
+    console.error(`❌ Video 1 not found: ${video1Path}`);
+    return false;
+  }
   
-  console.log(`🔍 Comparing ${currentVideos.length} current videos with ${referenceVideos.length} reference videos`);
+  if (!existsSync(video2Path)) {
+    console.error(`❌ Video 2 not found: ${video2Path}`);
+    return false;
+  }
+
+  console.log('🔍 Comparing videos...');
   
-  const results: VideoComparisonResult[] = [];
-  const changedScenarios: Set<string> = new Set();
-  
-  for (const currentVideo of currentVideos) {
-    const currentFilename = currentVideo.split('/').pop()!;
-    const parsed = parseVideoFilename(currentFilename);
+  try {
+    const result = await compareVideoFrames(video1Path, video2Path);
     
-    if (!parsed) {
-      console.warn(`⚠️ Could not parse filename: ${currentFilename}`);
-      continue;
+    console.log('📊 Comparison Results:');
+    console.log('=' .repeat(50));
+    console.log(`Similarity: ${result.similarityPercentage.toFixed(1)}%`);
+    console.log(`${result.details}`);
+    
+    if (result.sizeDiff > 0) {
+      console.log(`Size difference: ${result.sizeDiff} bytes`);
     }
     
-    const { scenario, theme } = parsed;
-    
-    // Find matching reference video
-    const matchingReference = referenceVideos.find(refVideo => {
-      const refFilename = refVideo.split('/').pop()!;
-      const refParsed = parseVideoFilename(refFilename);
-      return refParsed && refParsed.scenario === scenario && refParsed.theme === theme;
-    });
-    
-    if (!matchingReference) {
-      console.log(`📹 New video detected: ${scenario} (${theme})`);
-      results.push({
-        scenario,
-        theme,
-        hasSignificantChanges: true,
-        similarityPercentage: 0,
-        frameCountDiff: 0,
-        sizeDiff: 0,
-        details: "New video - no reference to compare"
-      });
-      changedScenarios.add(scenario);
-      continue;
-    }
-    
-    console.log(`🔄 Comparing ${scenario} (${theme})...`);
-    
-    // Get file sizes
-    const currentSize = statSync(currentVideo).size;
-    const referenceSize = statSync(matchingReference).size;
-    const sizeDiff = Math.abs(currentSize - referenceSize);
-    
-    // Compare frames
-    const comparison = await compareVideoFrames(currentVideo, matchingReference);
-    const hasSignificantChanges = comparison.similarityPercentage < threshold;
-    
-    results.push({
-      scenario,
-      theme,
-      hasSignificantChanges,
-      similarityPercentage: comparison.similarityPercentage,
-      frameCountDiff: comparison.frameCountDiff,
-      sizeDiff,
-      details: comparison.details
-    });
+    const hasSignificantChanges = result.similarityPercentage < threshold;
     
     if (hasSignificantChanges) {
-      changedScenarios.add(scenario);
-      console.log(`📊 ${scenario} (${theme}): ${comparison.similarityPercentage.toFixed(1)}% similar - CHANGED`);
+      console.log(`🔄 SIGNIFICANT CHANGES DETECTED (< ${threshold}% similar)`);
+      console.log('💡 README update may be needed');
     } else {
-      console.log(`✅ ${scenario} (${theme}): ${comparison.similarityPercentage.toFixed(1)}% similar - NO CHANGE`);
+      console.log(`✅ NO SIGNIFICANT CHANGES (>= ${threshold}% similar)`);
+      console.log('💡 README update not needed');
     }
-  }
-  
-  const overallChangesDetected = changedScenarios.size > 0;
-  const shouldUpdateReadme = overallChangesDetected;
-  
-  return {
-    overallChangesDetected,
-    changedScenarios: Array.from(changedScenarios),
-    results,
-    shouldUpdateReadme
-  };
-}
-
-function printSummary(summary: ComparisonSummary): void {
-  console.log('\n📋 Video Comparison Summary');
-  console.log('=' .repeat(50));
-  
-  if (summary.overallChangesDetected) {
-    console.log(`🔄 Changes detected in ${summary.changedScenarios.length} scenario(s):`);
-    for (const scenario of summary.changedScenarios) {
-      console.log(`   • ${scenario}`);
+    
+    // Set GitHub Actions outputs if running in CI
+    if (process.env.GITHUB_ACTIONS) {
+      console.log(`\n::set-output name=changes_detected::${hasSignificantChanges}`);
+      console.log(`::set-output name=similarity_percentage::${result.similarityPercentage.toFixed(1)}`);
     }
-    console.log(`\n💡 README update recommended: ${summary.shouldUpdateReadme ? 'YES' : 'NO'}`);
-  } else {
-    console.log('✅ No significant changes detected');
-    console.log('💡 README update needed: NO');
-  }
-  
-  console.log('\n📊 Detailed Results:');
-  console.log('-'.repeat(50));
-  
-  for (const result of summary.results) {
-    const status = result.hasSignificantChanges ? '🔄 CHANGED' : '✅ NO CHANGE';
-    console.log(`${result.scenario} (${result.theme}): ${status}`);
-    console.log(`   Similarity: ${result.similarityPercentage.toFixed(1)}%`);
-    console.log(`   ${result.details}`);
-    if (result.sizeDiff > 0) {
-      console.log(`   Size difference: ${result.sizeDiff} bytes`);
-    }
+    
+    // Return true if changes detected (for script exit code)
+    return hasSignificantChanges;
+    
+  } catch (error) {
+    console.error('❌ Video comparison failed:', error instanceof Error ? error.message : error);
+    return false;
   }
 }
 
 async function main() {
   const args = process.argv.slice(2);
   
-  if (args.length < 2) {
-    console.error('Usage: compare-demo-videos.ts <current-videos-dir> <reference-videos-dir> [threshold]');
-    console.error('Example: compare-demo-videos.ts ./demo-recordings ./reference-videos 95');
-    process.exit(1);
+  if (args.length === 0 || args.includes('--help') || args.includes('-h')) {
+    console.log('🎬 Demo Video Comparison Tool');
+    console.log('==============================');
+    console.log('');
+    console.log('Usage:');
+    console.log('  compare-demo-videos.ts <video1> <video2> [threshold]');
+    console.log('');
+    console.log('Examples:');
+    console.log('  compare-demo-videos.ts video1.webm video2.webm');
+    console.log('  compare-demo-videos.ts video1.webm video2.webm 90');
+    console.log('');
+    console.log('Options:');
+    console.log('  video1      Path to first video file');
+    console.log('  video2      Path to second video file');
+    console.log('  threshold   Similarity threshold percentage (default: 95)');
+    console.log('  --help, -h  Show this help message');
+    console.log('');
+    console.log('Exit codes:');
+    console.log('  0 - No significant changes detected');
+    console.log('  1 - Significant changes detected');
+    console.log('  2 - Error occurred');
+    process.exit(0);
   }
   
-  const [currentVideosDir, referenceVideosDir, thresholdArg] = args;
+  if (args.length < 2) {
+    console.error('❌ Insufficient arguments');
+    console.error('Usage: compare-demo-videos.ts <video1> <video2> [threshold]');
+    process.exit(2);
+  }
+  
+  const [video1Path, video2Path, thresholdArg] = args;
   const threshold = thresholdArg ? parseFloat(thresholdArg) : 95;
   
-  console.log('🎬 Demo Video Comparison Tool');
-  console.log('==============================');
-  console.log(`Current videos: ${currentVideosDir}`);
-  console.log(`Reference videos: ${referenceVideosDir}`);
-  console.log(`Similarity threshold: ${threshold}%`);
-  console.log('');
-  
   try {
-    const summary = await compareVideos(currentVideosDir, referenceVideosDir, threshold);
-    printSummary(summary);
+    const changesDetected = await compareVideos(video1Path, video2Path, threshold);
     
-    // Set GitHub Actions outputs if running in CI
-    if (process.env.GITHUB_ACTIONS) {
-      console.log(`\n::set-output name=changes_detected::${summary.overallChangesDetected}`);
-      console.log(`::set-output name=should_update_readme::${summary.shouldUpdateReadme}`);
-      console.log(`::set-output name=changed_scenarios::${summary.changedScenarios.join(',')}`);
-    }
-    
-    // Exit with code 1 if changes detected (for conditional workflow steps)
-    process.exit(summary.overallChangesDetected ? 1 : 0);
+    // Exit with code 1 if changes detected, 0 if no changes
+    process.exit(changesDetected ? 1 : 0);
     
   } catch (error) {
-    console.error('❌ Video comparison failed:', error instanceof Error ? error.message : error);
-    process.exit(1);
+    console.error('❌ Unexpected error:', error instanceof Error ? error.message : error);
+    process.exit(2);
   }
 }
 
@@ -289,4 +210,4 @@ if (
   main().catch(console.error);
 }
 
-export { compareVideos, type ComparisonSummary, type VideoComparisonResult };
+export { compareVideos, compareVideoFrames, type VideoComparisonResult };

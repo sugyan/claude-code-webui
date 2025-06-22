@@ -1,0 +1,240 @@
+name: Demo Comparison
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release tag to compare against README'
+        required: true
+        type: string
+      threshold:
+        description: 'Similarity threshold percentage'
+        required: false
+        default: '95'
+        type: string
+
+jobs:
+  compare-demos:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        run: npm ci
+        working-directory: frontend
+
+      - name: Install FFmpeg for video comparison
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+
+      - name: Determine release tag
+        id: release-tag
+        run: |
+          if [ "${{ github.event_name }}" = "release" ]; then
+            RELEASE_TAG="${{ github.event.release.tag_name }}"
+          else
+            RELEASE_TAG="${{ github.event.inputs.release_tag }}"
+          fi
+          echo "release_tag=$RELEASE_TAG" >> $GITHUB_OUTPUT
+          echo "🏷️ Using release tag: $RELEASE_TAG"
+
+      - name: Extract README video URL
+        id: extract-readme
+        run: |
+          # Extract the demo video URL from README.md (should be only one)
+          README_URL=$(grep -o 'https://[^)]*\.webm' README.md | head -1)
+          
+          if [ -z "$README_URL" ]; then
+            echo "⚠️ No video URL found in README.md"
+            echo "readme_url=" >> $GITHUB_OUTPUT
+            echo "readme_found=false" >> $GITHUB_OUTPUT
+          else
+            echo "📋 Found README video: $README_URL"
+            echo "readme_url=$README_URL" >> $GITHUB_OUTPUT
+            echo "readme_found=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Download release video
+        id: download-release
+        run: |
+          # Download codeGeneration-dark video from release
+          echo "📥 Downloading release video: codeGeneration-dark"
+          
+          if gh release download "${{ steps.release-tag.outputs.release_tag }}" --pattern "codeGeneration-dark-*.webm"; then
+            RELEASE_VIDEO=$(ls codeGeneration-dark-*.webm | head -1)
+            echo "✅ Downloaded: $RELEASE_VIDEO"
+            echo "release_video=$RELEASE_VIDEO" >> $GITHUB_OUTPUT
+            echo "release_found=true" >> $GITHUB_OUTPUT
+          else
+            echo "❌ No codeGeneration-dark video found in release"
+            echo "release_video=" >> $GITHUB_OUTPUT
+            echo "release_found=false" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Download README video
+        id: download-readme
+        if: steps.extract-readme.outputs.readme_found == 'true'
+        run: |
+          # Download video from README URL
+          README_URL="${{ steps.extract-readme.outputs.readme_url }}"
+          
+          echo "📥 Downloading README video from: $README_URL"
+          
+          if curl -L "$README_URL" -o readme-video.webm; then
+            echo "✅ Downloaded README video"
+            echo "download_success=true" >> $GITHUB_OUTPUT
+          else
+            echo "❌ Failed to download README video"
+            echo "download_success=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Compare videos
+        id: compare
+        if: |
+          steps.extract-readme.outputs.readme_found == 'true' &&
+          steps.download-release.outputs.release_found == 'true' &&
+          steps.download-readme.outputs.download_success == 'true'
+        run: |
+          cd frontend
+          
+          THRESHOLD="${{ github.event.inputs.threshold || '95' }}"
+          RELEASE_VIDEO="../${{ steps.download-release.outputs.release_video }}"
+          README_VIDEO="../readme-video.webm"
+          
+          echo "🔍 Comparing videos:"
+          echo "  Release: $RELEASE_VIDEO"
+          echo "  README: $README_VIDEO"
+          echo "  Threshold: $THRESHOLD%"
+          echo ""
+          
+          # Run comparison
+          if npx tsx scripts/compare-demo-videos.ts "$RELEASE_VIDEO" "$README_VIDEO" "$THRESHOLD"; then
+            echo "comparison_result=no_changes" >> $GITHUB_OUTPUT
+            echo "✅ No significant differences detected"
+          else
+            echo "comparison_result=changes_detected" >> $GITHUB_OUTPUT
+            echo "🔄 Significant differences detected"
+          fi
+        continue-on-error: true
+
+      - name: Create issue for README update
+        if: steps.compare.outputs.comparison_result == 'changes_detected'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const releaseTag = '${{ steps.release-tag.outputs.release_tag }}';
+            const repositoryUrl = 'https://github.com/${{ github.repository }}';
+            
+            const issueTitle = `📹 Demo videos in README may need updating (Release ${releaseTag})`;
+            
+            const issueBody = `## Demo Video Update Needed
+            
+            Our automated comparison detected differences between the demo videos referenced in README.md and the videos included in release **${releaseTag}**.
+            
+            ### What to check:
+            
+            1. **Compare videos manually:**
+               - README videos: Check links in README.md
+               - Release videos: [${releaseTag} release assets](${repositoryUrl}/releases/tag/${releaseTag})
+            
+            2. **If update is needed:**
+               - Download new videos from release assets
+               - Update README.md with new video links
+               - Ensure video descriptions match current functionality
+            
+            3. **Test the videos:**
+               - Verify videos play correctly
+               - Check that they demonstrate current features accurately
+            
+            ### How to resolve:
+            
+            \`\`\`bash
+            # Download new video from release
+            gh release download ${releaseTag} --pattern "codeGeneration-dark-*.webm"
+            
+            # Compare with current README video manually or use script:
+            cd frontend  
+            npx tsx scripts/compare-demo-videos.ts ../codeGeneration-dark-*.webm /path/to/current/readme/video.webm
+            
+            # If update needed, replace URL in README.md
+            \`\`\`
+            
+            ### Automation Details
+            
+            - **Release**: ${releaseTag}
+            - **Repository**: ${repositoryUrl}
+            - **Comparison threshold**: ${{ github.event.inputs.threshold || '95' }}%
+            - **Detected**: ${{ github.event_name == 'release' ? 'Automatically after release' : 'Manual workflow trigger' }}
+            
+            ---
+            
+            _This issue was automatically created by the demo comparison workflow. Close this issue once the README has been updated or if no update is actually needed._
+            `;
+            
+            // Check if similar issue already exists
+            const { data: existingIssues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: ['demo-update-needed'],
+              state: 'open'
+            });
+            
+            const existingIssue = existingIssues.find(issue => 
+              issue.title.includes(releaseTag)
+            );
+            
+            if (existingIssue) {
+              console.log(`ℹ️ Issue already exists for ${releaseTag}: #${existingIssue.number}`);
+              core.summary.addRaw(`⚠️ Issue already exists: #${existingIssue.number}`);
+            } else {
+              const { data: newIssue } = await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: issueTitle,
+                body: issueBody,
+                labels: ['demo-update-needed', 'documentation'],
+                assignees: ['${{ github.repository_owner }}']
+              });
+              
+              console.log(`✅ Created issue: #${newIssue.number}`);
+              core.summary.addRaw(`📝 Created issue: [#${newIssue.number}](${newIssue.html_url})`);
+            }
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Demo Comparison Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Item | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Release Tag | ${{ steps.release-tag.outputs.release_tag }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Trigger | ${{ github.event_name == 'release' && 'Automatic (release published)' || 'Manual workflow dispatch' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| README Video | ${{ steps.extract-readme.outputs.readme_found == 'true' && '✅ Found' || '❌ Not found' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Release Video | ${{ steps.download-release.outputs.release_found == 'true' && '✅ Found' || '❌ Not found' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Comparison Result | ${{ steps.compare.outputs.comparison_result == 'changes_detected' && '🔄 Changes detected' || steps.compare.outputs.comparison_result == 'no_changes' && '✅ No changes' || 'ℹ️ Skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Issue Created | ${{ steps.compare.outputs.comparison_result == 'changes_detected' && '✅ Yes' || 'ℹ️ Not needed' }} |" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ steps.compare.outputs.comparison_result }}" = "changes_detected" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### Next Steps" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "1. Check the created GitHub issue for details" >> $GITHUB_STEP_SUMMARY
+            echo "2. Compare README videos with release assets manually" >> $GITHUB_STEP_SUMMARY
+            echo "3. Update README.md if needed" >> $GITHUB_STEP_SUMMARY
+            echo "4. Close the issue once resolved" >> $GITHUB_STEP_SUMMARY
+          fi
