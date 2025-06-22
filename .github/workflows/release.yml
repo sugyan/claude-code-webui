@@ -63,78 +63,8 @@ jobs:
           name: ${{ matrix.artifact_name }}
           path: dist/${{ matrix.artifact_name }}*
 
-  demo-recording:
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    outputs:
-      videos-generated: ${{ steps.demo-workflow.outputs.videos-generated }}
-    steps:
-      - name: Trigger demo recording workflow
-        id: demo-workflow
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const { data: workflow } = await github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'demo-recording.yml',
-              ref: context.ref,
-              inputs: {
-                scenarios: 'codeGeneration',
-                themes: 'both',
-                update_readme: 'false'
-              }
-            });
-            
-            // Wait a moment for the workflow to start
-            await new Promise(resolve => setTimeout(resolve, 5000));
-            
-            // Find the workflow run
-            const { data: runs } = await github.rest.actions.listWorkflowRuns({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'demo-recording.yml',
-              head_sha: context.sha,
-              per_page: 1
-            });
-            
-            if (runs.workflow_runs.length > 0) {
-              const runId = runs.workflow_runs[0].id;
-              console.log(`Demo recording workflow started: ${runId}`);
-              
-              // Wait for the workflow to complete (with timeout)
-              let attempts = 0;
-              const maxAttempts = 60; // 30 minutes max
-              
-              while (attempts < maxAttempts) {
-                const { data: run } = await github.rest.actions.getWorkflowRun({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  run_id: runId
-                });
-                
-                if (run.status === 'completed') {
-                  console.log(`Demo recording completed with conclusion: ${run.conclusion}`);
-                  core.setOutput('videos-generated', run.conclusion === 'success' ? 'true' : 'false');
-                  break;
-                }
-                
-                console.log(`Waiting for demo recording... (${attempts + 1}/${maxAttempts})`);
-                await new Promise(resolve => setTimeout(resolve, 30000)); // Wait 30 seconds
-                attempts++;
-              }
-              
-              if (attempts >= maxAttempts) {
-                console.log('Demo recording workflow timed out');
-                core.setOutput('videos-generated', 'false');
-              }
-            } else {
-              console.log('No demo recording workflow run found');
-              core.setOutput('videos-generated', 'false');
-            }
-
   release:
-    needs: [build, demo-recording]
+    needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -142,43 +72,38 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        run: npm ci
+        working-directory: frontend
+
+      - name: Install Playwright browsers
+        run: npx playwright install chromium
+        working-directory: frontend
+
+      - name: Record demo videos
+        run: |
+          cd frontend
+          npm run record:demo codeGeneration -- --theme=both
+        continue-on-error: true
+
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
           path: ./artifacts
-
-      - name: Download demo videos if available
-        if: needs.demo-recording.outputs.videos-generated == 'true'
-        continue-on-error: true
-        run: |
-          # Try to download demo videos from the demo-recording workflow
-          mkdir -p ./demo-videos
-          
-          # Get the latest demo recording workflow run for this commit
-          DEMO_RUN_ID=$(gh run list --workflow=demo-recording.yml --commit=${{ github.sha }} --limit=1 --json databaseId --jq='.[0].databaseId')
-          
-          if [ -n "$DEMO_RUN_ID" ] && [ "$DEMO_RUN_ID" != "null" ]; then
-            echo "📥 Downloading demo videos from workflow run: $DEMO_RUN_ID"
-            gh run download $DEMO_RUN_ID --name demo-videos-* --dir ./demo-videos || true
-            
-            if [ "$(find ./demo-videos -name '*.webm' 2>/dev/null | wc -l)" -gt 0 ]; then
-              echo "✅ Demo videos downloaded successfully"
-              ls -la ./demo-videos/
-            else
-              echo "⚠️ No demo videos found in artifacts"
-            fi
-          else
-            echo "⚠️ No demo recording workflow run found for this commit"
-          fi
-        env:
-          GH_TOKEN: ${{ github.token }}
 
       - name: Create release
         uses: softprops/action-gh-release@v2
         with:
           files: |
             artifacts/*/*
-            demo-videos/**/*.webm
+            frontend/demo-recordings/*.webm
           generate_release_notes: true
           draft: false
           prerelease: false
