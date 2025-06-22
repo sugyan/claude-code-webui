@@ -25,14 +25,14 @@ async function generateFrameHashes(videoPath: string): Promise<string[]> {
         '-'
       ], { stdio: ['pipe', 'pipe', 'pipe'] });
       
-      let output = '';
+      let buffer = '';
       child.stdout.on('data', (data) => {
-        output += data.toString();
+        buffer += data.toString();
       });
       
       child.on('close', (code) => {
         if (code === 0) {
-          resolve(output);
+          resolve(buffer);
         } else {
           reject(new Error(`ffmpeg failed with code ${code}`));
         }
