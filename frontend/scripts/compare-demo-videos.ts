@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { spawn } from "child_process";
-import { existsSync, statSync } from "fs";
+import { existsSync, statSync, appendFileSync } from "fs";
 
 /**
  * Demo video comparison script
@@ -141,9 +141,9 @@ async function compareVideos(video1Path: string, video2Path: string, threshold: 
     }
     
     // Set GitHub Actions outputs if running in CI
-    if (process.env.GITHUB_ACTIONS) {
-      console.log(`\n::set-output name=changes_detected::${hasSignificantChanges}`);
-      console.log(`::set-output name=similarity_percentage::${result.similarityPercentage.toFixed(1)}`);
+    if (process.env.GITHUB_ACTIONS && process.env.GITHUB_OUTPUT) {
+      appendFileSync(process.env.GITHUB_OUTPUT, `changes_detected=${hasSignificantChanges}\n`);
+      appendFileSync(process.env.GITHUB_OUTPUT, `similarity_percentage=${result.similarityPercentage.toFixed(1)}\n`);
     }
     
     // Return true if changes detected (for script exit code)

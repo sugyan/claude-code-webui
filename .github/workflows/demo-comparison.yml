@@ -200,7 +200,7 @@ jobs:
             
             if (existingIssue) {
               console.log(`ℹ️ Issue already exists for ${releaseTag}: #${existingIssue.number}`);
-              core.summary.addRaw(`⚠️ Issue already exists: #${existingIssue.number}`);
+              await core.summary.addRaw(`⚠️ Issue already exists: #${existingIssue.number}`).write();
             } else {
               const { data: newIssue } = await github.rest.issues.create({
                 owner: context.repo.owner,
@@ -212,7 +212,7 @@ jobs:
               });
               
               console.log(`✅ Created issue: #${newIssue.number}`);
-              core.summary.addRaw(`📝 Created issue: [#${newIssue.number}](${newIssue.html_url})`);
+              await core.summary.addRaw(`📝 Created issue: [#${newIssue.number}](${newIssue.html_url})`).write();
             }
 
       - name: Summary
