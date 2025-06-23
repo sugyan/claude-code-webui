@@ -24,7 +24,7 @@ export function ChatMessageComponent({ message }: ChatMessageComponentProps) {
       alignment={isUser ? "right" : "left"}
       colorScheme={colorScheme}
     >
-      <div className="mb-2 flex items-center justify-between">
+      <div className="mb-2 flex items-center justify-between gap-4">
         <div
           className={`text-xs font-semibold opacity-90 ${
             isUser ? "text-blue-100" : "text-slate-600 dark:text-slate-400"
