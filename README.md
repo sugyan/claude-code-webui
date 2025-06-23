@@ -13,13 +13,14 @@
 
 ## 📑 Table of Contents
 
-- [✨ Why Claude Code Web UI?](#-why-claude-code-web-ui)
-- [🚀 Quick Start](#-quick-start)
-- [🔧 Development](#-development)
-- [🔒 Security Considerations](#-security-considerations)
-- [📚 Documentation](#-documentation)
-- [❓ FAQ](#-faq)
-- [📄 License](#-license)
+- [✨ Why Claude Code Web UI?](#why-claude-code-web-ui)
+- [🚀 Quick Start](#quick-start)
+- [🔧 Development](#development)
+- [🔒 Security Considerations](#security-considerations)
+- [📚 Documentation](#documentation)
+- [❓ FAQ](#faq)
+- [🤝 Contributing](#contributing)
+- [📄 License](#license)
 
 ---
 
