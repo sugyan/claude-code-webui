@@ -60,6 +60,8 @@ chmod +x claude-code-webui-macos-arm64
 
 ### Development Setup
 
+#### Quick Start
+
 1. **Start Backend**:
 
    ```bash
@@ -77,6 +79,24 @@ chmod +x claude-code-webui-macos-arm64
 3. **Access Application**: http://localhost:3000
    - First, select a project directory from the list or choose a new one
    - Then interact with Claude in the context of that project
+
+#### Port Configuration
+
+You can customize the backend port using a `.env` file in the project root:
+
+```bash
+# Create .env file for custom port
+echo "PORT=9000" > .env
+
+# Both backend and frontend will use the same port
+cd backend && deno task dev     # Starts on port 9000
+cd frontend && npm run dev      # Proxies to localhost:9000
+```
+
+**Alternative methods:**
+- Environment variable: `PORT=9000 deno task dev` (backend)
+- CLI argument: `./claude-code-webui --port 9000` (binary)
+- Frontend port: `npm run dev -- --port 4000` (if needed)
 
 ## Documentation
 

@@ -41,7 +41,7 @@ This project consists of three main components:
 ### Backend (Deno)
 
 - **Location**: `backend/`
-- **Port**: 8080 (configurable via CLI)
+- **Port**: 8080 (configurable via CLI argument or PORT environment variable)
 - **Technology**: Deno with TypeScript + Hono framework
 - **Purpose**: Executes `claude` commands and streams JSON responses to frontend
 
@@ -72,7 +72,7 @@ This project consists of three main components:
 ### Frontend (React)
 
 - **Location**: `frontend/`
-- **Port**: 3000
+- **Port**: 3000 (configurable via `--port` CLI argument to `npm run dev`)
 - **Technology**: Vite + React + SWC + TypeScript + TailwindCSS + React Router
 - **Purpose**: Provides project selection and chat interface with streaming responses
 
@@ -164,6 +164,32 @@ The application supports conversation continuity within the same chat session us
 - Node.js (for frontend)
 - Claude CLI tool installed and configured
 
+### Port Configuration
+
+The application supports flexible port configuration for development:
+
+#### Unified Backend Port Management
+
+Create a `.env` file in the project root to set the backend port:
+
+```bash
+# .env
+PORT=9000
+```
+
+Both backend startup and frontend proxy configuration will automatically use this port:
+
+```bash
+cd backend && deno task dev     # Starts backend on port 9000
+cd frontend && npm run dev      # Configures proxy to localhost:9000
+```
+
+#### Alternative Configuration Methods
+
+- **Environment Variable**: `PORT=9000 deno task dev`
+- **CLI Argument**: `deno run --env-file --allow-net --allow-run --allow-read --allow-env main.ts --port 9000`
+- **Frontend Port**: `npm run dev -- --port 4000` (for frontend UI port)
+
 ### Running the Application
 
 1. **Start Backend**:
@@ -181,8 +207,8 @@ The application supports conversation continuity within the same chat session us
    ```
 
 3. **Access Application**:
-   - Frontend: http://localhost:3000
-   - Backend API: http://localhost:8080
+   - Frontend: http://localhost:3000 (or custom port via `npm run dev -- --port XXXX`)
+   - Backend API: http://localhost:8080 (or PORT from .env file)
 
 ### Project Structure
 
@@ -238,7 +264,7 @@ The application supports conversation continuity within the same chat session us
 
 1. **Raw JSON Streaming**: Backend passes Claude JSON responses without modification to allow frontend flexibility in handling different message types.
 
-2. **Separate Ports**: Backend (8080) and frontend (3000) run on different ports to allow independent development and deployment.
+2. **Configurable Ports**: Backend port configurable via PORT environment variable or CLI argument, frontend port via CLI argument to allow independent development and deployment.
 
 3. **TypeScript Throughout**: Consistent TypeScript usage across all components with shared type definitions.
 
