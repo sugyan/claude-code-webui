@@ -7,7 +7,7 @@ import type {
 import { TimestampComponent } from "./TimestampComponent";
 import { MessageContainer } from "./messages/MessageContainer";
 import { CollapsibleDetails } from "./messages/CollapsibleDetails";
-import { MESSAGE_CONSTANTS, UI_CONSTANTS } from "../utils/constants";
+import { MESSAGE_CONSTANTS } from "../utils/constants";
 
 interface ChatMessageComponentProps {
   message: ChatMessage;
@@ -30,7 +30,7 @@ export function ChatMessageComponent({ message }: ChatMessageComponentProps) {
             isUser ? "text-blue-100" : "text-slate-600 dark:text-slate-400"
           }`}
         >
-          {isUser ? "You" : "Assistant"}
+          {isUser ? "User" : "Claude"}
         </div>
         <TimestampComponent
           timestamp={message.timestamp}
@@ -153,24 +153,11 @@ export function LoadingComponent() {
       colorScheme="bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-100"
     >
       <div className="text-xs font-semibold mb-2 opacity-90 text-slate-600 dark:text-slate-400">
-        Assistant
+        Claude
       </div>
       <div className="flex items-center gap-2 text-sm">
-        <span>Thinking</span>
-        <div className="flex gap-1">
-          <div
-            className="w-1 h-1 bg-current rounded-full animate-bounce"
-            style={{ animationDelay: UI_CONSTANTS.ANIMATION_DELAYS.BOUNCE_1 }}
-          ></div>
-          <div
-            className="w-1 h-1 bg-current rounded-full animate-bounce"
-            style={{ animationDelay: UI_CONSTANTS.ANIMATION_DELAYS.BOUNCE_2 }}
-          ></div>
-          <div
-            className="w-1 h-1 bg-current rounded-full animate-bounce"
-            style={{ animationDelay: UI_CONSTANTS.ANIMATION_DELAYS.BOUNCE_3 }}
-          ></div>
-        </div>
+        <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+        <span className="animate-pulse">Thinking...</span>
       </div>
     </MessageContainer>
   );

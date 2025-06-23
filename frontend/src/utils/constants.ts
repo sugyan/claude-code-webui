@@ -2,11 +2,6 @@
 export const UI_CONSTANTS = {
   NEAR_BOTTOM_THRESHOLD_PX: 100,
   TEXTAREA_MAX_HEIGHT: 200,
-  ANIMATION_DELAYS: {
-    BOUNCE_1: "0ms",
-    BOUNCE_2: "150ms",
-    BOUNCE_3: "300ms",
-  },
 } as const;
 
 // Keyboard shortcuts
