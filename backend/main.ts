@@ -24,6 +24,7 @@ if (args.version) {
 }
 
 const PORT = validatePort(args.port);
+const HOST = args.host;
 
 // Debug mode enabled via CLI flag or environment variable
 const DEBUG_MODE = isDebugMode(args);
@@ -233,6 +234,6 @@ app.post("/api/chat", async (c) => {
 app.use("/*", serveStatic({ root: import.meta.dirname + "/dist" }));
 
 if (import.meta.main) {
-  console.log(`🚀 Server starting on http://localhost:${PORT}`);
-  Deno.serve({ port: PORT }, app.fetch);
+  console.log(`🚀 Server starting on http://${HOST}:${PORT}`);
+  Deno.serve({ port: PORT, hostname: HOST }, app.fetch);
 }

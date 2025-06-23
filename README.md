@@ -8,26 +8,39 @@ A web-based interface for the `claude` command line tool that provides streaming
 [codeGeneration-dark-2025-06-20T15-06-24.webm](https://github.com/user-attachments/assets/559a46ae-41b9-440d-af3a-70ffe8e177fe)
 
 
-## ⚠️ Important Security Notice
+## 🔒 Security Considerations
 
-**This tool is designed for local development use only.** It executes the `claude` CLI command locally and provides a web interface to interact with it. 
+**This tool executes the `claude` CLI command locally and provides web access to it.** Please be aware of the following security considerations:
 
-⚠️ **DO NOT expose this server to the internet or public networks.** Doing so would:
-- Give external users full access to your local environment through Claude CLI
-- Allow execution of arbitrary commands on your machine
-- Potentially expose sensitive files and credentials
+### For Local Use (Recommended)
+- ✅ **Localhost access** (`127.0.0.1`) - Safest option for personal development
+- ✅ **Local network sharing** - Can be accessed by other devices on your trusted network (e.g., smartphone, tablet)
 
-Always run this tool only on `localhost` (127.0.0.1) and never bind it to public IP addresses.
+### Important Security Notes
+- ⚠️ **Network exposure**: When binding to `0.0.0.0` or your network IP, the tool becomes accessible to other devices on your network
+- ⚠️ **No authentication**: The tool currently has no built-in authentication mechanism
+- ⚠️ **Full system access**: Claude can read files and execute commands in your selected project directories
+- 🚫 **Public internet**: Never expose this tool to the public internet without proper security measures
+
+### Safe Network Usage
+```bash
+# Local only (default)
+./claude-code-webui --port 8080
+
+# Network accessible (use with caution on trusted networks only)
+./claude-code-webui --port 8080 --host 0.0.0.0
+```
 
 ## About This Tool
 
-This application serves as a **local web UI replacement** for the Claude CLI tool. Instead of interacting with Claude through the command line, you can:
+This application serves as a **web UI for the Claude CLI tool**. Instead of interacting with Claude through the command line, you can:
 
 - **Select project directories** to work with specific codebases
-- Use a modern chat interface in your browser
+- Use a modern chat interface accessible from any device on your network
 - View streaming responses in real-time
 - Access the same Claude functionality with better UX
 - Switch between different projects seamlessly
+- Use from mobile devices when connected to your local network
 
 The tool works by:
 1. Selecting a project directory from configured projects or browsing for new ones

@@ -5,20 +5,23 @@ export interface ParsedArgs {
   version: boolean;
   debug: boolean;
   port: string;
+  host: string;
 }
 
 export function parseCliArgs(): ParsedArgs {
   const args = parseArgs(Deno.args, {
     boolean: ["help", "version", "debug"],
-    string: ["port"],
+    string: ["port", "host"],
     alias: {
       "help": "h",
       "version": "v",
       "port": "p",
       "debug": "d",
+      "host": "H",
     },
     default: {
       port: Deno.env.get("PORT") || "8080", // Use PORT env var if available, fallback to CLI arg or default
+      host: "127.0.0.1", // Default to localhost only
     },
   });
 
@@ -27,6 +30,7 @@ export function parseCliArgs(): ParsedArgs {
     version: args.version,
     debug: args.debug,
     port: args.port as string,
+    host: args.host as string,
   };
 }
 
@@ -37,6 +41,9 @@ export function showHelp(): void {
   console.log("");
   console.log("Options:");
   console.log("  -p, --port <number>   Port to listen on (default: 8080)");
+  console.log(
+    "  -H, --host <address>  Host address to bind to (default: 127.0.0.1)",
+  );
   console.log(
     "  -d, --debug          Enable debug mode (also via DEBUG=true env var)",
   );
