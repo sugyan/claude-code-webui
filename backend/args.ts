@@ -18,7 +18,7 @@ export function parseCliArgs(): ParsedArgs {
       "debug": "d",
     },
     default: {
-      port: "8080",
+      port: Deno.env.get("PORT") || "8080", // Use PORT env var if available, fallback to CLI arg or default
     },
   });
 

@@ -1,6 +1,6 @@
 {
   "tasks": {
-    "dev": "deno run --allow-net --allow-run --allow-read --allow-env --watch main.ts --debug",
+    "dev": "deno run --env-file --allow-net --allow-run --allow-read --allow-env --watch main.ts --debug",
     "build": "deno compile --allow-net --allow-run --allow-read --allow-env --include ./VERSION --include ./dist --output ../dist/claude-code-webui main.ts",
     "format": "deno fmt",
     "lint": "deno lint",

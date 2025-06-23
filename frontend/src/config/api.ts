@@ -1,6 +1,6 @@
 // API configuration
 export const API_CONFIG = {
-  BASE_URL: "http://localhost:8080",
+  BASE_URL: "", // Use relative paths for API calls
   ENDPOINTS: {
     CHAT: "/api/chat",
     ABORT: "/api/abort",
