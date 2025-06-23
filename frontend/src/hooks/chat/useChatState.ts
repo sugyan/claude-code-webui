@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import type { AllMessage, ChatMessage } from "../../types";
+import { generateId } from "../../utils/id";
 
 export function useChatState() {
   const [messages, setMessages] = useState<AllMessage[]>([]);
@@ -31,7 +32,7 @@ export function useChatState() {
   }, []);
 
   const generateRequestId = useCallback(() => {
-    const requestId = crypto.randomUUID();
+    const requestId = generateId();
     setCurrentRequestId(requestId);
     return requestId;
   }, []);

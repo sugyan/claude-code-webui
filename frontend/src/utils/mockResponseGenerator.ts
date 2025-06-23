@@ -1,5 +1,6 @@
 import type { SDKMessage } from "@anthropic-ai/claude-code";
 import { generateToolPattern } from "./toolUtils";
+import { generateId } from "./id";
 
 export interface MockStreamResponse {
   type: "claude_json" | "done" | "error";
@@ -38,7 +39,7 @@ export function createAssistantMessage(
   return {
     type: "assistant",
     message: {
-      id: "msg_" + crypto.randomUUID(),
+      id: "msg_" + generateId(),
       type: "message",
       role: "assistant",
       content: [{ type: "text", text: content }],
@@ -81,12 +82,12 @@ export function createToolUseMessage(
   toolName: string,
   toolInput: Record<string, unknown>,
   sessionId: string,
-  toolUseId: string = crypto.randomUUID(),
+  toolUseId: string = generateId(),
 ): Extract<SDKMessage, { type: "assistant" }> {
   return {
     type: "assistant",
     message: {
-      id: "msg_" + crypto.randomUUID(),
+      id: "msg_" + generateId(),
       type: "message",
       role: "assistant",
       content: [
