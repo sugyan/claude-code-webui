@@ -231,31 +231,20 @@ app.post("/api/chat", async (c) => {
 });
 
 // Static file serving with SPA fallback
-// 1. Serve assets from /assets/* path
+// Serve static assets (CSS, JS, images, etc.)
 app.use("/assets/*", serveStatic({ root: import.meta.dirname + "/dist" }));
 
-// 2. Serve root level static files (favicon, etc.)
-app.get("/*", async (c) => {
-  const path = c.req.path;
+// Serve root-level static files (favicon, etc.) with SPA fallback
+app.use("/*", serveStatic({ root: import.meta.dirname + "/dist" }));
 
-  // Skip API routes (already handled above)
-  if (path.startsWith("/api/")) {
+// SPA fallback for all unmatched routes (but not API routes)
+app.get("*", async (c) => {
+  // Skip API routes
+  if (c.req.path.startsWith("/api/")) {
     return c.notFound();
   }
 
-  // For root level files with extensions, try to serve them from dist
-  if (path !== "/" && path.includes(".")) {
-    try {
-      const response = await serveStatic({
-        root: import.meta.dirname + "/dist",
-      })(c, () => Promise.resolve());
-      if (response) return response;
-    } catch {
-      // File not found, fall through to SPA fallback
-    }
-  }
-
-  // SPA fallback: serve index.html for all other routes
+  // Serve index.html for client-side routing
   try {
     const indexPath = import.meta.dirname + "/dist/index.html";
     const indexContent = await Deno.readTextFile(indexPath);
