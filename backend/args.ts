@@ -29,9 +29,13 @@ export async function parseCliArgs(): Promise<ParsedArgs> {
     .option("-p, --port <port:number>", "Port to listen on", {
       default: parseInt(Deno.env.get("PORT") || "8080", 10),
     })
-    .option("-H, --host <host:string>", "Host address to bind to", {
-      default: "127.0.0.1",
-    })
+    .option(
+      "--host <host:string>",
+      "Host address to bind to (use 0.0.0.0 for all interfaces)",
+      {
+        default: "127.0.0.1",
+      },
+    )
     .option("-d, --debug", "Enable debug mode")
     .env("DEBUG=<enable:boolean>", "Enable debug mode")
     .parse(Deno.args);
