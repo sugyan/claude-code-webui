@@ -1,8 +1,6 @@
 import { Command } from "@cliffy/command";
 
 export interface ParsedArgs {
-  help: boolean;
-  version: boolean;
   debug: boolean;
   port: number;
   host: string;
@@ -39,14 +37,8 @@ export async function parseCliArgs(): Promise<ParsedArgs> {
     .parse(Deno.args);
 
   return {
-    help: false, // Cliffy handles help automatically
-    version: false, // Cliffy handles version automatically
     debug: options.debug || false,
     port: options.port,
     host: options.host,
   };
-}
-
-export function isDebugMode(args: ParsedArgs): boolean {
-  return args.debug || Deno.env.get("DEBUG") === "true";
 }

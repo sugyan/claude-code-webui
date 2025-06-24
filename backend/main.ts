@@ -3,7 +3,7 @@ import { cors } from "hono/cors";
 import { serveStatic } from "hono/deno";
 import { AbortError, query } from "npm:@anthropic-ai/claude-code@1.0.27";
 import type { ChatRequest, StreamResponse } from "../shared/types.ts";
-import { isDebugMode, parseCliArgs } from "./args.ts";
+import { parseCliArgs } from "./args.ts";
 
 const args = await parseCliArgs();
 
@@ -11,7 +11,7 @@ const PORT = args.port;
 const HOST = args.host;
 
 // Debug mode enabled via CLI flag or environment variable
-const DEBUG_MODE = isDebugMode(args);
+const DEBUG_MODE = args.debug;
 
 const app = new Hono();
 
