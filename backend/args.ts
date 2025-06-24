@@ -20,6 +20,7 @@ export async function parseCliArgs(): Promise<ParsedArgs> {
         error instanceof Error ? error.message : String(error)
       }`,
     );
+    Deno.exit(1);
   }
 
   const { options } = await new Command()
