@@ -15,6 +15,7 @@
 
 - [✨ Why Claude Code Web UI?](#why-claude-code-web-ui)
 - [🚀 Quick Start](#quick-start)
+- [⚙️ CLI Options](#️-cli-options)
 - [🔧 Development](#development)
 - [🔒 Security Considerations](#security-considerations)
 - [📚 Documentation](#documentation)
@@ -79,6 +80,44 @@ cd frontend && npm run dev
 - ✅ **Claude CLI** installed and authenticated ([Get it here](https://github.com/anthropics/claude-code))
 - ✅ **Modern browser** (Chrome, Firefox, Safari, Edge)
 
+
+---
+
+## ⚙️ CLI Options
+
+The backend server supports the following command-line options:
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `-p, --port <port>` | Port to listen on | 8080 |
+| `--host <host>` | Host address to bind to | 127.0.0.1 |
+| `-d, --debug` | Enable debug mode | false |
+| `-h, --help` | Show help message | - |
+| `-V, --version` | Show version | - |
+
+### Environment Variables
+
+- `PORT` - Same as `--port`
+- `DEBUG` - Same as `--debug`
+
+### Examples
+
+```bash
+# Default (localhost:8080)
+./claude-code-webui
+
+# Custom port
+./claude-code-webui --port 3000
+
+# Bind to all interfaces (accessible from network)
+./claude-code-webui --host 0.0.0.0 --port 9000
+
+# Enable debug mode
+./claude-code-webui --debug
+
+# Using environment variables
+PORT=9000 DEBUG=true ./claude-code-webui
+```
 
 ---
 
