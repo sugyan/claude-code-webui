@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { serveStatic } from "hono/deno";
-import { AbortError, query } from "npm:@anthropic-ai/claude-code@1.0.27";
+import { AbortError, query } from "@anthropic-ai/claude-code";
 import type { ChatRequest, StreamResponse } from "../shared/types.ts";
 import { parseCliArgs } from "./args.ts";
 

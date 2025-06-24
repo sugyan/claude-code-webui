@@ -5,10 +5,10 @@
     "jsr:@cliffy/flags@1.0.0-rc.7": "1.0.0-rc.7",
     "jsr:@cliffy/internal@1.0.0-rc.7": "1.0.0-rc.7",
     "jsr:@cliffy/table@1.0.0-rc.7": "1.0.0-rc.7",
-    "jsr:@hono/hono@4": "4.7.11",
+    "jsr:@hono/hono@4": "4.8.2",
     "jsr:@std/fmt@~1.0.2": "1.0.8",
     "jsr:@std/text@~1.0.7": "1.0.14",
-    "npm:@anthropic-ai/claude-code@1.0.27": "1.0.27"
+    "npm:@anthropic-ai/claude-code@1.0.33": "1.0.33"
   },
   "jsr": {
     "@cliffy/command@1.0.0-rc.7": {
@@ -36,8 +36,8 @@
         "jsr:@std/fmt"
       ]
     },
-    "@hono/hono@4.7.11": {
-      "integrity": "52b9395e4f2448fbaf82a6bd7925d15e59f4055037e74d6c2f657f3618b11193"
+    "@hono/hono@4.8.2": {
+      "integrity": "74fe4fb5392ecc757a6e1d63bc9af9194f720a82ef741e4080a51d7a32799511"
     },
     "@std/fmt@1.0.8": {
       "integrity": "71e1fc498787e4434d213647a6e43e794af4fd393ef8f52062246e06f7e372b7"
@@ -47,8 +47,8 @@
     }
   },
   "npm": {
-    "@anthropic-ai/claude-code@1.0.27": {
-      "integrity": "sha512-iRKi8Ll/y/GxFqM6UZUMPTyJVirgeR/dH6WY8XnKGNL5ye4DDHRAdE4Ux4N8zssq7rriNVRPWoQGKfqmw/0foQ==",
+    "@anthropic-ai/claude-code@1.0.33": {
+      "integrity": "sha512-rKQ1C0+iSV/bS4LVfyCt2FIkIc8MnFi5EbmRAXEunNkXLCQLHfXjsqx7cLOy7c11vZwGkyf/wEp5LwaDQHdjCQ==",
       "optionalDependencies": [
         "@img/sharp-darwin-arm64",
         "@img/sharp-darwin-x64",
@@ -135,7 +135,8 @@
     "dependencies": [
       "jsr:@cliffy/command@^1.0.0-rc.7",
       "jsr:@hono/hono@4",
-      "jsr:@std/assert@1"
+      "jsr:@std/assert@1",
+      "npm:@anthropic-ai/claude-code@1.0.33"
     ]
   }
 }

@@ -373,6 +373,55 @@ cd backend && deno task build
 - **Output**: GitHub Releases with downloadable binaries
 - **Features**: Frontend is automatically bundled into each binary
 
+## Claude Code Dependency Management
+
+### Current Version Policy
+
+Both frontend and backend use **fixed versions** (without caret `^`) to ensure consistency:
+
+- **Frontend**: `frontend/package.json` - `"@anthropic-ai/claude-code": "1.0.33"`
+- **Backend**: `backend/deno.json` imports - `"@anthropic-ai/claude-code": "npm:@anthropic-ai/claude-code@1.0.33"`
+
+### Version Update Procedure
+
+When updating to a new Claude Code version (e.g., 1.0.40):
+
+1. **Check current versions**:
+   ```bash
+   # Frontend
+   grep "@anthropic-ai/claude-code" frontend/package.json
+   
+   # Backend  
+   grep "@anthropic-ai/claude-code" backend/deno.json
+   ```
+
+2. **Update Frontend**:
+   ```bash
+   # Edit frontend/package.json - change version number
+   # "@anthropic-ai/claude-code": "1.0.XX"
+   cd frontend && npm install
+   ```
+
+3. **Update Backend**:
+   ```bash
+   # Edit backend/deno.json imports - change version number
+   # "@anthropic-ai/claude-code": "npm:@anthropic-ai/claude-code@1.0.XX"
+   cd backend && rm deno.lock && deno cache main.ts
+   ```
+
+4. **Verify and test**:
+   ```bash
+   make check
+   ```
+
+### Version Consistency Check
+
+Ensure both environments use the same version:
+```bash
+# Should show the same version number
+grep "@anthropic-ai/claude-code" frontend/package.json backend/deno.json
+```
+
 ## Commands for Claude
 
 ### Unified Commands (from project root)
