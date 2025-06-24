@@ -5,34 +5,34 @@ import { existsSync, statSync, appendFileSync } from "fs";
 
 /**
  * Demo video comparison script
- * Compares two demo videos using frame-by-frame analysis
+ * Compares two demo videos using SSIM (Structural Similarity Index)
  */
 
 interface VideoComparisonResult {
   similarityPercentage: number;
-  frameCountDiff: number;
   sizeDiff: number;
   details: string;
 }
 
-async function generateFrameHashes(videoPath: string): Promise<string[]> {
+async function compareVideoSSIM(video1Path: string, video2Path: string): Promise<number> {
   try {
     const output = await new Promise<string>((resolve, reject) => {
       const child = spawn('ffmpeg', [
-        '-i', videoPath,
-        '-vf', 'scale=160:90',
-        '-f', 'framemd5',
+        '-i', video1Path,
+        '-i', video2Path,
+        '-lavfi', 'ssim',
+        '-f', 'null',
         '-'
       ], { stdio: ['pipe', 'pipe', 'pipe'] });
       
-      let buffer = '';
-      child.stdout.on('data', (data) => {
-        buffer += data.toString();
+      let errorBuffer = '';
+      child.stderr.on('data', (data) => {
+        errorBuffer += data.toString();
       });
       
       child.on('close', (code) => {
         if (code === 0) {
-          resolve(buffer);
+          resolve(errorBuffer);
         } else {
           reject(new Error(`ffmpeg failed with code ${code}`));
         }
@@ -41,47 +41,28 @@ async function generateFrameHashes(videoPath: string): Promise<string[]> {
       child.on('error', reject);
     });
     
-    const lines = output.split('\n').filter(line => line.startsWith('0,'));
-    return lines.map(line => line.split(',')[2]);
+    // Extract SSIM value from output like: "SSIM Y:0.982189 ... All:0.985266 ..."
+    const ssimMatch = output.match(/SSIM.*All:([0-9.]+)/);
+    if (ssimMatch) {
+      return parseFloat(ssimMatch[1]) * 100; // Convert to percentage
+    } else {
+      throw new Error('Could not parse SSIM value from ffmpeg output');
+    }
   } catch (error) {
-    console.warn(`Could not generate frame hashes for ${videoPath}: ${error}`);
-    return [];
+    console.warn(`Could not calculate SSIM for ${video1Path} vs ${video2Path}: ${error}`);
+    return 0;
   }
 }
 
 async function compareVideoFrames(video1Path: string, video2Path: string): Promise<VideoComparisonResult> {
-  const [hashes1, hashes2] = await Promise.all([
-    generateFrameHashes(video1Path),
-    generateFrameHashes(video2Path)
-  ]);
+  const similarityPercentage = await compareVideoSSIM(video1Path, video2Path);
   
-  if (hashes1.length === 0 || hashes2.length === 0) {
+  if (similarityPercentage === 0) {
     return {
       similarityPercentage: 0,
-      frameCountDiff: Math.abs(hashes1.length - hashes2.length),
       sizeDiff: 0,
-      details: "Could not generate frame hashes for comparison"
+      details: "Could not calculate SSIM for comparison"
     };
-  }
-  
-  const minFrames = Math.min(hashes1.length, hashes2.length);
-  const frameCountDiff = Math.abs(hashes1.length - hashes2.length);
-  
-  let identicalFrames = 0;
-  
-  for (let i = 0; i < minFrames; i++) {
-    if (hashes1[i] === hashes2[i]) {
-      identicalFrames++;
-    }
-  }
-  
-  const similarityPercentage = minFrames > 0 ? (identicalFrames / minFrames) * 100 : 0;
-  
-  let details = `Frames: ${hashes1.length} vs ${hashes2.length}, `;
-  details += `Identical: ${identicalFrames}/${minFrames} (${similarityPercentage.toFixed(1)}%)`;
-  
-  if (frameCountDiff > 0) {
-    details += `, Frame count difference: ${frameCountDiff}`;
   }
   
   // Get file sizes
@@ -89,9 +70,10 @@ async function compareVideoFrames(video1Path: string, video2Path: string): Promi
   const size2 = statSync(video2Path).size;
   const sizeDiff = Math.abs(size1 - size2);
   
+  const details = `SSIM similarity: ${similarityPercentage.toFixed(1)}%`;
+  
   return { 
     similarityPercentage, 
-    frameCountDiff, 
     sizeDiff,
     details 
   };
@@ -172,7 +154,7 @@ async function main() {
     console.log('Options:');
     console.log('  video1      Path to first video file');
     console.log('  video2      Path to second video file');
-    console.log('  threshold   Similarity threshold percentage (default: 95)');
+    console.log('  threshold   SSIM similarity threshold percentage (default: 95)');
     console.log('  --help, -h  Show this help message');
     console.log('');
     console.log('Exit codes:');
