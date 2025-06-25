@@ -40,7 +40,6 @@ jobs:
 
       - name: Install FFmpeg for video comparison
         run: |
-          sudo apt-get update
           sudo apt-get install -y ffmpeg
 
       - name: Determine release tag
