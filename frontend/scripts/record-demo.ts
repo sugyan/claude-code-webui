@@ -146,6 +146,10 @@ async function recordDemoVideo(options: RecordingOptions): Promise<void> {
         timeout: 120000, // 2 minutes timeout
       });
       logTiming("✅ Demo completed detected");
+      
+      // Wait 1 second for viewers to read the final message
+      await page.waitForTimeout(1000);
+      logTiming("✅ Buffer time completed");
     } catch (error) {
       logTiming("❌ Demo did not complete within timeout");
       throw error;
