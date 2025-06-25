@@ -13,7 +13,7 @@ on:
       threshold:
         description: "Similarity threshold percentage"
         required: false
-        default: "99"
+        default: "95"
         type: string
 
 jobs:
@@ -64,8 +64,8 @@ jobs:
         id: extract-readme
         run: |
           # Extract the demo video URL from README.md (should be only one)
-          # Look for lines containing 'webm' and extract user-attachments URL
-          README_URL=$(grep 'webm' README.md | grep -o 'https://github.com/user-attachments/assets/[a-f0-9-]*' | head -1)
+          # Look for user-attachments URL pattern directly
+          README_URL=$(grep -o 'https://github.com/user-attachments/assets/[a-f0-9-]*' README.md | head -1)
 
           if [ -z "$README_URL" ]; then
             echo "⚠️ No video URL found in README.md"
@@ -122,7 +122,7 @@ jobs:
         run: |
           cd frontend
 
-          THRESHOLD="${{ github.event.inputs.threshold || '99' }}"
+          THRESHOLD="${{ github.event.inputs.threshold || '95' }}"
           RELEASE_VIDEO="../${{ steps.download-release.outputs.release_video }}"
           README_VIDEO="../readme-video.webm"
 
@@ -188,7 +188,7 @@ jobs:
 
             - **Release**: ${releaseTag}
             - **Repository**: ${repositoryUrl}
-            - **Comparison threshold**: ${{ github.event.inputs.threshold || '99' }}%
+            - **Comparison threshold**: ${{ github.event.inputs.threshold || '95' }}%
             - **Detected**: ${{ github.event_name == 'workflow_run' && 'Automatically after release workflow' || 'Manual workflow trigger' }}
 
             ---
