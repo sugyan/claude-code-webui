@@ -19,3 +19,28 @@ export interface AbortRequest {
 export interface ProjectsResponse {
   projects: string[];
 }
+
+// Conversation history types
+export interface ConversationSummary {
+  sessionId: string;
+  startTime: string;
+  lastTime: string;
+  messageCount: number;
+  lastMessagePreview: string;
+  participantCount: number;
+}
+
+export interface HistoryListResponse {
+  conversations: ConversationSummary[];
+}
+
+export interface ConversationHistory {
+  sessionId: string;
+  messages: unknown[]; // Will be ChatMessage[] but avoiding frontend type dependency
+  metadata: {
+    startTime: string;
+    endTime: string;
+    messageCount: number;
+    continuedFrom?: string;
+  };
+}
