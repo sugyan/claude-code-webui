@@ -2,8 +2,19 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { serveStatic } from "hono/deno";
 import { AbortError, query } from "@anthropic-ai/claude-code";
-import type { ChatRequest, StreamResponse } from "../shared/types.ts";
+import type {
+  ChatRequest,
+  HistoryListResponse,
+  StreamResponse,
+} from "../shared/types.ts";
 import { parseCliArgs } from "./args.ts";
+import {
+  getHistoryDirectory,
+  sanitizeProjectPath,
+  validateProjectPath,
+} from "./history/pathUtils.ts";
+import { parseAllHistoryFiles } from "./history/parser.ts";
+import { groupConversations } from "./history/grouping.ts";
 
 const args = await parseCliArgs();
 
@@ -134,6 +145,72 @@ app.get("/api/projects", async (c) => {
   } catch (error) {
     console.error("Error reading projects:", error);
     return c.json({ error: "Failed to read projects" }, 500);
+  }
+});
+
+// Conversation history endpoint
+app.get("/api/projects/:projectPath/histories", async (c) => {
+  try {
+    const rawProjectPath = c.req.param("projectPath");
+
+    if (!rawProjectPath) {
+      return c.json({ error: "Project path is required" }, 400);
+    }
+
+    // Sanitize and validate project path
+    const projectPath = sanitizeProjectPath(rawProjectPath);
+
+    if (!validateProjectPath(projectPath)) {
+      return c.json({ error: "Invalid project path" }, 400);
+    }
+
+    if (DEBUG_MODE) {
+      console.debug(`[DEBUG] Fetching histories for project: ${projectPath}`);
+    }
+
+    // Get history directory and parse files
+    const historyDir = getHistoryDirectory(projectPath);
+
+    if (DEBUG_MODE) {
+      console.debug(`[DEBUG] History directory: ${historyDir}`);
+    }
+
+    const conversationFiles = await parseAllHistoryFiles(historyDir);
+
+    if (DEBUG_MODE) {
+      console.debug(
+        `[DEBUG] Found ${conversationFiles.length} conversation files`,
+      );
+    }
+
+    // Group conversations and remove duplicates
+    const conversations = groupConversations(conversationFiles);
+
+    if (DEBUG_MODE) {
+      console.debug(
+        `[DEBUG] After grouping: ${conversations.length} unique conversations`,
+      );
+    }
+
+    const response: HistoryListResponse = {
+      conversations,
+    };
+
+    return c.json(response);
+  } catch (error) {
+    console.error("Error fetching conversation histories:", error);
+
+    if (error instanceof Error) {
+      // Handle specific error types
+      if (error.message.includes("HOME environment variable")) {
+        return c.json({ error: "Server configuration error" }, 500);
+      }
+    }
+
+    return c.json({
+      error: "Failed to fetch conversation histories",
+      details: error instanceof Error ? error.message : String(error),
+    }, 500);
   }
 });
 
