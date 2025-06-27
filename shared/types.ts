@@ -38,25 +38,34 @@ export interface HistoryListResponse {
   conversations: ConversationSummary[];
 }
 
+// Import SDK types
+import type {
+  SDKMessage,
+  SDKUserMessage,
+  SDKAssistantMessage,
+  SDKSystemMessage,
+  SDKResultMessage,
+} from "@anthropic-ai/claude-code";
+
+// SDK messages with timestamp added as number (milliseconds since epoch)
+export type TimestampedSDKUserMessage = SDKUserMessage & { timestamp: number };
+export type TimestampedSDKAssistantMessage = SDKAssistantMessage & { timestamp: number };
+export type TimestampedSDKSystemMessage = SDKSystemMessage & { timestamp: number };
+export type TimestampedSDKResultMessage = SDKResultMessage & { timestamp: number };
+
+export type TimestampedSDKMessage = 
+  | TimestampedSDKUserMessage 
+  | TimestampedSDKAssistantMessage 
+  | TimestampedSDKSystemMessage 
+  | TimestampedSDKResultMessage;
+
 export interface ConversationHistory {
   sessionId: string;
-  messages: FormattedMessage[]; // Backend formatted messages compatible with frontend
+  messages: TimestampedSDKMessage[]; // SDK-based messages with timestamp
   metadata: {
     startTime: string;
     endTime: string;
     messageCount: number;
     continuedFrom?: string;
   };
-}
-
-// Backend message format - compatible with frontend ChatMessage interface
-export interface FormattedMessage {
-  type: "chat" | "system" | "tool" | "tool_result";
-  role?: "user" | "assistant";
-  content: string;
-  timestamp: number;
-  // Additional fields for specific message types
-  subtype?: string;
-  toolName?: string;
-  summary?: string;
 }

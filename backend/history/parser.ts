@@ -3,23 +3,32 @@
  * Handles reading and parsing Claude conversation history files
  */
 
-// Internal types for parsed history data
-export interface ParsedMessage {
+import type {
+  SDKAssistantMessage,
+  SDKUserMessage,
+} from "@anthropic-ai/claude-code";
+
+// Raw JSONL line structure from Claude history files
+export interface RawHistoryLine {
+  type: "user" | "assistant" | "system" | "result";
+  message?: SDKUserMessage["message"] | SDKAssistantMessage["message"];
   sessionId: string;
-  timestamp: string;
-  type: string;
-  message?: {
-    id?: string;
-    role?: string;
-    content?: unknown;
-  };
-  uuid?: string;
+  timestamp: string; // ISO string format
+  uuid: string;
+  parentUuid?: string | null;
+  isSidechain?: boolean;
+  userType?: string;
+  cwd?: string;
+  version?: string;
+  requestId?: string;
 }
 
+// Legacy interface maintained for transition period
+// TODO: Remove once all references are updated to use ConversationHistory
 export interface ConversationFile {
   sessionId: string;
   filePath: string;
-  messages: ParsedMessage[];
+  messages: RawHistoryLine[];
   messageIds: Set<string>;
   startTime: string;
   lastTime: string;
@@ -42,7 +51,7 @@ async function parseHistoryFile(
       return null; // Empty file
     }
 
-    const messages: ParsedMessage[] = [];
+    const messages: RawHistoryLine[] = [];
     const messageIds = new Set<string>();
     let startTime = "";
     let lastTime = "";
@@ -50,7 +59,7 @@ async function parseHistoryFile(
 
     for (const line of lines) {
       try {
-        const parsed = JSON.parse(line) as ParsedMessage;
+        const parsed = JSON.parse(line) as RawHistoryLine;
         messages.push(parsed);
 
         // Track message IDs from assistant messages
@@ -130,6 +139,7 @@ async function getHistoryFiles(historyDir: string): Promise<string[]> {
 
 /**
  * Parse all conversation files in a history directory
+ * @deprecated Use individual conversation loading instead
  */
 export async function parseAllHistoryFiles(
   historyDir: string,

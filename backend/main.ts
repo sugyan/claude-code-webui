@@ -4,7 +4,6 @@ import { serveStatic } from "hono/deno";
 import { AbortError, query } from "@anthropic-ai/claude-code";
 import type {
   ChatRequest,
-  ConversationHistory,
   HistoryListResponse,
   ProjectInfo,
   ProjectsResponse,
@@ -18,8 +17,7 @@ import {
 import { parseAllHistoryFiles } from "./history/parser.ts";
 import { groupConversations } from "./history/grouping.ts";
 import { loadConversation } from "./history/conversationLoader.ts";
-import { processConversationMessages } from "./history/timestampRestore.ts";
-import { formatMessages } from "./history/messageFormat.ts";
+// Note: processConversationMessages and formatMessages are now handled inside loadConversation
 
 const args = await parseCliArgs();
 
@@ -268,13 +266,13 @@ app.get("/api/projects/:encodedProjectName/histories/:sessionId", async (c) => {
       );
     }
 
-    // Load the specific conversation
-    const conversationFile = await loadConversation(
+    // Load the specific conversation (already returns processed ConversationHistory)
+    const conversationHistory = await loadConversation(
       encodedProjectName,
       sessionId,
     );
 
-    if (!conversationFile) {
+    if (!conversationHistory) {
       return c.json({
         error: "Conversation not found",
         sessionId,
@@ -283,33 +281,11 @@ app.get("/api/projects/:encodedProjectName/histories/:sessionId", async (c) => {
 
     if (DEBUG_MODE) {
       console.debug(
-        `[DEBUG] Loaded conversation with ${conversationFile.messages.length} messages`,
+        `[DEBUG] Loaded conversation with ${conversationHistory.messages.length} messages`,
       );
     }
 
-    // Process messages with timestamp restoration and sorting
-    const { messages: processedMessages, metadata } =
-      processConversationMessages(
-        conversationFile.messages,
-        sessionId,
-      );
-
-    // Format messages for frontend compatibility
-    const formattedMessages = formatMessages(processedMessages);
-
-    if (DEBUG_MODE) {
-      console.debug(
-        `[DEBUG] Processed and formatted ${formattedMessages.length} messages`,
-      );
-    }
-
-    const response: ConversationHistory = {
-      sessionId,
-      messages: formattedMessages,
-      metadata,
-    };
-
-    return c.json(response);
+    return c.json(conversationHistory);
   } catch (error) {
     console.error("Error fetching conversation details:", error);
 

@@ -1,188 +1,128 @@
 /**
  * Message formatting utilities
- * Converts JSONL messages to frontend-compatible ChatMessage format
+ * Converts JSONL messages to timestamped SDK message format
  */
 
-import type { ParsedMessage } from "./parser.ts";
-import type { FormattedMessage } from "../../shared/types.ts";
+import type {
+  SDKAssistantMessage,
+  SDKUserMessage,
+} from "@anthropic-ai/claude-code";
+import type {
+  TimestampedSDKAssistantMessage,
+  TimestampedSDKMessage,
+  TimestampedSDKResultMessage,
+  TimestampedSDKSystemMessage,
+  TimestampedSDKUserMessage,
+} from "../../shared/types.ts";
+import type { RawHistoryLine } from "./parser.ts";
 
 /**
- * Convert a ParsedMessage to frontend-compatible format
+ * Convert a RawHistoryLine to TimestampedSDKMessage
  */
-export function formatMessage(parsedMessage: ParsedMessage): FormattedMessage {
-  const timestamp = new Date(parsedMessage.timestamp).getTime();
+export function formatMessage(rawLine: RawHistoryLine): TimestampedSDKMessage {
+  const timestamp = new Date(rawLine.timestamp).getTime();
 
-  // Handle chat messages (user/assistant)
-  if (
-    parsedMessage.message?.role === "user" ||
-    parsedMessage.message?.role === "assistant"
-  ) {
-    const content = extractMessageContent(parsedMessage.message.content);
-    return {
-      type: "chat",
-      role: parsedMessage.message.role,
-      content,
-      timestamp,
-    };
-  }
-
-  // Handle tool usage
-  if (
-    parsedMessage.type === "tool_use" ||
-    (parsedMessage.message && "tool" in parsedMessage.message)
-  ) {
-    const toolInfo = extractToolInfo(parsedMessage);
-    if (toolInfo.type === "tool_result") {
-      return {
-        type: "tool_result",
-        content: toolInfo.content,
-        timestamp,
-        toolName: toolInfo.toolName,
-        summary: toolInfo.summary,
-      };
-    } else {
-      return {
-        type: "tool",
-        content: toolInfo.content,
+  switch (rawLine.type) {
+    case "user": {
+      const userMessage: TimestampedSDKUserMessage = {
+        type: "user",
+        message: rawLine.message as SDKUserMessage["message"], // Cast to API message type
+        parent_tool_use_id: null,
+        session_id: rawLine.sessionId,
         timestamp,
       };
-    }
-  }
-
-  // Handle system messages and everything else
-  return {
-    type: "system",
-    content: extractSystemMessage(parsedMessage),
-    timestamp,
-    subtype: parsedMessage.type || "unknown",
-  };
-}
-
-/**
- * Extract text content from various message content formats
- */
-function extractMessageContent(content: unknown): string {
-  if (typeof content === "string") {
-    return content;
-  }
-
-  if (Array.isArray(content)) {
-    // Handle array format (typical for Claude SDK messages)
-    const textParts: string[] = [];
-
-    for (const item of content) {
-      if (typeof item === "string") {
-        textParts.push(item);
-      } else if (typeof item === "object" && item && "text" in item) {
-        textParts.push(String(item.text));
-      } else if (typeof item === "object" && item && "type" in item) {
-        // Handle different content types
-        if (item.type === "text" && "text" in item) {
-          textParts.push(String(item.text));
-        } else if (item.type === "tool_use" && "name" in item) {
-          textParts.push(`[Tool: ${item.name}]`);
-        }
-      }
+      return userMessage;
     }
 
-    return textParts.join(" ");
-  }
-
-  if (typeof content === "object" && content && "text" in content) {
-    return String(content.text);
-  }
-
-  // Fallback: stringify the content
-  return JSON.stringify(content);
-}
-
-/**
- * Extract tool information from parsed message
- */
-function extractToolInfo(parsedMessage: ParsedMessage): {
-  type: "tool" | "tool_result";
-  toolName: string;
-  content: string;
-  summary: string;
-} {
-  const fallback = {
-    type: "tool" as const,
-    toolName: "unknown",
-    content: "Tool usage",
-    summary: "Tool was used",
-  };
-
-  // Try to extract tool information from various possible structures
-  const msg = parsedMessage.message || parsedMessage;
-
-  if (typeof msg === "object" && msg && "tool" in msg) {
-    const tool = msg.tool;
-    if (typeof tool === "object" && tool && "name" in tool) {
-      // Type assertion for tool object
-      const toolObj = tool as Record<string, unknown>;
-      return {
-        type: "tool",
-        toolName: String(tool.name),
-        content: extractMessageContent(
-          toolObj.input || toolObj.content || "Tool executed",
-        ),
-        summary: `Used ${tool.name}`,
+    case "assistant": {
+      const assistantMessage: TimestampedSDKAssistantMessage = {
+        type: "assistant",
+        message: rawLine.message as SDKAssistantMessage["message"], // Cast to API message type
+        parent_tool_use_id: null,
+        session_id: rawLine.sessionId,
+        timestamp,
       };
+      return assistantMessage;
+    }
+
+    case "system": {
+      const systemMessage: TimestampedSDKSystemMessage = {
+        type: "system",
+        subtype: "init",
+        apiKeySource: "user", // Default value
+        cwd: rawLine.cwd || "",
+        session_id: rawLine.sessionId,
+        tools: [],
+        mcp_servers: [],
+        model: "claude-3-5-sonnet-20241022", // Default value
+        permissionMode: "default",
+        timestamp,
+      };
+      return systemMessage;
+    }
+
+    case "result": {
+      const resultMessage: TimestampedSDKResultMessage = {
+        type: "result",
+        subtype: "success",
+        duration_ms: 0,
+        duration_api_ms: 0,
+        is_error: false,
+        num_turns: 1,
+        result: "Result",
+        session_id: rawLine.sessionId,
+        total_cost_usd: 0,
+        usage: {
+          input_tokens: 0,
+          output_tokens: 0,
+          cache_creation_input_tokens: 0,
+          cache_read_input_tokens: 0,
+        },
+        timestamp,
+      };
+      return resultMessage;
+    }
+
+    default: {
+      // Fallback to system message
+      const fallbackMessage: TimestampedSDKSystemMessage = {
+        type: "system",
+        subtype: "init",
+        apiKeySource: "user",
+        cwd: rawLine.cwd || "",
+        session_id: rawLine.sessionId,
+        tools: [],
+        mcp_servers: [],
+        model: "claude-3-5-sonnet-20241022",
+        permissionMode: "default",
+        timestamp,
+      };
+      return fallbackMessage;
     }
   }
-
-  // Check for tool results
-  if (typeof msg === "object" && msg && "result" in msg) {
-    const result = msg.result;
-    return {
-      type: "tool_result",
-      toolName: extractToolName(msg) || "unknown",
-      content: extractMessageContent(result),
-      summary: "Tool execution completed",
-    };
-  }
-
-  return fallback;
 }
 
 /**
- * Extract tool name from various message structures
- */
-function extractToolName(msg: unknown): string | undefined {
-  if (typeof msg === "object" && msg && "tool_name" in msg) {
-    return String(msg.tool_name);
-  }
-  if (typeof msg === "object" && msg && "name" in msg) {
-    return String(msg.name);
-  }
-  return undefined;
-}
-
-/**
- * Extract system message content
- */
-function extractSystemMessage(parsedMessage: ParsedMessage): string {
-  // Try message field first
-  if (parsedMessage.message) {
-    if (typeof parsedMessage.message === "string") {
-      return parsedMessage.message;
-    }
-    if (typeof parsedMessage.message === "object") {
-      return JSON.stringify(parsedMessage.message);
-    }
-  }
-
-  // Fallback to type or generic message
-  return parsedMessage.type || "System message";
-}
-
-/**
- * Convert array of ParsedMessages to frontend-compatible format
+ * Convert array of RawHistoryLines to TimestampedSDKMessages
  */
 export function formatMessages(
-  parsedMessages: ParsedMessage[],
-): FormattedMessage[] {
-  return parsedMessages.map(formatMessage);
+  rawLines: RawHistoryLine[],
+): TimestampedSDKMessage[] {
+  return rawLines.map(formatMessage);
+}
+
+/**
+ * Filter messages to only include specific types
+ * Useful when frontend wants to display only certain message types
+ */
+export function filterMessagesByType<T extends TimestampedSDKMessage["type"]>(
+  messages: TimestampedSDKMessage[],
+  type: T,
+): Extract<TimestampedSDKMessage, { type: T }>[] {
+  return messages.filter((msg) => msg.type === type) as Extract<
+    TimestampedSDKMessage,
+    { type: T }
+  >[];
 }
 
 /**
@@ -190,7 +130,9 @@ export function formatMessages(
  * Useful when frontend only wants to display conversational content
  */
 export function filterChatMessages(
-  formattedMessages: FormattedMessage[],
-): FormattedMessage[] {
-  return formattedMessages.filter((msg) => msg.type === "chat");
+  messages: TimestampedSDKMessage[],
+): (TimestampedSDKUserMessage | TimestampedSDKAssistantMessage)[] {
+  return messages.filter(
+    (msg) => msg.type === "user" || msg.type === "assistant",
+  ) as (TimestampedSDKUserMessage | TimestampedSDKAssistantMessage)[];
 }
