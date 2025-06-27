@@ -4,73 +4,68 @@
  */
 
 /**
- * Encode a project path to a Claude history directory name
+ * Get the encoded directory name for a project path by checking what actually exists
  * Example: "/Users/sugyan/tmp/" → "-Users-sugyan-tmp"
  */
-export function encodeProjectPath(projectPath: string): string {
-  // Remove trailing slash if present
-  const normalizedPath = projectPath.replace(/\/$/, "");
-
-  // Convert slashes to hyphens
-  // Leading slash becomes a leading hyphen
-  const encoded = normalizedPath.replace(/\//g, "-");
-
-  return encoded;
-}
-
-/**
- * Decode a Claude history directory name back to a project path
- * Example: "-Users-sugyan-tmp" → "/Users/sugyan/tmp"
- */
-export function decodeProjectPath(encodedPath: string): string {
-  // Convert hyphens back to slashes
-  const decoded = encodedPath.replace(/-/g, "/");
-
-  return decoded;
-}
-
-/**
- * Get the full path to the Claude history directory for a project
- */
-export function getHistoryDirectory(projectPath: string): string {
+export async function getEncodedProjectName(
+  projectPath: string,
+): Promise<string | null> {
   const homeDir = Deno.env.get("HOME");
   if (!homeDir) {
-    throw new Error("HOME environment variable not found");
+    return null;
   }
 
-  const encodedPath = encodeProjectPath(projectPath);
-  return `${homeDir}/.claude/projects/${encodedPath}`;
+  const projectsDir = `${homeDir}/.claude/projects`;
+
+  try {
+    // Read all directories in .claude/projects
+    const entries = [];
+    for await (const entry of Deno.readDir(projectsDir)) {
+      if (entry.isDirectory) {
+        entries.push(entry.name);
+      }
+    }
+
+    // Convert project path to expected encoded format for comparison
+    const normalizedPath = projectPath.replace(/\/$/, "");
+    const expectedEncoded = normalizedPath.replace(/\//g, "-");
+
+    // Find exact match first
+    if (entries.includes(expectedEncoded)) {
+      return expectedEncoded;
+    }
+
+    // If no exact match, try to find a close match
+    // This handles edge cases in Claude's encoding
+    for (const entry of entries) {
+      // Decode the entry name back to a path and compare
+      const decodedPath = entry.replace(/-/g, "/");
+      if (decodedPath === normalizedPath) {
+        return entry;
+      }
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
 }
 
 /**
- * Validate that a project path is safe and well-formed
+ * Validate that an encoded project name is safe
  */
-export function validateProjectPath(projectPath: string): boolean {
-  // Basic validation - should be an absolute path
-  if (!projectPath.startsWith("/")) {
+export function validateEncodedProjectName(encodedName: string): boolean {
+  // Should not be empty
+  if (!encodedName) {
     return false;
   }
 
-  // Should not contain dangerous characters
+  // Should not contain dangerous characters for directory names
   // deno-lint-ignore no-control-regex
-  const dangerousChars = /[<>:"|?*\x00-\x1f]/;
-  if (dangerousChars.test(projectPath)) {
+  const dangerousChars = /[<>:"|?*\x00-\x1f\/\\]/;
+  if (dangerousChars.test(encodedName)) {
     return false;
   }
 
   return true;
-}
-
-/**
- * Sanitize a project path parameter from URL
- * Handles URL decoding and basic cleanup
- */
-export function sanitizeProjectPath(rawPath: string): string {
-  // URL decode
-  const decoded = decodeURIComponent(rawPath);
-
-  // Basic cleanup - remove multiple slashes, normalize
-  const normalized = decoded.replace(/\/+/g, "/");
-
-  return normalized;
 }

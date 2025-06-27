@@ -5,13 +5,14 @@ import { AbortError, query } from "@anthropic-ai/claude-code";
 import type {
   ChatRequest,
   HistoryListResponse,
+  ProjectInfo,
+  ProjectsResponse,
   StreamResponse,
 } from "../shared/types.ts";
 import { parseCliArgs } from "./args.ts";
 import {
-  getHistoryDirectory,
-  sanitizeProjectPath,
-  validateProjectPath,
+  getEncodedProjectName,
+  validateEncodedProjectName,
 } from "./history/pathUtils.ts";
 import { parseAllHistoryFiles } from "./history/parser.ts";
 import { groupConversations } from "./history/grouping.ts";
@@ -131,14 +132,28 @@ app.get("/api/projects", async (c) => {
       const config = JSON.parse(configContent);
 
       if (config.projects && typeof config.projects === "object") {
-        const projects = Object.keys(config.projects);
-        return c.json({ projects });
+        const projectPaths = Object.keys(config.projects);
+
+        // Get encoded names for each project
+        const projects: ProjectInfo[] = [];
+        for (const path of projectPaths) {
+          const encodedName = await getEncodedProjectName(path);
+          projects.push({
+            path,
+            encodedName: encodedName || "", // Use empty string if no encoded name found
+          });
+        }
+
+        const response: ProjectsResponse = { projects };
+        return c.json(response);
       } else {
-        return c.json({ projects: [] });
+        const response: ProjectsResponse = { projects: [] };
+        return c.json(response);
       }
     } catch (error) {
       if (error instanceof Deno.errors.NotFound) {
-        return c.json({ projects: [] });
+        const response: ProjectsResponse = { projects: [] };
+        return c.json(response);
       }
       throw error;
     }
@@ -149,30 +164,48 @@ app.get("/api/projects", async (c) => {
 });
 
 // Conversation history endpoint
-app.get("/api/projects/:projectPath/histories", async (c) => {
+app.get("/api/projects/:encodedProjectName/histories", async (c) => {
   try {
-    const rawProjectPath = c.req.param("projectPath");
+    const encodedProjectName = c.req.param("encodedProjectName");
 
-    if (!rawProjectPath) {
-      return c.json({ error: "Project path is required" }, 400);
+    if (!encodedProjectName) {
+      return c.json({ error: "Encoded project name is required" }, 400);
     }
 
-    // Sanitize and validate project path
-    const projectPath = sanitizeProjectPath(rawProjectPath);
-
-    if (!validateProjectPath(projectPath)) {
-      return c.json({ error: "Invalid project path" }, 400);
+    if (!validateEncodedProjectName(encodedProjectName)) {
+      return c.json({ error: "Invalid encoded project name" }, 400);
     }
 
     if (DEBUG_MODE) {
-      console.debug(`[DEBUG] Fetching histories for project: ${projectPath}`);
+      console.debug(
+        `[DEBUG] Fetching histories for encoded project: ${encodedProjectName}`,
+      );
     }
 
-    // Get history directory and parse files
-    const historyDir = getHistoryDirectory(projectPath);
+    // Get home directory
+    const homeDir = Deno.env.get("HOME");
+    if (!homeDir) {
+      return c.json({ error: "Server configuration error" }, 500);
+    }
+
+    // Build history directory path directly from encoded name
+    const historyDir = `${homeDir}/.claude/projects/${encodedProjectName}`;
 
     if (DEBUG_MODE) {
       console.debug(`[DEBUG] History directory: ${historyDir}`);
+    }
+
+    // Check if the directory exists
+    try {
+      const dirInfo = await Deno.stat(historyDir);
+      if (!dirInfo.isDirectory) {
+        return c.json({ error: "Project not found" }, 404);
+      }
+    } catch (error) {
+      if (error instanceof Deno.errors.NotFound) {
+        return c.json({ error: "Project not found" }, 404);
+      }
+      throw error;
     }
 
     const conversationFiles = await parseAllHistoryFiles(historyDir);
@@ -199,13 +232,6 @@ app.get("/api/projects/:projectPath/histories", async (c) => {
     return c.json(response);
   } catch (error) {
     console.error("Error fetching conversation histories:", error);
-
-    if (error instanceof Error) {
-      // Handle specific error types
-      if (error.message.includes("HOME environment variable")) {
-        return c.json({ error: "Server configuration error" }, 500);
-      }
-    }
 
     return c.json({
       error: "Failed to fetch conversation histories",
