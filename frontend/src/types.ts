@@ -87,6 +87,7 @@ export type {
   StreamResponse,
   ChatRequest,
   ProjectsResponse,
+  ProjectInfo,
 } from "../../shared/types";
 
 // Re-export SDK types
