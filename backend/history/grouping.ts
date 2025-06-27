@@ -58,21 +58,12 @@ export function groupConversations(
 function createConversationSummary(
   conversationFile: ConversationFile,
 ): ConversationSummary {
-  // Count unique participants (roles)
-  const participantRoles = new Set<string>();
-  for (const message of conversationFile.messages) {
-    if (message.message?.role) {
-      participantRoles.add(message.message.role);
-    }
-  }
-
   return {
     sessionId: conversationFile.sessionId,
     startTime: conversationFile.startTime,
     lastTime: conversationFile.lastTime,
     messageCount: conversationFile.messageCount,
     lastMessagePreview: conversationFile.lastMessagePreview,
-    participantCount: participantRoles.size,
   };
 }
 
