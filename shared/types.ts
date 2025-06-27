@@ -16,8 +16,13 @@ export interface AbortRequest {
   requestId: string;
 }
 
+export interface ProjectInfo {
+  path: string;
+  encodedName: string;
+}
+
 export interface ProjectsResponse {
-  projects: string[];
+  projects: ProjectInfo[];
 }
 
 // Conversation history types
@@ -27,7 +32,6 @@ export interface ConversationSummary {
   lastTime: string;
   messageCount: number;
   lastMessagePreview: string;
-  participantCount: number;
 }
 
 export interface HistoryListResponse {

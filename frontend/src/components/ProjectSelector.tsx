@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FolderIcon, PlusIcon } from "@heroicons/react/24/outline";
-import type { ProjectsResponse } from "../types";
+import type { ProjectsResponse, ProjectInfo } from "../types";
 import { getProjectsUrl } from "../config/api";
 
 export function ProjectSelector() {
-  const [projects, setProjects] = useState<string[]>([]);
+  const [projects, setProjects] = useState<ProjectInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -116,13 +116,13 @@ export function ProjectSelector() {
               </h2>
               {projects.map((project) => (
                 <button
-                  key={project}
-                  onClick={() => handleProjectSelect(project)}
+                  key={project.path}
+                  onClick={() => handleProjectSelect(project.path)}
                   className="w-full flex items-center gap-3 p-4 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-lg transition-colors text-left"
                 >
                   <FolderIcon className="h-5 w-5 text-slate-500 dark:text-slate-400 flex-shrink-0" />
                   <span className="text-slate-800 dark:text-slate-200 font-mono text-sm">
-                    {project}
+                    {project.path}
                   </span>
                 </button>
               ))}
