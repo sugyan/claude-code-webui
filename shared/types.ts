@@ -38,15 +38,25 @@ export interface HistoryListResponse {
   conversations: ConversationSummary[];
 }
 
-// TODO: This type will be used in the second API endpoint implementation (Issue #104)
-// GET /api/projects/:projectPath/histories/:sessionId
 export interface ConversationHistory {
   sessionId: string;
-  messages: unknown[]; // Will be ChatMessage[] but avoiding frontend type dependency
+  messages: FormattedMessage[]; // Backend formatted messages compatible with frontend
   metadata: {
     startTime: string;
     endTime: string;
     messageCount: number;
     continuedFrom?: string;
   };
+}
+
+// Backend message format - compatible with frontend ChatMessage interface
+export interface FormattedMessage {
+  type: "chat" | "system" | "tool" | "tool_result";
+  role?: "user" | "assistant";
+  content: string;
+  timestamp: number;
+  // Additional fields for specific message types
+  subtype?: string;
+  toolName?: string;
+  summary?: string;
 }

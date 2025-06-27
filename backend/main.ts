@@ -4,6 +4,7 @@ import { serveStatic } from "hono/deno";
 import { AbortError, query } from "@anthropic-ai/claude-code";
 import type {
   ChatRequest,
+  ConversationHistory,
   HistoryListResponse,
   ProjectInfo,
   ProjectsResponse,
@@ -16,6 +17,9 @@ import {
 } from "./history/pathUtils.ts";
 import { parseAllHistoryFiles } from "./history/parser.ts";
 import { groupConversations } from "./history/grouping.ts";
+import { loadConversation } from "./history/conversationLoader.ts";
+import { processConversationMessages } from "./history/timestampRestore.ts";
+import { formatMessages } from "./history/messageFormat.ts";
 
 const args = await parseCliArgs();
 
@@ -235,6 +239,99 @@ app.get("/api/projects/:encodedProjectName/histories", async (c) => {
 
     return c.json({
       error: "Failed to fetch conversation histories",
+      details: error instanceof Error ? error.message : String(error),
+    }, 500);
+  }
+});
+
+// Individual conversation detail endpoint
+app.get("/api/projects/:encodedProjectName/histories/:sessionId", async (c) => {
+  try {
+    const encodedProjectName = c.req.param("encodedProjectName");
+    const sessionId = c.req.param("sessionId");
+
+    if (!encodedProjectName) {
+      return c.json({ error: "Encoded project name is required" }, 400);
+    }
+
+    if (!sessionId) {
+      return c.json({ error: "Session ID is required" }, 400);
+    }
+
+    if (!validateEncodedProjectName(encodedProjectName)) {
+      return c.json({ error: "Invalid encoded project name" }, 400);
+    }
+
+    if (DEBUG_MODE) {
+      console.debug(
+        `[DEBUG] Fetching conversation details for project: ${encodedProjectName}, session: ${sessionId}`,
+      );
+    }
+
+    // Load the specific conversation
+    const conversationFile = await loadConversation(
+      encodedProjectName,
+      sessionId,
+    );
+
+    if (!conversationFile) {
+      return c.json({
+        error: "Conversation not found",
+        sessionId,
+      }, 404);
+    }
+
+    if (DEBUG_MODE) {
+      console.debug(
+        `[DEBUG] Loaded conversation with ${conversationFile.messages.length} messages`,
+      );
+    }
+
+    // Process messages with timestamp restoration and sorting
+    const { messages: processedMessages, metadata } =
+      processConversationMessages(
+        conversationFile.messages,
+        sessionId,
+      );
+
+    // Format messages for frontend compatibility
+    const formattedMessages = formatMessages(processedMessages);
+
+    if (DEBUG_MODE) {
+      console.debug(
+        `[DEBUG] Processed and formatted ${formattedMessages.length} messages`,
+      );
+    }
+
+    const response: ConversationHistory = {
+      sessionId,
+      messages: formattedMessages,
+      metadata,
+    };
+
+    return c.json(response);
+  } catch (error) {
+    console.error("Error fetching conversation details:", error);
+
+    // Handle specific error types
+    if (error instanceof Error) {
+      if (error.message.includes("Invalid session ID")) {
+        return c.json({
+          error: "Invalid session ID format",
+          details: error.message,
+        }, 400);
+      }
+
+      if (error.message.includes("Invalid encoded project name")) {
+        return c.json({
+          error: "Invalid project name",
+          details: error.message,
+        }, 400);
+      }
+    }
+
+    return c.json({
+      error: "Failed to fetch conversation details",
       details: error instanceof Error ? error.message : String(error),
     }, 500);
   }
