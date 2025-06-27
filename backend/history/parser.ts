@@ -29,8 +29,9 @@ export interface ConversationFile {
 
 /**
  * Parse a single JSONL file and extract conversation data
+ * @private - Internal function used by parseAllHistoryFiles
  */
-export async function parseHistoryFile(
+async function parseHistoryFile(
   filePath: string,
 ): Promise<ConversationFile | null> {
   try {
@@ -108,8 +109,9 @@ export async function parseHistoryFile(
 
 /**
  * Get all JSONL files in a history directory
+ * @private - Internal function used by parseAllHistoryFiles
  */
-export async function getHistoryFiles(historyDir: string): Promise<string[]> {
+async function getHistoryFiles(historyDir: string): Promise<string[]> {
   try {
     const files: string[] = [];
 

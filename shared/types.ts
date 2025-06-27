@@ -38,6 +38,8 @@ export interface HistoryListResponse {
   conversations: ConversationSummary[];
 }
 
+// TODO: This type will be used in the second API endpoint implementation (Issue #104)
+// GET /api/projects/:projectPath/histories/:sessionId
 export interface ConversationHistory {
   sessionId: string;
   messages: unknown[]; // Will be ChatMessage[] but avoiding frontend type dependency
