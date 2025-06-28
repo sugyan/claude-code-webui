@@ -51,7 +51,7 @@ dev-backend:
 	cd backend && deno task dev
 
 # Quality checks (run before commit)
-check: format-check lint typecheck test
+check: format-check lint typecheck test build-frontend
 
 # Install dependencies
 install:

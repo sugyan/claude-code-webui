@@ -1,52 +1,48 @@
 /**
  * Message formatting utilities
- * Converts JSONL messages to timestamped SDK message format
+ * Converts JSONL messages to unknown objects for frontend compatibility
  */
 
 import type {
   SDKAssistantMessage,
   SDKUserMessage,
 } from "@anthropic-ai/claude-code";
-import type {
-  TimestampedSDKAssistantMessage,
-  TimestampedSDKMessage,
-  TimestampedSDKResultMessage,
-  TimestampedSDKSystemMessage,
-  TimestampedSDKUserMessage,
-} from "../../shared/types.ts";
 import type { RawHistoryLine } from "./parser.ts";
 
+// Basic interface for typed message access
+interface BasicMessage {
+  type: string;
+}
+
 /**
- * Convert a RawHistoryLine to TimestampedSDKMessage
+ * Convert a RawHistoryLine to unknown object (TimestampedSDKMessage compatible)
  */
-export function formatMessage(rawLine: RawHistoryLine): TimestampedSDKMessage {
+export function formatMessage(rawLine: RawHistoryLine): unknown {
   const timestamp = new Date(rawLine.timestamp).getTime();
 
   switch (rawLine.type) {
     case "user": {
-      const userMessage: TimestampedSDKUserMessage = {
+      return {
         type: "user",
         message: rawLine.message as SDKUserMessage["message"], // Cast to API message type
         parent_tool_use_id: null,
         session_id: rawLine.sessionId,
         timestamp,
       };
-      return userMessage;
     }
 
     case "assistant": {
-      const assistantMessage: TimestampedSDKAssistantMessage = {
+      return {
         type: "assistant",
         message: rawLine.message as SDKAssistantMessage["message"], // Cast to API message type
         parent_tool_use_id: null,
         session_id: rawLine.sessionId,
         timestamp,
       };
-      return assistantMessage;
     }
 
     case "system": {
-      const systemMessage: TimestampedSDKSystemMessage = {
+      return {
         type: "system",
         subtype: "init",
         apiKeySource: "user", // Default value
@@ -58,11 +54,10 @@ export function formatMessage(rawLine: RawHistoryLine): TimestampedSDKMessage {
         permissionMode: "default",
         timestamp,
       };
-      return systemMessage;
     }
 
     case "result": {
-      const resultMessage: TimestampedSDKResultMessage = {
+      return {
         type: "result",
         subtype: "success",
         duration_ms: 0,
@@ -80,12 +75,11 @@ export function formatMessage(rawLine: RawHistoryLine): TimestampedSDKMessage {
         },
         timestamp,
       };
-      return resultMessage;
     }
 
     default: {
       // Fallback to system message
-      const fallbackMessage: TimestampedSDKSystemMessage = {
+      return {
         type: "system",
         subtype: "init",
         apiKeySource: "user",
@@ -97,17 +91,16 @@ export function formatMessage(rawLine: RawHistoryLine): TimestampedSDKMessage {
         permissionMode: "default",
         timestamp,
       };
-      return fallbackMessage;
     }
   }
 }
 
 /**
- * Convert array of RawHistoryLines to TimestampedSDKMessages
+ * Convert array of RawHistoryLines to unknown[] (TimestampedSDKMessage compatible)
  */
 export function formatMessages(
   rawLines: RawHistoryLine[],
-): TimestampedSDKMessage[] {
+): unknown[] {
   return rawLines.map(formatMessage);
 }
 
@@ -115,14 +108,11 @@ export function formatMessages(
  * Filter messages to only include specific types
  * Useful when frontend wants to display only certain message types
  */
-export function filterMessagesByType<T extends TimestampedSDKMessage["type"]>(
-  messages: TimestampedSDKMessage[],
-  type: T,
-): Extract<TimestampedSDKMessage, { type: T }>[] {
-  return messages.filter((msg) => msg.type === type) as Extract<
-    TimestampedSDKMessage,
-    { type: T }
-  >[];
+export function filterMessagesByType(
+  messages: unknown[],
+  type: string,
+): unknown[] {
+  return messages.filter((msg) => (msg as BasicMessage).type === type);
 }
 
 /**
@@ -130,9 +120,12 @@ export function filterMessagesByType<T extends TimestampedSDKMessage["type"]>(
  * Useful when frontend only wants to display conversational content
  */
 export function filterChatMessages(
-  messages: TimestampedSDKMessage[],
-): (TimestampedSDKUserMessage | TimestampedSDKAssistantMessage)[] {
+  messages: unknown[],
+): unknown[] {
   return messages.filter(
-    (msg) => msg.type === "user" || msg.type === "assistant",
-  ) as (TimestampedSDKUserMessage | TimestampedSDKAssistantMessage)[];
+    (msg) => {
+      const basicMsg = msg as BasicMessage;
+      return basicMsg.type === "user" || basicMsg.type === "assistant";
+    },
+  );
 }

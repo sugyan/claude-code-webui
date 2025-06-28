@@ -38,30 +38,12 @@ export interface HistoryListResponse {
   conversations: ConversationSummary[];
 }
 
-// Import SDK types
-import type {
-  SDKMessage,
-  SDKUserMessage,
-  SDKAssistantMessage,
-  SDKSystemMessage,
-  SDKResultMessage,
-} from "@anthropic-ai/claude-code";
-
-// SDK messages with timestamp added as number (milliseconds since epoch)
-export type TimestampedSDKUserMessage = SDKUserMessage & { timestamp: number };
-export type TimestampedSDKAssistantMessage = SDKAssistantMessage & { timestamp: number };
-export type TimestampedSDKSystemMessage = SDKSystemMessage & { timestamp: number };
-export type TimestampedSDKResultMessage = SDKResultMessage & { timestamp: number };
-
-export type TimestampedSDKMessage = 
-  | TimestampedSDKUserMessage 
-  | TimestampedSDKAssistantMessage 
-  | TimestampedSDKSystemMessage 
-  | TimestampedSDKResultMessage;
-
+// Conversation history types
+// Note: messages are typed as unknown[] to avoid frontend/backend dependency issues
+// Frontend should cast to TimestampedSDKMessage[] (defined in frontend/src/types.ts)
 export interface ConversationHistory {
   sessionId: string;
-  messages: TimestampedSDKMessage[]; // SDK-based messages with timestamp
+  messages: unknown[]; // TimestampedSDKMessage[] in practice, but avoiding frontend type dependency
   metadata: {
     startTime: string;
     endTime: string;
