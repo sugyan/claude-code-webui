@@ -139,7 +139,7 @@ async function getHistoryFiles(historyDir: string): Promise<string[]> {
 
 /**
  * Parse all conversation files in a history directory
- * @deprecated Use individual conversation loading instead
+ * Used by the histories endpoint to get conversation summaries
  */
 export async function parseAllHistoryFiles(
   historyDir: string,

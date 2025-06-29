@@ -50,3 +50,4 @@ export interface ConversationHistory {
     messageCount: number;
   };
 }
+

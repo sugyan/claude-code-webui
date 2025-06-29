@@ -477,6 +477,8 @@ The project uses the following labels for categorizing pull requests and issues:
 - 🔨 **`refactor`** - Code refactoring (no functional changes)
 - 🧪 **`test`** - Adding or updating tests
 - 🔧 **`chore`** - Maintenance, dependencies, tooling updates
+- 🖥️ **`backend`** - Backend-related changes
+- 🎨 **`frontend`** - Frontend-related changes
 
 **For Claude**: When creating PRs, always include:
 
@@ -490,6 +492,8 @@ The project uses the following labels for categorizing pull requests and issues:
    - [ ] 🔨 `refactor` - Code refactoring
    - [ ] 🧪 `test` - Adding or updating tests
    - [ ] 🔧 `chore` - Maintenance, dependencies, tooling
+   - [ ] 🖥️ `backend` - Backend-related changes
+   - [ ] 🎨 `frontend` - Frontend-related changes
    ```
 2. **Description**: Brief summary of what changed and why
 3. **GitHub labels**: Add corresponding labels using `--label` flag: `gh pr create --label "feature,documentation"`
