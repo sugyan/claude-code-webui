@@ -57,16 +57,12 @@ export type ToolResultMessage = {
 
 // TimestampedSDKMessage types for conversation history API
 // These extend Claude SDK types with timestamp information
-export type TimestampedSDKUserMessage = SDKUserMessage & { timestamp: number };
-export type TimestampedSDKAssistantMessage = SDKAssistantMessage & {
-  timestamp: number;
-};
-export type TimestampedSDKSystemMessage = SDKSystemMessage & {
-  timestamp: number;
-};
-export type TimestampedSDKResultMessage = SDKResultMessage & {
-  timestamp: number;
-};
+type WithTimestamp<T> = T & { timestamp: string };
+
+export type TimestampedSDKUserMessage = WithTimestamp<SDKUserMessage>;
+export type TimestampedSDKAssistantMessage = WithTimestamp<SDKAssistantMessage>;
+export type TimestampedSDKSystemMessage = WithTimestamp<SDKSystemMessage>;
+export type TimestampedSDKResultMessage = WithTimestamp<SDKResultMessage>;
 
 export type TimestampedSDKMessage =
   | TimestampedSDKUserMessage
