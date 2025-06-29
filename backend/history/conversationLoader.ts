@@ -5,7 +5,6 @@
 
 import type { RawHistoryLine } from "./parser.ts";
 import type { ConversationHistory } from "../../shared/types.ts";
-import { formatMessages } from "./messageFormat.ts";
 import { processConversationMessages } from "./timestampRestore.ts";
 import { validateEncodedProjectName } from "./pathUtils.ts";
 
@@ -76,12 +75,9 @@ async function parseConversationFile(
     }
   }
 
-  // Convert raw lines to SDK messages with timestamps
-  const sdkMessages = formatMessages(rawLines);
-
   // Process messages (restore timestamps, sort, etc.)
   const { messages: processedMessages, metadata } = processConversationMessages(
-    sdkMessages,
+    rawLines,
     sessionId,
   );
 

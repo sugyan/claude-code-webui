@@ -3,12 +3,7 @@
  * Handles restoring accurate timestamps for continued conversations
  */
 
-// Basic interface for messages with timestamp
-interface MessageWithTimestamp {
-  timestamp: number;
-  type: string;
-  message?: { id?: string };
-}
+import type { RawHistoryLine } from "./parser.ts";
 
 /**
  * Restore accurate timestamps for messages in a conversation
@@ -16,23 +11,22 @@ interface MessageWithTimestamp {
  * This function restores original timestamps from first occurrence of each message.id
  */
 export function restoreTimestamps(
-  messages: unknown[],
-): unknown[] {
+  messages: RawHistoryLine[],
+): RawHistoryLine[] {
   // Create a map to track the earliest timestamp for each message ID
-  const timestampMap = new Map<string, number>();
+  const timestampMap = new Map<string, string>();
 
   // First pass: collect earliest timestamps for each message.id
   for (const msg of messages) {
-    const typedMsg = msg as MessageWithTimestamp;
-    if (typedMsg.type === "assistant" && typedMsg.message?.id) {
-      const messageId = typedMsg.message.id;
+    if (msg.type === "assistant" && msg.message?.id) {
+      const messageId = msg.message.id;
       if (!timestampMap.has(messageId)) {
-        timestampMap.set(messageId, typedMsg.timestamp);
+        timestampMap.set(messageId, msg.timestamp);
       } else {
         // Keep the earliest timestamp
         const existingTimestamp = timestampMap.get(messageId)!;
-        if (typedMsg.timestamp < existingTimestamp) {
-          timestampMap.set(messageId, typedMsg.timestamp);
+        if (msg.timestamp < existingTimestamp) {
+          timestampMap.set(messageId, msg.timestamp);
         }
       }
     }
@@ -40,12 +34,11 @@ export function restoreTimestamps(
 
   // Second pass: restore timestamps and return updated messages
   return messages.map((msg) => {
-    const typedMsg = msg as MessageWithTimestamp;
-    if (typedMsg.type === "assistant" && typedMsg.message?.id) {
-      const restoredTimestamp = timestampMap.get(typedMsg.message.id);
+    if (msg.type === "assistant" && msg.message?.id) {
+      const restoredTimestamp = timestampMap.get(msg.message.id);
       if (restoredTimestamp) {
         return {
-          ...typedMsg,
+          ...msg,
           timestamp: restoredTimestamp,
         };
       }
@@ -59,11 +52,10 @@ export function restoreTimestamps(
  * Sort messages by timestamp (chronological order)
  */
 export function sortMessagesByTimestamp(
-  messages: unknown[],
-): unknown[] {
+  messages: RawHistoryLine[],
+): RawHistoryLine[] {
   return [...messages].sort((a, b) => {
-    return (a as MessageWithTimestamp).timestamp -
-      (b as MessageWithTimestamp).timestamp;
+    return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
   });
 }
 
@@ -72,15 +64,14 @@ export function sortMessagesByTimestamp(
  * Returns the potential parent session ID if detected
  */
 export function detectContinuation(
-  messages: unknown[],
+  messages: RawHistoryLine[],
 ): string | undefined {
   // Look for system messages that might indicate continuation
   for (const msg of messages) {
-    const typedMsg = msg as MessageWithTimestamp;
-    if (typedMsg.type === "system") {
+    if (msg.type === "system") {
       // Check for continuation indicators in system messages
       // System messages might contain information about session continuation
-      const content = JSON.stringify(typedMsg);
+      const content = JSON.stringify(msg);
       if (content.includes("continue") || content.includes("resume")) {
         // Try to extract session ID from the message
         // This is a heuristic approach - the exact format may vary
@@ -98,7 +89,7 @@ export function detectContinuation(
  * Calculate conversation metadata from messages
  */
 export function calculateConversationMetadata(
-  messages: unknown[],
+  messages: RawHistoryLine[],
   _sessionId: string,
 ): {
   startTime: string;
@@ -117,14 +108,8 @@ export function calculateConversationMetadata(
 
   // Sort messages by timestamp to get accurate start/end times
   const sortedMessages = sortMessagesByTimestamp(messages);
-  const startTime = new Date(
-    (sortedMessages[0] as MessageWithTimestamp).timestamp,
-  )
-    .toISOString();
-  const endTime = new Date(
-    (sortedMessages[sortedMessages.length - 1] as MessageWithTimestamp)
-      .timestamp,
-  ).toISOString();
+  const startTime = sortedMessages[0].timestamp;
+  const endTime = sortedMessages[sortedMessages.length - 1].timestamp;
 
   // Detect if this conversation was continued from another
   const continuedFrom = detectContinuation(messages);
@@ -142,7 +127,7 @@ export function calculateConversationMetadata(
  * This is the main function to call for preparing messages for API response
  */
 export function processConversationMessages(
-  messages: unknown[],
+  messages: RawHistoryLine[],
   sessionId: string,
 ): {
   messages: unknown[];
@@ -162,8 +147,9 @@ export function processConversationMessages(
   // Calculate metadata
   const metadata = calculateConversationMetadata(sortedMessages, sessionId);
 
+  // Return as unknown[] for frontend compatibility
   return {
-    messages: sortedMessages,
+    messages: sortedMessages as unknown[],
     metadata,
   };
 }
