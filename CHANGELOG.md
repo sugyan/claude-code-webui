@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.1.23](https://github.com/sugyan/claude-code-webui/compare/v0.1.22...v0.1.23) - 2025-06-29
+- 🔧 Remove unnecessary apt-get update in demo-comparison workflow by @sugyan in https://github.com/sugyan/claude-code-webui/pull/98
+- feat: implement conversation history listing API by @sugyan in https://github.com/sugyan/claude-code-webui/pull/105
+- feat: implement conversation detail retrieval API (Issue #104) by @sugyan in https://github.com/sugyan/claude-code-webui/pull/107
+
 ## [v0.1.22](https://github.com/sugyan/claude-code-webui/compare/v0.1.21...v0.1.22) - 2025-06-25
 - Improve README with modern design and better organization by @sugyan in https://github.com/sugyan/claude-code-webui/pull/93
 - Migrate backend CLI from manual parsing to Cliffy framework by @sugyan in https://github.com/sugyan/claude-code-webui/pull/95
