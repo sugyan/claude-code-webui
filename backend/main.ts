@@ -62,10 +62,12 @@ app.post(
 );
 
 // Static file serving with SPA fallback
+// Resolve dist directory path relative to this module
+const distPath = new URL("./dist", import.meta.url).pathname;
 // Serve static assets (CSS, JS, images, etc.)
-app.use("/assets/*", serveStatic({ root: "./dist" }));
+app.use("/assets/*", serveStatic({ root: distPath }));
 // Serve root level files (favicon, etc.)
-app.use("/*", serveStatic({ root: "./dist" }));
+app.use("/*", serveStatic({ root: distPath }));
 
 // SPA fallback - serve index.html for all unmatched routes (except API routes)
 app.get("*", async (c) => {
@@ -77,7 +79,7 @@ app.get("*", async (c) => {
   }
 
   try {
-    const indexPath = "./dist/index.html";
+    const indexPath = new URL("./dist/index.html", import.meta.url).pathname;
     const indexFile = await Deno.readFile(indexPath);
     return c.html(new TextDecoder().decode(indexFile));
   } catch (error) {
