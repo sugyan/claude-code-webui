@@ -51,8 +51,3 @@ export interface ConversationHistory {
   };
 }
 
-// Application configuration shared across handlers
-export interface AppConfig {
-  debugMode: boolean;
-  // Future configuration options can be added here
-}

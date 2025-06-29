@@ -1,5 +1,5 @@
 import { createMiddleware } from "hono/factory";
-import type { AppConfig } from "../../shared/types.ts";
+import type { AppConfig } from "../types.ts";
 
 /**
  * Configuration options for the middleware
