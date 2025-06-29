@@ -60,32 +60,6 @@ export function sortMessagesByTimestamp(
 }
 
 /**
- * Detect if this conversation was continued from another session
- * Returns the potential parent session ID if detected
- */
-export function detectContinuation(
-  messages: RawHistoryLine[],
-): string | undefined {
-  // Look for system messages that might indicate continuation
-  for (const msg of messages) {
-    if (msg.type === "system") {
-      // Check for continuation indicators in system messages
-      // System messages might contain information about session continuation
-      const content = JSON.stringify(msg);
-      if (content.includes("continue") || content.includes("resume")) {
-        // Try to extract session ID from the message
-        // This is a heuristic approach - the exact format may vary
-        const sessionIdMatch = content.match(/[a-f0-9-]{36}/); // UUID pattern
-        if (sessionIdMatch) {
-          return sessionIdMatch[0];
-        }
-      }
-    }
-  }
-  return undefined;
-}
-
-/**
  * Calculate conversation metadata from messages
  */
 export function calculateConversationMetadata(
@@ -95,7 +69,6 @@ export function calculateConversationMetadata(
   startTime: string;
   endTime: string;
   messageCount: number;
-  continuedFrom?: string;
 } {
   if (messages.length === 0) {
     const now = new Date().toISOString();
@@ -111,14 +84,10 @@ export function calculateConversationMetadata(
   const startTime = sortedMessages[0].timestamp;
   const endTime = sortedMessages[sortedMessages.length - 1].timestamp;
 
-  // Detect if this conversation was continued from another
-  const continuedFrom = detectContinuation(messages);
-
   return {
     startTime,
     endTime,
     messageCount: messages.length,
-    ...(continuedFrom && { continuedFrom }),
   };
 }
 
@@ -135,7 +104,6 @@ export function processConversationMessages(
     startTime: string;
     endTime: string;
     messageCount: number;
-    continuedFrom?: string;
   };
 } {
   // Restore timestamps

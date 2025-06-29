@@ -48,6 +48,5 @@ export interface ConversationHistory {
     startTime: string;
     endTime: string;
     messageCount: number;
-    continuedFrom?: string;
   };
 }
