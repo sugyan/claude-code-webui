@@ -94,17 +94,16 @@ async function* executeClaudeCommand(
 
 /**
  * Handles POST /api/chat requests with streaming responses
- * @param c - Hono context object
+ * @param c - Hono context object with config variables
  * @param requestAbortControllers - Shared map of abort controllers
- * @param debugMode - Enable debug logging
  * @returns Response with streaming NDJSON
  */
 export async function handleChatRequest(
   c: Context,
   requestAbortControllers: Map<string, AbortController>,
-  debugMode = false,
 ) {
   const chatRequest: ChatRequest = await c.req.json();
+  const { debugMode } = c.var.config;
 
   if (debugMode) {
     console.debug(

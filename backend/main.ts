@@ -2,6 +2,10 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { serveStatic } from "hono/deno";
 import { parseCliArgs } from "./args.ts";
+import {
+  type ConfigContext,
+  createConfigMiddleware,
+} from "./middleware/config.ts";
 import { handleProjectsRequest } from "./handlers/projects.ts";
 import { handleHistoriesRequest } from "./handlers/histories.ts";
 import { handleConversationRequest } from "./handlers/conversations.ts";
@@ -16,7 +20,7 @@ const HOST = args.host;
 // Debug mode enabled via CLI flag or environment variable
 const DEBUG_MODE = args.debug;
 
-const app = new Hono();
+const app = new Hono<ConfigContext>();
 
 // Store AbortControllers for each request (shared with chat handler)
 const requestAbortControllers = new Map<string, AbortController>();
@@ -31,27 +35,30 @@ app.use(
   }),
 );
 
+// Configuration middleware - makes app settings available to all handlers
+app.use("*", createConfigMiddleware({ debugMode: DEBUG_MODE }));
+
 // API routes
 app.get("/api/projects", (c) => handleProjectsRequest(c));
 
 app.get(
   "/api/projects/:encodedProjectName/histories",
-  (c) => handleHistoriesRequest(c, DEBUG_MODE),
+  (c) => handleHistoriesRequest(c),
 );
 
 app.get(
   "/api/projects/:encodedProjectName/histories/:sessionId",
-  (c) => handleConversationRequest(c, DEBUG_MODE),
+  (c) => handleConversationRequest(c),
 );
 
 app.post(
   "/api/abort/:requestId",
-  (c) => handleAbortRequest(c, requestAbortControllers, DEBUG_MODE),
+  (c) => handleAbortRequest(c, requestAbortControllers),
 );
 
 app.post(
   "/api/chat",
-  (c) => handleChatRequest(c, requestAbortControllers, DEBUG_MODE),
+  (c) => handleChatRequest(c, requestAbortControllers),
 );
 
 // Static file serving with SPA fallback

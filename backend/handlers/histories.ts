@@ -7,12 +7,12 @@ import { groupConversations } from "../history/grouping.ts";
 /**
  * Handles GET /api/projects/:encodedProjectName/histories requests
  * Fetches conversation history list for a specific project
- * @param c - Hono context object
- * @param debugMode - Enable debug logging
+ * @param c - Hono context object with config variables
  * @returns JSON response with conversation history list
  */
-export async function handleHistoriesRequest(c: Context, debugMode = false) {
+export async function handleHistoriesRequest(c: Context) {
   try {
+    const { debugMode } = c.var.config;
     const encodedProjectName = c.req.param("encodedProjectName");
 
     if (!encodedProjectName) {

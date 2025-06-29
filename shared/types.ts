@@ -50,3 +50,9 @@ export interface ConversationHistory {
     messageCount: number;
   };
 }
+
+// Application configuration shared across handlers
+export interface AppConfig {
+  debugMode: boolean;
+  // Future configuration options can be added here
+}

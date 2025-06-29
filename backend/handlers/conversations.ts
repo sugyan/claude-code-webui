@@ -5,12 +5,12 @@ import { loadConversation } from "../history/conversationLoader.ts";
 /**
  * Handles GET /api/projects/:encodedProjectName/histories/:sessionId requests
  * Retrieves detailed conversation history for a specific session
- * @param c - Hono context object
- * @param debugMode - Enable debug logging
+ * @param c - Hono context object with config variables
  * @returns JSON response with conversation details
  */
-export async function handleConversationRequest(c: Context, debugMode = false) {
+export async function handleConversationRequest(c: Context) {
   try {
+    const { debugMode } = c.var.config;
     const encodedProjectName = c.req.param("encodedProjectName");
     const sessionId = c.req.param("sessionId");
 

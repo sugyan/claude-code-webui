@@ -3,16 +3,15 @@ import { Context } from "hono";
 /**
  * Handles POST /api/abort/:requestId requests
  * Aborts an ongoing chat request by request ID
- * @param c - Hono context object
+ * @param c - Hono context object with config variables
  * @param requestAbortControllers - Map of request IDs to AbortControllers
- * @param debugMode - Enable debug logging
  * @returns JSON response indicating success or failure
  */
 export function handleAbortRequest(
   c: Context,
   requestAbortControllers: Map<string, AbortController>,
-  debugMode = false,
 ) {
+  const { debugMode } = c.var.config;
   const requestId = c.req.param("requestId");
 
   if (!requestId) {
