@@ -4,6 +4,8 @@ export const API_CONFIG = {
     CHAT: "/api/chat",
     ABORT: "/api/abort",
     PROJECTS: "/api/projects",
+    HISTORIES: "/api/projects",
+    CONVERSATIONS: "/api/projects",
   },
 } as const;
 
@@ -25,4 +27,16 @@ export const getChatUrl = () => {
 // Helper function to get projects URL
 export const getProjectsUrl = () => {
   return API_CONFIG.ENDPOINTS.PROJECTS;
+};
+
+// Helper function to get histories URL
+export const getHistoriesUrl = (projectPath: string) => {
+  const encodedPath = encodeURIComponent(projectPath);
+  return `${API_CONFIG.ENDPOINTS.HISTORIES}/${encodedPath}/histories`;
+};
+
+// Helper function to get conversation URL
+export const getConversationUrl = (projectPath: string, sessionId: string) => {
+  const encodedPath = encodeURIComponent(projectPath);
+  return `${API_CONFIG.ENDPOINTS.CONVERSATIONS}/${encodedPath}/histories/${sessionId}`;
 };

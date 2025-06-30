@@ -1,5 +1,5 @@
 import { useEffect, useCallback } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import type { ChatRequest, ChatMessage } from "../types";
 import { useTheme } from "../hooks/useTheme";
 import { useClaudeStreaming } from "../hooks/useClaudeStreaming";
@@ -7,6 +7,7 @@ import { useChatState } from "../hooks/chat/useChatState";
 import { usePermissions } from "../hooks/chat/usePermissions";
 import { useAbortController } from "../hooks/chat/useAbortController";
 import { ThemeToggle } from "./chat/ThemeToggle";
+import { HistoryButton } from "./chat/HistoryButton";
 import { ChatInput } from "./chat/ChatInput";
 import { ChatMessages } from "./chat/ChatMessages";
 import { PermissionDialog } from "./PermissionDialog";
@@ -16,6 +17,7 @@ import type { StreamingContext } from "../hooks/streaming/useMessageProcessor";
 
 export function ChatPage() {
   const location = useLocation();
+  const navigate = useNavigate();
   const workingDirectory =
     location.pathname.replace("/projects", "") || undefined;
 
@@ -223,6 +225,13 @@ export function ChatPage() {
     closePermissionDialog();
   }, [closePermissionDialog]);
 
+  const handleHistoryClick = useCallback(() => {
+    const normalizedPath = workingDirectory?.startsWith("/")
+      ? workingDirectory
+      : `/${workingDirectory}`;
+    navigate(`/projects${normalizedPath}/histories`);
+  }, [navigate, workingDirectory]);
+
   // Handle global keyboard shortcuts
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
@@ -251,7 +260,10 @@ export function ChatPage() {
               </p>
             )}
           </div>
-          <ThemeToggle theme={theme} onToggle={toggleTheme} />
+          <div className="flex items-center gap-3">
+            <HistoryButton onClick={handleHistoryClick} />
+            <ThemeToggle theme={theme} onToggle={toggleTheme} />
+          </div>
         </div>
 
         {/* Chat Messages */}
