@@ -28,21 +28,12 @@ export async function getEncodedProjectName(
 
     // Convert project path to expected encoded format for comparison
     const normalizedPath = projectPath.replace(/\/$/, "");
-    const expectedEncoded = normalizedPath.replace(/\//g, "-");
+    // Claude converts both '/' and '.' to '-'
+    const expectedEncoded = normalizedPath.replace(/[/.]/g, "-");
 
-    // Find exact match first
+    // Find exact match - if not found, return null
     if (entries.includes(expectedEncoded)) {
       return expectedEncoded;
-    }
-
-    // If no exact match, try to find a close match
-    // This handles edge cases in Claude's encoding
-    for (const entry of entries) {
-      // Decode the entry name back to a path and compare
-      const decodedPath = entry.replace(/-/g, "/");
-      if (decodedPath === normalizedPath) {
-        return entry;
-      }
     }
 
     return null;

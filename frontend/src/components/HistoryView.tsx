@@ -17,14 +17,14 @@ export function HistoryView({ encodedName }: HistoryViewProps) {
   useEffect(() => {
     const loadConversations = async () => {
       if (!encodedName) {
-        setError("Project not found");
-        setLoading(false);
+        // Keep loading state when encodedName is not available yet
         return;
       }
 
       try {
         setLoading(true);
         const response = await fetch(`/api/projects/${encodedName}/histories`);
+
         if (!response.ok) {
           throw new Error(
             `Failed to load conversations: ${response.statusText}`,
@@ -50,13 +50,13 @@ export function HistoryView({ encodedName }: HistoryViewProps) {
     navigate({ search: searchParams.toString() });
   };
 
-  if (loading) {
+  if (loading || !encodedName) {
     return (
       <div className="flex-1 flex items-center justify-center">
         <div className="text-center">
           <div className="w-8 h-8 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-slate-600 dark:text-slate-400">
-            Loading conversations...
+            {!encodedName ? "Loading project..." : "Loading conversations..."}
           </p>
         </div>
       </div>
@@ -66,7 +66,7 @@ export function HistoryView({ encodedName }: HistoryViewProps) {
   if (error) {
     return (
       <div className="flex-1 flex items-center justify-center">
-        <div className="text-center">
+        <div className="text-center max-w-md">
           <div className="w-16 h-16 mx-auto mb-4 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center">
             <svg
               className="w-8 h-8 text-red-500"
@@ -85,7 +85,9 @@ export function HistoryView({ encodedName }: HistoryViewProps) {
           <h2 className="text-slate-800 dark:text-slate-100 text-xl font-semibold mb-2">
             Error Loading History
           </h2>
-          <p className="text-slate-600 dark:text-slate-400 text-sm">{error}</p>
+          <p className="text-slate-600 dark:text-slate-400 text-sm mb-4">
+            {error}
+          </p>
         </div>
       </div>
     );

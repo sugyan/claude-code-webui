@@ -23,8 +23,16 @@ export function ChatPage() {
   const [searchParams] = useSearchParams();
   const [projects, setProjects] = useState<ProjectInfo[]>([]);
 
-  const workingDirectory =
-    location.pathname.replace("/projects", "") || undefined;
+  // Extract and normalize working directory from URL
+  const workingDirectory = (() => {
+    const rawPath = location.pathname.replace("/projects", "");
+    if (!rawPath) return undefined;
+
+    // URL decode the path
+    const decodedPath = decodeURIComponent(rawPath);
+
+    return decodedPath;
+  })();
 
   // Get current view from query parameters
   const currentView = searchParams.get("view");
@@ -260,8 +268,28 @@ export function ChatPage() {
 
   // Get encoded name for current working directory
   const getEncodedName = useCallback(() => {
-    if (!workingDirectory || !projects.length) return null;
-    const project = projects.find((p) => p.path === workingDirectory);
+    if (!workingDirectory || !projects.length) {
+      return null;
+    }
+
+    // Try exact match first
+    let project = projects.find((p) => p.path === workingDirectory);
+
+    // If no exact match, try normalized matches
+    if (!project) {
+      // Try with trailing slash removed
+      const normalizedWorking = workingDirectory.replace(/\/$/, "");
+      project = projects.find(
+        (p) => p.path.replace(/\/$/, "") === normalizedWorking,
+      );
+
+      // Try with trailing slash added
+      if (!project) {
+        const workingWithSlash = normalizedWorking + "/";
+        project = projects.find((p) => p.path === workingWithSlash);
+      }
+    }
+
     return project?.encodedName || null;
   }, [workingDirectory, projects]);
 
