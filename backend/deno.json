@@ -4,7 +4,8 @@
     "build": "deno compile --allow-net --allow-run --allow-read --allow-env --include ./VERSION --include ./dist --output ../dist/claude-code-webui main.ts",
     "format": "deno fmt",
     "lint": "deno lint",
-    "check": "deno check main.ts args.ts"
+    "check": "deno check main.ts args.ts",
+    "test": "deno test --allow-env --allow-read"
   },
   "imports": {
     "@std/assert": "jsr:@std/assert@1",

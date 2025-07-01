@@ -272,24 +272,7 @@ export function ChatPage() {
       return null;
     }
 
-    // Try exact match first
-    let project = projects.find((p) => p.path === workingDirectory);
-
-    // If no exact match, try normalized matches
-    if (!project) {
-      // Try with trailing slash removed
-      const normalizedWorking = workingDirectory.replace(/\/$/, "");
-      project = projects.find(
-        (p) => p.path.replace(/\/$/, "") === normalizedWorking,
-      );
-
-      // Try with trailing slash added
-      if (!project) {
-        const workingWithSlash = normalizedWorking + "/";
-        project = projects.find((p) => p.path === workingWithSlash);
-      }
-    }
-
+    const project = projects.find((p) => p.path === workingDirectory);
     return project?.encodedName || null;
   }, [workingDirectory, projects]);
 

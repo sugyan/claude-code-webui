@@ -31,8 +31,11 @@ typecheck-backend:
 	cd backend && deno task check
 
 # Testing
-test:
+test: test-frontend test-backend
+test-frontend:
 	cd frontend && npm run test:run
+test-backend:
+	cd backend && deno task test
 
 # Building
 build: build-frontend copy-dist build-backend

@@ -353,6 +353,30 @@ The modular frontend architecture provides several key benefits:
 - **Code Splitting**: Easier to implement lazy loading for large features
 - **Memory Efficiency**: Reduced memory footprint with focused hooks
 
+## Testing
+
+The project includes comprehensive test suites for both frontend and backend components:
+
+### Frontend Testing
+
+- **Framework**: Vitest with Testing Library
+- **Coverage**: Component testing, hook testing, and integration tests
+- **Location**: Tests are co-located with source files (`*.test.ts`, `*.test.tsx`)
+- **Run**: `make test-frontend` or `cd frontend && npm run test:run`
+
+### Backend Testing  
+
+- **Framework**: Deno's built-in test runner with std/assert
+- **Coverage**: Path encoding utilities, API handlers, and integration tests
+- **Location**: `backend/pathUtils.test.ts` and other `*.test.ts` files
+- **Run**: `make test-backend` or `cd backend && deno task test`
+
+### Unified Testing
+
+- **All Tests**: `make test` - Runs both frontend and backend tests
+- **Quality Checks**: `make check` - Includes tests in pre-commit quality validation
+- **CI Integration**: GitHub Actions automatically runs all tests on push/PR
+
 ## Single Binary Distribution
 
 The project supports creating self-contained executables for all major platforms:
@@ -429,13 +453,14 @@ grep "@anthropic-ai/claude-code" frontend/package.json backend/deno.json
 - **Format**: `make format` - Format both frontend and backend
 - **Lint**: `make lint` - Lint both frontend and backend
 - **Type Check**: `make typecheck` - Type check both frontend and backend
-- **Test**: `make test` - Run frontend tests
+- **Test**: `make test` - Run both frontend and backend tests
 - **Quality Check**: `make check` - Run all quality checks before commit
 - **Format Specific Files**: `make format-files FILES="file1 file2"` - Format specific files with prettier
 
 ### Individual Commands
 
 - **Development**: `make dev-backend` / `make dev-frontend`
+- **Testing**: `make test-frontend` / `make test-backend`
 - **Build Binary**: `make build-backend`
 - **Build Frontend**: `make build-frontend`
 
