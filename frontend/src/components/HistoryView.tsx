@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import type { ConversationSummary } from "../../../shared/types";
+import { getHistoriesUrl } from "../config/api";
 
 interface HistoryViewProps {
   workingDirectory: string;
@@ -23,7 +24,7 @@ export function HistoryView({ encodedName }: HistoryViewProps) {
 
       try {
         setLoading(true);
-        const response = await fetch(`/api/projects/${encodedName}/histories`);
+        const response = await fetch(getHistoriesUrl(encodedName));
 
         if (!response.ok) {
           throw new Error(
