@@ -24,14 +24,17 @@ export async function handleProjectsRequest(c: Context) {
       if (config.projects && typeof config.projects === "object") {
         const projectPaths = Object.keys(config.projects);
 
-        // Get encoded names for each project
+        // Get encoded names for each project, only include projects with history
         const projects: ProjectInfo[] = [];
         for (const path of projectPaths) {
           const encodedName = await getEncodedProjectName(path);
-          projects.push({
-            path,
-            encodedName: encodedName || "", // Use empty string if no encoded name found
-          });
+          // Only include projects that have history directories
+          if (encodedName) {
+            projects.push({
+              path,
+              encodedName,
+            });
+          }
         }
 
         const response: ProjectsResponse = { projects };
