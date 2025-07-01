@@ -1,6 +1,7 @@
-import { useEffect, useCallback } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import type { ChatRequest, ChatMessage } from "../types";
+import { useEffect, useCallback, useState } from "react";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { ChevronLeftIcon } from "@heroicons/react/24/outline";
+import type { ChatRequest, ChatMessage, ProjectInfo } from "../types";
 import { useTheme } from "../hooks/useTheme";
 import { useClaudeStreaming } from "../hooks/useClaudeStreaming";
 import { useChatState } from "../hooks/chat/useChatState";
@@ -11,15 +12,25 @@ import { HistoryButton } from "./chat/HistoryButton";
 import { ChatInput } from "./chat/ChatInput";
 import { ChatMessages } from "./chat/ChatMessages";
 import { PermissionDialog } from "./PermissionDialog";
-import { getChatUrl } from "../config/api";
+import { HistoryView } from "./HistoryView";
+import { getChatUrl, getProjectsUrl } from "../config/api";
 import { KEYBOARD_SHORTCUTS } from "../utils/constants";
 import type { StreamingContext } from "../hooks/streaming/useMessageProcessor";
 
 export function ChatPage() {
   const location = useLocation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [projects, setProjects] = useState<ProjectInfo[]>([]);
+
   const workingDirectory =
     location.pathname.replace("/projects", "") || undefined;
+
+  // Get current view from query parameters
+  const currentView = searchParams.get("view");
+  // TODO: sessionId will be used for conversation restoration in issue #112
+  // const sessionId = searchParams.get("sessionId");
+  const isHistoryView = currentView === "history";
 
   const { theme, toggleTheme } = useTheme();
   const { processStreamLine } = useClaudeStreaming();
@@ -226,11 +237,37 @@ export function ChatPage() {
   }, [closePermissionDialog]);
 
   const handleHistoryClick = useCallback(() => {
-    const normalizedPath = workingDirectory?.startsWith("/")
-      ? workingDirectory
-      : `/${workingDirectory}`;
-    navigate(`/projects${normalizedPath}/histories`);
-  }, [navigate, workingDirectory]);
+    const searchParams = new URLSearchParams();
+    searchParams.set("view", "history");
+    navigate({ search: searchParams.toString() });
+  }, [navigate]);
+
+  // Load projects to get encodedName mapping
+  useEffect(() => {
+    const loadProjects = async () => {
+      try {
+        const response = await fetch(getProjectsUrl());
+        if (response.ok) {
+          const data = await response.json();
+          setProjects(data.projects || []);
+        }
+      } catch (error) {
+        console.error("Failed to load projects:", error);
+      }
+    };
+    loadProjects();
+  }, []);
+
+  // Get encoded name for current working directory
+  const getEncodedName = useCallback(() => {
+    if (!workingDirectory || !projects.length) return null;
+    const project = projects.find((p) => p.path === workingDirectory);
+    return project?.encodedName || null;
+  }, [workingDirectory, projects]);
+
+  const handleBackToChat = useCallback(() => {
+    navigate({ search: "" });
+  }, [navigate]);
 
   // Handle global keyboard shortcuts
   useEffect(() => {
@@ -250,34 +287,56 @@ export function ChatPage() {
       <div className="max-w-6xl mx-auto p-6 h-screen flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between mb-8 flex-shrink-0">
-          <div>
-            <h1 className="text-slate-800 dark:text-slate-100 text-3xl font-bold tracking-tight">
-              Claude Code Web UI
-            </h1>
-            {workingDirectory && (
-              <p className="text-slate-600 dark:text-slate-400 text-sm font-mono mt-1">
-                {workingDirectory}
-              </p>
+          <div className="flex items-center gap-4">
+            {isHistoryView && (
+              <button
+                onClick={handleBackToChat}
+                className="p-2 rounded-lg bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 transition-all duration-200 backdrop-blur-sm shadow-sm hover:shadow-md"
+                aria-label="Back to chat"
+              >
+                <ChevronLeftIcon className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+              </button>
             )}
+            <div>
+              <h1 className="text-slate-800 dark:text-slate-100 text-3xl font-bold tracking-tight">
+                {isHistoryView ? "Conversation History" : "Claude Code Web UI"}
+              </h1>
+              {workingDirectory && (
+                <p className="text-slate-600 dark:text-slate-400 text-sm font-mono mt-1">
+                  {workingDirectory}
+                </p>
+              )}
+            </div>
           </div>
           <div className="flex items-center gap-3">
-            <HistoryButton onClick={handleHistoryClick} />
+            {!isHistoryView && <HistoryButton onClick={handleHistoryClick} />}
             <ThemeToggle theme={theme} onToggle={toggleTheme} />
           </div>
         </div>
 
-        {/* Chat Messages */}
-        <ChatMessages messages={messages} isLoading={isLoading} />
+        {/* Main Content */}
+        {isHistoryView ? (
+          <HistoryView
+            workingDirectory={workingDirectory || ""}
+            encodedName={getEncodedName()}
+            onBack={handleBackToChat}
+          />
+        ) : (
+          <>
+            {/* Chat Messages */}
+            <ChatMessages messages={messages} isLoading={isLoading} />
 
-        {/* Input */}
-        <ChatInput
-          input={input}
-          isLoading={isLoading}
-          currentRequestId={currentRequestId}
-          onInputChange={setInput}
-          onSubmit={() => sendMessage()}
-          onAbort={handleAbort}
-        />
+            {/* Input */}
+            <ChatInput
+              input={input}
+              isLoading={isLoading}
+              currentRequestId={currentRequestId}
+              onInputChange={setInput}
+              onSubmit={() => sendMessage()}
+              onAbort={handleAbort}
+            />
+          </>
+        )}
       </div>
 
       {/* Permission Dialog */}
