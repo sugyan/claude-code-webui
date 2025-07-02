@@ -1,17 +1,35 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import type { AllMessage, ChatMessage } from "../../types";
 import { generateId } from "../../utils/id";
 
-export function useChatState() {
-  const [messages, setMessages] = useState<AllMessage[]>([]);
+interface ChatStateOptions {
+  initialMessages?: AllMessage[];
+  initialSessionId?: string;
+}
+
+export function useChatState(options: ChatStateOptions = {}) {
+  const { initialMessages = [], initialSessionId = null } = options;
+
+  const [messages, setMessages] = useState<AllMessage[]>(initialMessages);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(
+    initialSessionId,
+  );
   const [currentRequestId, setCurrentRequestId] = useState<string | null>(null);
   const [hasShownInitMessage, setHasShownInitMessage] = useState(false);
   const [hasReceivedInit, setHasReceivedInit] = useState(false);
   const [currentAssistantMessage, setCurrentAssistantMessage] =
     useState<ChatMessage | null>(null);
+
+  // Update messages and sessionId when initial values change
+  useEffect(() => {
+    setMessages(initialMessages);
+  }, [initialMessages]);
+
+  useEffect(() => {
+    setCurrentSessionId(initialSessionId);
+  }, [initialSessionId]);
 
   const addMessage = useCallback((msg: AllMessage) => {
     setMessages((prev) => [...prev, msg]);

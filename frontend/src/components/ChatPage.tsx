@@ -7,6 +7,7 @@ import { useClaudeStreaming } from "../hooks/useClaudeStreaming";
 import { useChatState } from "../hooks/chat/useChatState";
 import { usePermissions } from "../hooks/chat/usePermissions";
 import { useAbortController } from "../hooks/chat/useAbortController";
+import { useAutoHistoryLoader } from "../hooks/useHistoryLoader";
 import { ThemeToggle } from "./chat/ThemeToggle";
 import { HistoryButton } from "./chat/HistoryButton";
 import { ChatInput } from "./chat/ChatInput";
@@ -34,16 +35,27 @@ export function ChatPage() {
     return decodedPath;
   })();
 
-  // Get current view from query parameters
+  // Get current view and sessionId from query parameters
   const currentView = searchParams.get("view");
-  // TODO: sessionId will be used for conversation restoration in issue #112
-  // const sessionId = searchParams.get("sessionId");
+  const sessionId = searchParams.get("sessionId");
   const isHistoryView = currentView === "history";
 
   const { theme, toggleTheme } = useTheme();
   const { processStreamLine } = useClaudeStreaming();
   const { abortRequest, createAbortHandler } = useAbortController();
 
+  // Load conversation history if sessionId is provided
+  const {
+    messages: historyMessages,
+    loading: historyLoading,
+    error: historyError,
+    sessionId: loadedSessionId,
+  } = useAutoHistoryLoader(
+    workingDirectory || undefined,
+    sessionId || undefined,
+  );
+
+  // Initialize chat state with loaded history
   const {
     messages,
     input,
@@ -63,7 +75,10 @@ export function ChatPage() {
     generateRequestId,
     resetRequestState,
     startRequest,
-  } = useChatState();
+  } = useChatState({
+    initialMessages: historyMessages,
+    initialSessionId: loadedSessionId || undefined,
+  });
 
   const {
     allowedTools,
@@ -310,11 +325,20 @@ export function ChatPage() {
             )}
             <div>
               <h1 className="text-slate-800 dark:text-slate-100 text-3xl font-bold tracking-tight">
-                {isHistoryView ? "Conversation History" : "Claude Code Web UI"}
+                {isHistoryView
+                  ? "Conversation History"
+                  : sessionId
+                    ? "Conversation"
+                    : "Claude Code Web UI"}
               </h1>
               {workingDirectory && (
                 <p className="text-slate-600 dark:text-slate-400 text-sm font-mono mt-1">
                   {workingDirectory}
+                  {sessionId && (
+                    <span className="ml-2 text-xs">
+                      Session: {sessionId.substring(0, 8)}...
+                    </span>
+                  )}
                 </p>
               )}
             </div>
@@ -332,6 +356,49 @@ export function ChatPage() {
             encodedName={getEncodedName()}
             onBack={handleBackToChat}
           />
+        ) : historyLoading ? (
+          /* Loading conversation history */
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
+              <div className="w-8 h-8 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-slate-600 dark:text-slate-400">
+                Loading conversation history...
+              </p>
+            </div>
+          </div>
+        ) : historyError ? (
+          /* Error loading conversation history */
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center max-w-md">
+              <div className="w-16 h-16 mx-auto mb-4 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center">
+                <svg
+                  className="w-8 h-8 text-red-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+              <h2 className="text-slate-800 dark:text-slate-100 text-xl font-semibold mb-2">
+                Error Loading Conversation
+              </h2>
+              <p className="text-slate-600 dark:text-slate-400 text-sm mb-4">
+                {historyError}
+              </p>
+              <button
+                onClick={() => navigate({ search: "" })}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Start New Conversation
+              </button>
+            </div>
+          </div>
         ) : (
           <>
             {/* Chat Messages */}

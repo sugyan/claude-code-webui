@@ -1,0 +1,141 @@
+import { useState, useEffect, useCallback } from "react";
+import type { AllMessage, TimestampedSDKMessage } from "../types";
+import type { ConversationHistory } from "../../../shared/types";
+import { getConversationUrl } from "../config/api";
+import {
+  convertConversationHistory,
+  isTimestampedSDKMessage,
+} from "../utils/messageConverter";
+
+interface HistoryLoaderState {
+  messages: AllMessage[];
+  loading: boolean;
+  error: string | null;
+  sessionId: string | null;
+}
+
+interface HistoryLoaderResult extends HistoryLoaderState {
+  loadHistory: (projectPath: string, sessionId: string) => Promise<void>;
+  clearHistory: () => void;
+}
+
+/**
+ * Hook for loading and converting conversation history from the backend
+ */
+export function useHistoryLoader(): HistoryLoaderResult {
+  const [state, setState] = useState<HistoryLoaderState>({
+    messages: [],
+    loading: false,
+    error: null,
+    sessionId: null,
+  });
+
+  const loadHistory = useCallback(
+    async (projectPath: string, sessionId: string) => {
+      if (!projectPath || !sessionId) {
+        setState((prev) => ({
+          ...prev,
+          error: "Project path and session ID are required",
+        }));
+        return;
+      }
+
+      try {
+        setState((prev) => ({
+          ...prev,
+          loading: true,
+          error: null,
+        }));
+
+        const response = await fetch(
+          getConversationUrl(projectPath, sessionId),
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to load conversation: ${response.status} ${response.statusText}`,
+          );
+        }
+
+        const conversationHistory: ConversationHistory = await response.json();
+
+        // Validate the response structure
+        if (
+          !conversationHistory.messages ||
+          !Array.isArray(conversationHistory.messages)
+        ) {
+          throw new Error("Invalid conversation history format");
+        }
+
+        // Convert unknown[] to TimestampedSDKMessage[] with type checking
+        const timestampedMessages: TimestampedSDKMessage[] = [];
+        for (const msg of conversationHistory.messages) {
+          if (isTimestampedSDKMessage(msg)) {
+            timestampedMessages.push(msg);
+          } else {
+            console.warn("Skipping invalid message in history:", msg);
+          }
+        }
+
+        // Convert to frontend message format
+        const convertedMessages =
+          convertConversationHistory(timestampedMessages);
+
+        setState((prev) => ({
+          ...prev,
+          messages: convertedMessages,
+          loading: false,
+          sessionId: conversationHistory.sessionId,
+        }));
+      } catch (error) {
+        console.error("Error loading conversation history:", error);
+
+        setState((prev) => ({
+          ...prev,
+          loading: false,
+          error:
+            error instanceof Error
+              ? error.message
+              : "Failed to load conversation history",
+        }));
+      }
+    },
+    [],
+  );
+
+  const clearHistory = useCallback(() => {
+    setState({
+      messages: [],
+      loading: false,
+      error: null,
+      sessionId: null,
+    });
+  }, []);
+
+  return {
+    ...state,
+    loadHistory,
+    clearHistory,
+  };
+}
+
+/**
+ * Hook for loading conversation history on mount when sessionId is provided
+ */
+export function useAutoHistoryLoader(
+  projectPath?: string,
+  sessionId?: string,
+): HistoryLoaderResult {
+  const historyLoader = useHistoryLoader();
+
+  useEffect(() => {
+    if (projectPath && sessionId) {
+      historyLoader.loadHistory(projectPath, sessionId);
+    } else {
+      historyLoader.clearHistory();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectPath, sessionId]);
+
+  return historyLoader;
+}
