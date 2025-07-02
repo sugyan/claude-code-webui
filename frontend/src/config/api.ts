@@ -36,7 +36,9 @@ export const getHistoriesUrl = (projectPath: string) => {
 };
 
 // Helper function to get conversation URL
-export const getConversationUrl = (projectPath: string, sessionId: string) => {
-  const encodedPath = encodeURIComponent(projectPath);
-  return `${API_CONFIG.ENDPOINTS.CONVERSATIONS}/${encodedPath}/histories/${sessionId}`;
+export const getConversationUrl = (
+  encodedProjectName: string,
+  sessionId: string,
+) => {
+  return `${API_CONFIG.ENDPOINTS.CONVERSATIONS}/${encodedProjectName}/histories/${sessionId}`;
 };

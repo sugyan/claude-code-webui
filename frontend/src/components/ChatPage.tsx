@@ -44,6 +44,16 @@ export function ChatPage() {
   const { processStreamLine } = useClaudeStreaming();
   const { abortRequest, createAbortHandler } = useAbortController();
 
+  // Get encoded name for current working directory
+  const getEncodedName = useCallback(() => {
+    if (!workingDirectory || !projects.length) {
+      return null;
+    }
+
+    const project = projects.find((p) => p.path === workingDirectory);
+    return project?.encodedName || null;
+  }, [workingDirectory, projects]);
+
   // Load conversation history if sessionId is provided
   const {
     messages: historyMessages,
@@ -51,7 +61,7 @@ export function ChatPage() {
     error: historyError,
     sessionId: loadedSessionId,
   } = useAutoHistoryLoader(
-    workingDirectory || undefined,
+    getEncodedName() || undefined,
     sessionId || undefined,
   );
 
@@ -280,16 +290,6 @@ export function ChatPage() {
     };
     loadProjects();
   }, []);
-
-  // Get encoded name for current working directory
-  const getEncodedName = useCallback(() => {
-    if (!workingDirectory || !projects.length) {
-      return null;
-    }
-
-    const project = projects.find((p) => p.path === workingDirectory);
-    return project?.encodedName || null;
-  }, [workingDirectory, projects]);
 
   const handleBackToChat = useCallback(() => {
     navigate({ search: "" });

@@ -31,11 +31,11 @@ export function useHistoryLoader(): HistoryLoaderResult {
   });
 
   const loadHistory = useCallback(
-    async (projectPath: string, sessionId: string) => {
-      if (!projectPath || !sessionId) {
+    async (encodedProjectName: string, sessionId: string) => {
+      if (!encodedProjectName || !sessionId) {
         setState((prev) => ({
           ...prev,
-          error: "Project path and session ID are required",
+          error: "Encoded project name and session ID are required",
         }));
         return;
       }
@@ -48,7 +48,7 @@ export function useHistoryLoader(): HistoryLoaderResult {
         }));
 
         const response = await fetch(
-          getConversationUrl(projectPath, sessionId),
+          getConversationUrl(encodedProjectName, sessionId),
         );
 
         if (!response.ok) {
@@ -123,19 +123,20 @@ export function useHistoryLoader(): HistoryLoaderResult {
  * Hook for loading conversation history on mount when sessionId is provided
  */
 export function useAutoHistoryLoader(
-  projectPath?: string,
+  encodedProjectName?: string,
   sessionId?: string,
 ): HistoryLoaderResult {
   const historyLoader = useHistoryLoader();
 
   useEffect(() => {
-    if (projectPath && sessionId) {
-      historyLoader.loadHistory(projectPath, sessionId);
-    } else {
+    if (encodedProjectName && sessionId) {
+      historyLoader.loadHistory(encodedProjectName, sessionId);
+    } else if (!sessionId) {
+      // Only clear if there's no sessionId - don't clear while waiting for encodedProjectName
       historyLoader.clearHistory();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [projectPath, sessionId]);
+  }, [encodedProjectName, sessionId]);
 
   return historyLoader;
 }
