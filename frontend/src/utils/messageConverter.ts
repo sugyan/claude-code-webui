@@ -15,27 +15,66 @@ import { formatToolArguments } from "./toolUtils";
 export function convertTimestampedSDKMessage(
   message: TimestampedSDKMessage,
 ): AllMessage[] {
-  console.log("Converting message:", message);
   const messages: AllMessage[] = [];
   const timestamp = new Date(message.timestamp).getTime();
 
   switch (message.type) {
     case "user": {
-      // Convert user message to ChatMessage
+      // Convert user message - check if it contains tool_result or regular text content
       const sdkUserMessage = message as Extract<
         TimestampedSDKMessage,
         { type: "user" }
       >;
-      const userMessage: ChatMessage = {
-        type: "chat",
-        role: "user",
-        content:
-          typeof sdkUserMessage.message === "string"
-            ? sdkUserMessage.message
-            : JSON.stringify(sdkUserMessage.message),
-        timestamp,
-      };
-      messages.push(userMessage);
+
+      const messageContent = sdkUserMessage.message.content;
+
+      if (Array.isArray(messageContent)) {
+        for (const contentItem of messageContent) {
+          if (contentItem.type === "tool_result") {
+            // Create tool result message
+            const toolResult = contentItem as {
+              tool_use_id: string;
+              content: string | Array<{ type: string; text?: string }>;
+            };
+
+            let resultContent = "";
+            if (typeof toolResult.content === "string") {
+              resultContent = toolResult.content;
+            } else if (Array.isArray(toolResult.content)) {
+              resultContent = toolResult.content
+                .map((c) => c.text || "")
+                .join("");
+            }
+
+            const toolResultMessage: ToolResultMessage = {
+              type: "tool_result",
+              toolName: "Tool", // Default name
+              content: resultContent,
+              summary: generateSummary(resultContent),
+              timestamp,
+            };
+            messages.push(toolResultMessage);
+          } else if (contentItem.type === "text") {
+            // Regular text content
+            const userMessage: ChatMessage = {
+              type: "chat",
+              role: "user",
+              content: (contentItem as { text: string }).text,
+              timestamp,
+            };
+            messages.push(userMessage);
+          }
+        }
+      } else if (typeof messageContent === "string") {
+        // Simple string content
+        const userMessage: ChatMessage = {
+          type: "chat",
+          role: "user",
+          content: messageContent,
+          timestamp,
+        };
+        messages.push(userMessage);
+      }
       break;
     }
 
@@ -70,32 +109,8 @@ export function convertTimestampedSDKMessage(
               timestamp,
             };
             toolMessages.push(toolMessage);
-          } else if (item.type === "tool_result") {
-            const toolResult = item as {
-              tool_use_id: string;
-              content: string | Array<{ type: string; text?: string }>;
-            };
-
-            let resultContent = "";
-            if (typeof toolResult.content === "string") {
-              resultContent = toolResult.content;
-            } else if (Array.isArray(toolResult.content)) {
-              resultContent = toolResult.content
-                .map((c) => c.text || "")
-                .join("");
-            }
-
-            // Find the corresponding tool name from previous tool messages
-            // In practice, we might need to maintain a map of tool_use_id to tool_name
-            const toolResultMessage: ToolResultMessage = {
-              type: "tool_result",
-              toolName: "Tool", // Default name - in practice this would be resolved
-              content: resultContent,
-              summary: generateSummary(resultContent),
-              timestamp,
-            };
-            toolMessages.push(toolResultMessage);
           }
+          // Note: tool_result is handled in user messages, not assistant messages
         }
       }
 
@@ -150,16 +165,13 @@ export function convertTimestampedSDKMessage(
 export function convertConversationHistory(
   timestampedMessages: TimestampedSDKMessage[],
 ): AllMessage[] {
-  console.log("Converting conversation history:", timestampedMessages);
   const allMessages: AllMessage[] = [];
 
   for (const message of timestampedMessages) {
     const converted = convertTimestampedSDKMessage(message);
-    console.log("Converted messages:", converted);
     allMessages.push(...converted);
   }
 
-  console.log("Final converted messages:", allMessages);
   return allMessages;
 }
 
