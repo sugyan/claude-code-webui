@@ -2,10 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import type { AllMessage, TimestampedSDKMessage } from "../types";
 import type { ConversationHistory } from "../../../shared/types";
 import { getConversationUrl } from "../config/api";
-import {
-  convertConversationHistory,
-  isTimestampedSDKMessage,
-} from "../utils/messageConverter";
+import { useMessageProcessor } from "./streaming/useMessageProcessor";
 
 interface HistoryLoaderState {
   messages: AllMessage[];
@@ -19,6 +16,19 @@ interface HistoryLoaderResult extends HistoryLoaderState {
   clearHistory: () => void;
 }
 
+// Type guard to check if a message is a TimestampedSDKMessage
+function isTimestampedSDKMessage(
+  message: unknown,
+): message is TimestampedSDKMessage {
+  return (
+    typeof message === "object" &&
+    message !== null &&
+    "type" in message &&
+    "timestamp" in message &&
+    typeof (message as { timestamp: unknown }).timestamp === "string"
+  );
+}
+
 /**
  * Hook for loading and converting conversation history from the backend
  */
@@ -29,6 +39,8 @@ export function useHistoryLoader(): HistoryLoaderResult {
     error: null,
     sessionId: null,
   });
+
+  const { convertConversationHistory } = useMessageProcessor();
 
   const loadHistory = useCallback(
     async (encodedProjectName: string, sessionId: string) => {
@@ -100,7 +112,7 @@ export function useHistoryLoader(): HistoryLoaderResult {
         }));
       }
     },
-    [],
+    [convertConversationHistory],
   );
 
   const clearHistory = useCallback(() => {
