@@ -15,16 +15,24 @@ import { formatToolArguments } from "./toolUtils";
 export function convertTimestampedSDKMessage(
   message: TimestampedSDKMessage,
 ): AllMessage[] {
+  console.log("Converting message:", message);
   const messages: AllMessage[] = [];
   const timestamp = new Date(message.timestamp).getTime();
 
   switch (message.type) {
     case "user": {
       // Convert user message to ChatMessage
+      const sdkUserMessage = message as Extract<
+        TimestampedSDKMessage,
+        { type: "user" }
+      >;
       const userMessage: ChatMessage = {
         type: "chat",
         role: "user",
-        content: message.message,
+        content:
+          typeof sdkUserMessage.message === "string"
+            ? sdkUserMessage.message
+            : JSON.stringify(sdkUserMessage.message),
         timestamp,
       };
       messages.push(userMessage);
@@ -33,51 +41,61 @@ export function convertTimestampedSDKMessage(
 
     case "assistant": {
       // Process assistant message content
+      const sdkAssistantMessage = message as Extract<
+        TimestampedSDKMessage,
+        { type: "assistant" }
+      >;
       let assistantContent = "";
       const toolMessages: (ToolMessage | ToolResultMessage)[] = [];
 
-      for (const item of message.message.content) {
-        if (item.type === "text") {
-          assistantContent += (item as { text: string }).text;
-        } else if (item.type === "tool_use") {
-          const toolUse = item as {
-            name: string;
-            input: Record<string, unknown>;
-            id: string;
-          };
+      // Check if message.content exists and is an array
+      if (
+        sdkAssistantMessage.message?.content &&
+        Array.isArray(sdkAssistantMessage.message.content)
+      ) {
+        for (const item of sdkAssistantMessage.message.content) {
+          if (item.type === "text") {
+            assistantContent += (item as { text: string }).text;
+          } else if (item.type === "tool_use") {
+            const toolUse = item as {
+              name: string;
+              input: Record<string, unknown>;
+              id: string;
+            };
 
-          // Create tool usage message
-          const toolMessage: ToolMessage = {
-            type: "tool",
-            content: `${toolUse.name}${formatToolArguments(toolUse.input)}`,
-            timestamp,
-          };
-          toolMessages.push(toolMessage);
-        } else if (item.type === "tool_result") {
-          const toolResult = item as {
-            tool_use_id: string;
-            content: string | Array<{ type: string; text?: string }>;
-          };
+            // Create tool usage message
+            const toolMessage: ToolMessage = {
+              type: "tool",
+              content: `${toolUse.name}${formatToolArguments(toolUse.input)}`,
+              timestamp,
+            };
+            toolMessages.push(toolMessage);
+          } else if (item.type === "tool_result") {
+            const toolResult = item as {
+              tool_use_id: string;
+              content: string | Array<{ type: string; text?: string }>;
+            };
 
-          let resultContent = "";
-          if (typeof toolResult.content === "string") {
-            resultContent = toolResult.content;
-          } else if (Array.isArray(toolResult.content)) {
-            resultContent = toolResult.content
-              .map((c) => c.text || "")
-              .join("");
+            let resultContent = "";
+            if (typeof toolResult.content === "string") {
+              resultContent = toolResult.content;
+            } else if (Array.isArray(toolResult.content)) {
+              resultContent = toolResult.content
+                .map((c) => c.text || "")
+                .join("");
+            }
+
+            // Find the corresponding tool name from previous tool messages
+            // In practice, we might need to maintain a map of tool_use_id to tool_name
+            const toolResultMessage: ToolResultMessage = {
+              type: "tool_result",
+              toolName: "Tool", // Default name - in practice this would be resolved
+              content: resultContent,
+              summary: generateSummary(resultContent),
+              timestamp,
+            };
+            toolMessages.push(toolResultMessage);
           }
-
-          // Find the corresponding tool name from previous tool messages
-          // In practice, we might need to maintain a map of tool_use_id to tool_name
-          const toolResultMessage: ToolResultMessage = {
-            type: "tool_result",
-            toolName: "Tool", // Default name - in practice this would be resolved
-            content: resultContent,
-            summary: generateSummary(resultContent),
-            timestamp,
-          };
-          toolMessages.push(toolResultMessage);
         }
       }
 
@@ -132,13 +150,16 @@ export function convertTimestampedSDKMessage(
 export function convertConversationHistory(
   timestampedMessages: TimestampedSDKMessage[],
 ): AllMessage[] {
+  console.log("Converting conversation history:", timestampedMessages);
   const allMessages: AllMessage[] = [];
 
   for (const message of timestampedMessages) {
     const converted = convertTimestampedSDKMessage(message);
+    console.log("Converted messages:", converted);
     allMessages.push(...converted);
   }
 
+  console.log("Final converted messages:", allMessages);
   return allMessages;
 }
 
