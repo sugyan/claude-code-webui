@@ -3,6 +3,64 @@ import { AbortError, query } from "@anthropic-ai/claude-code";
 import type { ChatRequest, StreamResponse } from "../../shared/types.ts";
 
 /**
+ * Automatically determines Claude Code execution configuration
+ * Supports both JavaScript files and shell script wrappers (migrate-installer)
+ */
+
+function getClaudeExecutionConfig(claudePath: string) {
+  /**
+   * Check if a file path represents a JavaScript/TypeScript file
+   */
+  const isJavaScriptFile = (filePath: string): boolean => {
+    return /\.(js|mjs|ts)$/.test(filePath);
+  };
+
+  /**
+   * Create Node.js execution configuration
+   */
+  const createNodeConfig = () => {
+    return {
+      executable: "node",
+      executableArgs: [],
+      pathToClaudeCodeExecutable: claudePath,
+    };
+  };
+
+  /**
+   * Create direct execution configuration
+   */
+  const createDirectConfig = () => {
+    return {
+      executable: claudePath,
+      executableArgs: [],
+      pathToClaudeCodeExecutable: claudePath,
+    };
+  };
+
+  // Check direct file extension first
+  if (isJavaScriptFile(claudePath)) {
+    return createNodeConfig();
+  }
+
+  // Check symlink target if applicable
+  try {
+    const stat = Deno.lstatSync(claudePath);
+    if (stat.isSymlink) {
+      const linkTarget = Deno.readLinkSync(claudePath);
+      
+      if (isJavaScriptFile(linkTarget)) {
+        return createNodeConfig();
+      }
+    }
+  } catch (error) {
+    // Silently continue if symlink check fails
+  }
+
+  // Default to direct execution for shell scripts and other executables
+  return createDirectConfig();
+}
+
+/**
  * Executes a Claude command and yields streaming responses
  * @param message - User message or command
  * @param requestId - Unique request identifier for abort functionality
@@ -48,12 +106,15 @@ async function* executeClaudeCommand(
       claudePath = "claude"; // fallback
     }
 
+    // Get Claude Code execution configuration for migrate-installer compatibility
+    const executionConfig = getClaudeExecutionConfig(claudePath);
+
     for await (
       const sdkMessage of query({
         prompt: processedMessage,
         options: {
           abortController,
-          pathToClaudeCodeExecutable: claudePath,
+          ...executionConfig,  // Use auto-detected execution configuration
           ...(sessionId ? { resume: sessionId } : {}),
           ...(allowedTools ? { allowedTools } : {}),
           ...(workingDirectory ? { cwd: workingDirectory } : {}),
@@ -79,6 +140,9 @@ async function* executeClaudeCommand(
     if (error instanceof AbortError) {
       yield { type: "aborted" };
     } else {
+      if (debugMode) {
+        console.error("Claude Code execution failed:", error);
+      }
       yield {
         type: "error",
         error: error instanceof Error ? error.message : String(error),
