@@ -350,26 +350,36 @@ export function ChatPage() {
               </button>
             )}
             <div>
-              <div className="flex items-center">
-                <button
-                  onClick={handleBackToProjects}
-                  className="text-slate-800 dark:text-slate-100 text-3xl font-bold tracking-tight hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 rounded-md px-1 -mx-1"
-                  aria-label="Back to project selection"
-                >
-                  Claude Code Web UI
-                </button>
-                {(isHistoryView || sessionId) && (
-                  <>
-                    <span className="text-slate-800 dark:text-slate-100 text-3xl font-bold tracking-tight mx-3 select-none">
-                      {" "}
-                      ›{" "}
-                    </span>
-                    <h1 className="text-slate-800 dark:text-slate-100 text-3xl font-bold tracking-tight">
-                      {isHistoryView ? "Conversation History" : "Conversation"}
-                    </h1>
-                  </>
-                )}
-              </div>
+              <nav aria-label="Breadcrumb">
+                <div className="flex items-center">
+                  <button
+                    onClick={handleBackToProjects}
+                    className="text-slate-800 dark:text-slate-100 text-3xl font-bold tracking-tight hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 rounded-md px-1 -mx-1"
+                    aria-label="Back to project selection"
+                  >
+                    Claude Code Web UI
+                  </button>
+                  {(isHistoryView || sessionId) && (
+                    <>
+                      <span
+                        className="text-slate-800 dark:text-slate-100 text-3xl font-bold tracking-tight mx-3 select-none"
+                        aria-hidden="true"
+                      >
+                        {" "}
+                        ›{" "}
+                      </span>
+                      <h1
+                        className="text-slate-800 dark:text-slate-100 text-3xl font-bold tracking-tight"
+                        aria-current="page"
+                      >
+                        {isHistoryView
+                          ? "Conversation History"
+                          : "Conversation"}
+                      </h1>
+                    </>
+                  )}
+                </div>
+              </nav>
               {workingDirectory && (
                 <div className="flex items-center text-sm font-mono mt-1">
                   <button
