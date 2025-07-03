@@ -306,6 +306,12 @@ export function ChatPage() {
     navigate("/");
   }, [navigate]);
 
+  const handleBackToProjectChat = useCallback(() => {
+    if (workingDirectory) {
+      navigate(`/projects${workingDirectory}`);
+    }
+  }, [navigate, workingDirectory]);
+
   // Handle global keyboard shortcuts
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
@@ -365,14 +371,20 @@ export function ChatPage() {
                 )}
               </div>
               {workingDirectory && (
-                <p className="text-slate-600 dark:text-slate-400 text-sm font-mono mt-1">
-                  {workingDirectory}
+                <div className="flex items-center text-sm font-mono mt-1">
+                  <button
+                    onClick={handleBackToProjectChat}
+                    className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 rounded px-1 -mx-1 cursor-pointer"
+                    aria-label={`Return to new chat in ${workingDirectory}`}
+                  >
+                    {workingDirectory}
+                  </button>
                   {sessionId && (
-                    <span className="ml-2 text-xs">
+                    <span className="ml-2 text-xs text-slate-600 dark:text-slate-400">
                       Session: {sessionId.substring(0, 8)}...
                     </span>
                   )}
-                </p>
+                </div>
               )}
             </div>
           </div>
