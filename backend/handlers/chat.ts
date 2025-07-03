@@ -31,7 +31,7 @@ function getClaudeExecutionConfig(claudePath: string) {
    */
   const createDirectConfig = () => {
     return {
-      executable: claudePath,
+      executable: claudePath as any,
       executableArgs: [],
       pathToClaudeCodeExecutable: claudePath,
     };
