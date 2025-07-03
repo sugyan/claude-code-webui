@@ -11,10 +11,8 @@ import {
   isResultMessage,
   isUserMessage,
 } from "../../utils/messageTypes";
-import {
-  useMessageProcessor,
-  type StreamingContext,
-} from "./useMessageProcessor";
+import { useMessageConverter } from "../useMessageConverter";
+import type { StreamingContext } from "./useMessageProcessor";
 import { useToolHandling } from "./useToolHandling";
 
 export function useStreamParser() {
@@ -23,7 +21,7 @@ export function useStreamParser() {
     createToolMessage,
     createResultMessage,
     createToolResultMessage,
-  } = useMessageProcessor();
+  } = useMessageConverter();
 
   const { toolUseCache, processToolResult } = useToolHandling();
 

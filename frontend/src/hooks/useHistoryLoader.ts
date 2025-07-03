@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import type { AllMessage, TimestampedSDKMessage } from "../types";
 import type { ConversationHistory } from "../../../shared/types";
 import { getConversationUrl } from "../config/api";
-import { useMessageProcessor } from "./streaming/useMessageProcessor";
+import { useMessageConverter } from "./useMessageConverter";
 
 interface HistoryLoaderState {
   messages: AllMessage[];
@@ -40,7 +40,7 @@ export function useHistoryLoader(): HistoryLoaderResult {
     sessionId: null,
   });
 
-  const { convertConversationHistory } = useMessageProcessor();
+  const { convertConversationHistory } = useMessageConverter();
 
   const loadHistory = useCallback(
     async (encodedProjectName: string, sessionId: string) => {
