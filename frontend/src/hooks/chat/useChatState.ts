@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import type { AllMessage, ChatMessage } from "../../types";
 import { generateId } from "../../utils/id";
 
@@ -7,10 +7,21 @@ interface ChatStateOptions {
   initialSessionId?: string;
 }
 
-export function useChatState(options: ChatStateOptions = {}) {
-  const { initialMessages = [], initialSessionId = null } = options;
+const DEFAULT_MESSAGES: AllMessage[] = [];
 
-  const [messages, setMessages] = useState<AllMessage[]>(initialMessages);
+export function useChatState(options: ChatStateOptions = {}) {
+  const { initialMessages = DEFAULT_MESSAGES, initialSessionId = null } =
+    options;
+
+  // Memoize initial messages to prevent infinite loops
+  const memoizedInitialMessages = useMemo(
+    () => initialMessages,
+    [initialMessages],
+  );
+
+  const [messages, setMessages] = useState<AllMessage[]>(
+    memoizedInitialMessages,
+  );
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(
@@ -24,8 +35,8 @@ export function useChatState(options: ChatStateOptions = {}) {
 
   // Update messages and sessionId when initial values change
   useEffect(() => {
-    setMessages(initialMessages);
-  }, [initialMessages]);
+    setMessages(memoizedInitialMessages);
+  }, [memoizedInitialMessages]);
 
   useEffect(() => {
     setCurrentSessionId(initialSessionId);
