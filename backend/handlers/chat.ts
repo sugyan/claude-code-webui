@@ -4,60 +4,47 @@ import type { ChatRequest, StreamResponse } from "../../shared/types.ts";
 
 /**
  * Automatically determines Claude Code execution configuration
- * Supports both JavaScript files and shell script wrappers (migrate-installer)
+ * Supports symlinks and shell script wrappers (migrate-installer)
  */
-
 function getClaudeExecutionConfig(claudePath: string) {
   /**
-   * Check if a file path represents a JavaScript/TypeScript file
+   * Extract actual executable path from bash script
+   * Parses 'exec "path"' pattern from migrate-installer wrapper scripts
    */
-  const isJavaScriptFile = (filePath: string): boolean => {
-    return /\.(js|mjs|ts)$/.test(filePath);
+  const getActualExecutablePath = (scriptPath: string): string => {
+    try {
+      const content = Deno.readTextFileSync(scriptPath);
+      const match = content.match(/exec\s+"([^"]+)"/);
+      return match ? match[1] : scriptPath;
+    } catch {
+      return scriptPath;
+    }
   };
 
   /**
-   * Create Node.js execution configuration
+   * Create Node.js execution configuration for Claude Code SDK
    */
-  const createNodeConfig = () => {
+  const createNodeConfig = (executablePath: string) => {
     return {
-      executable: "node",
+      executable: "node" as const,
       executableArgs: [],
-      pathToClaudeCodeExecutable: claudePath,
+      pathToClaudeCodeExecutable: executablePath,
     };
   };
 
-  /**
-   * Create direct execution configuration
-   */
-  const createDirectConfig = () => {
-    return {
-      executable: claudePath as any,
-      executableArgs: [],
-      pathToClaudeCodeExecutable: claudePath,
-    };
-  };
-
-  // Check direct file extension first
-  if (isJavaScriptFile(claudePath)) {
-    return createNodeConfig();
-  }
-
-  // Check symlink target if applicable
+  // Handle symlinks (typical npm install: /usr/local/bin/claude -> node_modules/.bin/claude)
   try {
     const stat = Deno.lstatSync(claudePath);
     if (stat.isSymlink) {
-      const linkTarget = Deno.readLinkSync(claudePath);
-      
-      if (isJavaScriptFile(linkTarget)) {
-        return createNodeConfig();
-      }
+      return createNodeConfig(claudePath); // Node.js resolves symlinks automatically
     }
-  } catch (error) {
-    // Silently continue if symlink check fails
+  } catch (_error) {
+    // Silently continue if stat check fails
   }
 
-  // Default to direct execution for shell scripts and other executables
-  return createDirectConfig();
+  // Handle shell scripts (migrate-installer: extract actual executable path)
+  const actualPath = getActualExecutablePath(claudePath);
+  return createNodeConfig(actualPath);
 }
 
 /**
@@ -114,7 +101,7 @@ async function* executeClaudeCommand(
         prompt: processedMessage,
         options: {
           abortController,
-          ...executionConfig,  // Use auto-detected execution configuration
+          ...executionConfig, // Use auto-detected execution configuration
           ...(sessionId ? { resume: sessionId } : {}),
           ...(allowedTools ? { allowedTools } : {}),
           ...(workingDirectory ? { cwd: workingDirectory } : {}),
