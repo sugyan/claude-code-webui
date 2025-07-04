@@ -35,11 +35,9 @@ Instead of being limited to command-line interactions, Claude Code Web UI brings
 |----------------|-------------------|
 | ⌨️ Terminal only | 🌐 Any device with a browser |
 | 📱 Desktop bound | 📱 Mobile-friendly interface |
-| 🔄 Command repetition | 💬 Conversational flow |
 | 📝 Plain text output | 🎨 Rich formatted responses |
 | 🗂️ Manual directory switching | 📁 Visual project selection |
-| 🕒 No conversation history | 📚 Browse past conversations |
-| 🎯 Single interaction mode | 🎭 Interactive demo mode |
+| 💻 Command-line interface | 🖱️ Point-and-click interface |
 
 ### Perfect for:
 - 👨‍💻 **Developers** who prefer visual interfaces
@@ -47,8 +45,6 @@ Instead of being limited to command-line interactions, Claude Code Web UI brings
 - 👥 **Teams** sharing coding sessions
 - 🔄 **Multi-project** workflows
 - 💡 **Rapid prototyping** with visual feedback
-- 📚 **History tracking** to review past conversations
-- 🎭 **Demos and presentations** with interactive examples
 
 ---
 
