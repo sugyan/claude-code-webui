@@ -59,7 +59,7 @@ This project consists of three main components:
 **API Endpoints**:
 
 - `GET /api/projects` - Retrieves list of available project directories
-  - Response: `{ projects: string[] }` - Array of project directory paths from Claude configuration
+  - Response: `{ projects: ProjectInfo[] }` - Array of project info objects with path and encodedName
 - `POST /api/chat` - Accepts chat messages and returns streaming responses
   - Request body: `{ message: string, sessionId?: string, requestId: string, allowedTools?: string[], workingDirectory?: string }`
   - `requestId` is required for request tracking and abort functionality
@@ -67,6 +67,10 @@ This project consists of three main components:
   - Optional `allowedTools` array restricts which tools Claude can use
   - Optional `workingDirectory` specifies the project directory for Claude execution
 - `POST /api/abort/:requestId` - Aborts an ongoing request by request ID
+- `GET /api/projects/:encodedProjectName/histories` - Retrieves list of conversation histories for a project
+  - Response: `{ conversations: ConversationSummary[] }` - Array of conversation summaries with session metadata
+- `GET /api/projects/:encodedProjectName/histories/:sessionId` - Retrieves detailed conversation history for a specific session
+  - Response: `ConversationHistory` - Complete conversation with messages and metadata
 - `/*` - Serves static frontend files (in single binary mode)
 
 ### Frontend (React)
@@ -79,7 +83,9 @@ This project consists of three main components:
 **Key Features**:
 
 - **Project Directory Selection**: Choose working directory before starting chat sessions
-- **Routing System**: Separate pages for project selection and chat interface
+- **Routing System**: Separate pages for project selection, chat interface, and demo mode
+- **Conversation History**: Browse and restore previous chat sessions with full message history
+- **Demo Mode**: Interactive demonstration system with automated scenarios and mock responses
 - Real-time streaming response display with modular message processing
 - Parses different Claude JSON message types (system, assistant, result, tool messages)
 - TailwindCSS utility-first styling for responsive design
@@ -95,6 +101,8 @@ This project consists of three main components:
 - Enhanced error handling and user feedback
 - Modular hook architecture for state management and business logic separation
 - Reusable UI components with consistent design patterns
+- **History Management**: View conversation summaries, timestamps, and message previews
+- **Demo Automation**: Automated demo recording and playback for presentations
 
 ### Shared Types
 
@@ -112,8 +120,23 @@ This project consists of three main components:
   - `workingDirectory?: string` - Optional project directory path for Claude execution
 - `AbortRequest` - Request structure for aborting ongoing operations
   - `requestId: string` - ID of the request to abort
+- `ProjectInfo` - Project information structure
+  - `path: string` - Full file system path to the project directory
+  - `encodedName: string` - URL-safe encoded project name
 - `ProjectsResponse` - Response structure for project directory list
-  - `projects: string[]` - Array of available project directory paths
+  - `projects: ProjectInfo[]` - Array of project information objects
+- `ConversationSummary` - Summary information for conversation history
+  - `sessionId: string` - Unique session identifier
+  - `startTime: string` - ISO timestamp of first message
+  - `lastTime: string` - ISO timestamp of last message
+  - `messageCount: number` - Total number of messages in conversation
+  - `lastMessagePreview: string` - Preview text of the last message
+- `HistoryListResponse` - Response structure for conversation history list
+  - `conversations: ConversationSummary[]` - Array of conversation summaries
+- `ConversationHistory` - Complete conversation history structure
+  - `sessionId: string` - Session identifier
+  - `messages: unknown[]` - Array of timestamped SDK messages (typed as unknown[] to avoid frontend dependency)
+  - `metadata: object` - Conversation metadata with startTime, endTime, and messageCount
 
 **Note**: Enhanced message types (`ChatMessage`, `SystemMessage`, `ToolMessage`, `ToolResultMessage`, etc.) are defined in `frontend/src/types.ts` for comprehensive frontend message handling.
 
@@ -216,7 +239,25 @@ cd frontend && npm run dev      # Configures proxy to localhost:9000
 ├── backend/           # Deno backend server
 │   ├── deno.json     # Deno configuration with permissions
 │   ├── main.ts       # Main server implementation
-│   └── args.ts       # CLI argument parsing
+│   ├── args.ts       # CLI argument parsing
+│   ├── types.ts      # Backend-specific type definitions
+│   ├── VERSION       # Version file for releases
+│   ├── handlers/     # Modular API handlers
+│   │   ├── abort.ts         # Request abortion handler
+│   │   ├── chat.ts          # Chat streaming handler
+│   │   ├── conversations.ts # Conversation details handler
+│   │   ├── histories.ts     # History listing handler
+│   │   └── projects.ts      # Project listing handler
+│   ├── history/      # History processing utilities
+│   │   ├── conversationLoader.ts  # Load specific conversations
+│   │   ├── grouping.ts             # Group conversation files
+│   │   ├── parser.ts               # Parse history files
+│   │   ├── pathUtils.ts            # Path validation utilities
+│   │   └── timestampRestore.ts     # Restore message timestamps
+│   ├── middleware/   # Middleware modules
+│   │   └── config.ts        # Configuration middleware
+│   ├── pathUtils.test.ts    # Path utility tests
+│   └── dist/         # Frontend build output (copied during build)
 ├── frontend/         # React frontend application
 │   ├── src/
 │   │   ├── App.tsx   # Main application component with routing
@@ -228,10 +269,16 @@ cd frontend && npm run dev      # Configures proxy to localhost:9000
 │   │   │   ├── constants.ts           # UI and application constants
 │   │   │   ├── messageTypes.ts        # Type guard functions for messages
 │   │   │   ├── toolUtils.ts           # Tool-related utility functions
-│   │   │   └── time.ts                # Time utilities
+│   │   │   ├── time.ts                # Time utilities
+│   │   │   ├── id.ts                  # ID generation utilities
+│   │   │   ├── messageConversion.ts   # Message conversion utilities
+│   │   │   └── mockResponseGenerator.ts # Demo response generator
 │   │   ├── hooks/
 │   │   │   ├── useClaudeStreaming.ts  # Simplified streaming interface
 │   │   │   ├── useTheme.ts            # Theme management hook
+│   │   │   ├── useHistoryLoader.ts    # History loading hook
+│   │   │   ├── useMessageConverter.ts # Message conversion hook
+│   │   │   ├── useDemoAutomation.ts   # Demo automation hook
 │   │   │   ├── chat/
 │   │   │   │   ├── useChatState.ts    # Chat state management
 │   │   │   │   ├── usePermissions.ts  # Permission handling logic
@@ -243,21 +290,34 @@ cd frontend && npm run dev      # Configures proxy to localhost:9000
 │   │   ├── components/
 │   │   │   ├── ChatPage.tsx           # Main chat interface page
 │   │   │   ├── ProjectSelector.tsx    # Project directory selection page
-│   │   │   ├── MessageComponents.tsx  # Message display components (refactored)
+│   │   │   ├── MessageComponents.tsx  # Message display components
 │   │   │   ├── PermissionDialog.tsx   # Permission handling dialog
 │   │   │   ├── TimestampComponent.tsx # Timestamp display
+│   │   │   ├── HistoryView.tsx        # Conversation history view
+│   │   │   ├── DemoPage.tsx           # Demo mode page
+│   │   │   ├── DemoPermissionDialogWrapper.tsx # Demo permission wrapper
 │   │   │   ├── chat/
 │   │   │   │   ├── ThemeToggle.tsx    # Theme toggle button
 │   │   │   │   ├── ChatInput.tsx      # Chat input component
-│   │   │   │   └── ChatMessages.tsx   # Chat messages container
+│   │   │   │   ├── ChatMessages.tsx   # Chat messages container
+│   │   │   │   └── HistoryButton.tsx  # History access button
 │   │   │   └── messages/
 │   │   │       ├── MessageContainer.tsx   # Reusable message wrapper
 │   │   │       └── CollapsibleDetails.tsx # Collapsible content component
+│   │   ├── types/
+│   │   │   └── window.d.ts     # Window type extensions
+│   │   ├── scripts/            # Demo recording scripts
+│   │   │   ├── record-demo.ts         # Demo recorder
+│   │   │   ├── demo-constants.ts      # Demo configuration
+│   │   │   └── compare-demo-videos.ts # Demo comparison
+│   │   ├── tests/              # End-to-end tests
+│   │   │   └── demo-validation.spec.ts # Demo validation tests
 │   │   ├── package.json
 │   │   └── vite.config.ts     # Vite config with @tailwindcss/vite plugin
 ├── shared/           # Shared TypeScript types
 │   └── types.ts
-└── CLAUDE.md        # This documentation
+├── CLAUDE.md        # Technical documentation
+└── README.md        # User documentation
 ```
 
 ## Key Design Decisions

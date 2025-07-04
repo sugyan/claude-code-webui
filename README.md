@@ -38,6 +38,8 @@ Instead of being limited to command-line interactions, Claude Code Web UI brings
 | 🔄 Command repetition | 💬 Conversational flow |
 | 📝 Plain text output | 🎨 Rich formatted responses |
 | 🗂️ Manual directory switching | 📁 Visual project selection |
+| 🕒 No conversation history | 📚 Browse past conversations |
+| 🎯 Single interaction mode | 🎭 Interactive demo mode |
 
 ### Perfect for:
 - 👨‍💻 **Developers** who prefer visual interfaces
@@ -45,6 +47,8 @@ Instead of being limited to command-line interactions, Claude Code Web UI brings
 - 👥 **Teams** sharing coding sessions
 - 🔄 **Multi-project** workflows
 - 💡 **Rapid prototyping** with visual feedback
+- 📚 **History tracking** to review past conversations
+- 🎭 **Demos and presentations** with interactive examples
 
 ---
 
@@ -90,7 +94,7 @@ The backend server supports the following command-line options:
 | Option | Description | Default |
 |--------|-------------|---------|
 | `-p, --port <port>` | Port to listen on | 8080 |
-| `--host <host>` | Host address to bind to | 127.0.0.1 |
+| `--host <host>` | Host address to bind to (use 0.0.0.0 for all interfaces) | 127.0.0.1 |
 | `-d, --debug` | Enable debug mode | false |
 | `-h, --help` | Show help message | - |
 | `-V, --version` | Show version | - |
