@@ -37,14 +37,6 @@ Instead of being limited to command-line interactions, Claude Code Web UI brings
 | 📱 Desktop bound | 📱 Mobile-friendly interface |
 | 📝 Plain text output | 🎨 Rich formatted responses |
 | 🗂️ Manual directory switching | 📁 Visual project selection |
-| 💻 Command-line interface | 🖱️ Point-and-click interface |
-
-### Perfect for:
-- 👨‍💻 **Developers** who prefer visual interfaces
-- 📱 **Mobile users** who want to code on-the-go
-- 👥 **Teams** sharing coding sessions
-- 🔄 **Multi-project** workflows
-- 💡 **Rapid prototyping** with visual feedback
 
 ---
 
@@ -159,8 +151,7 @@ Both backend and frontend will automatically use this port.
 ### ✅ Safe Usage Patterns
 
 - **🏠 Local development**: Default localhost access
-- **🏢 Trusted networks**: LAN access for team collaboration
-- **🔐 Project isolation**: Claude only accesses selected directories
+- **📱 Personal network**: LAN access from your own devices
 
 ### ⚠️ Security Notes
 
