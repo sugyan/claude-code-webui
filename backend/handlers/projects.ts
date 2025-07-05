@@ -10,7 +10,9 @@ import { getEncodedProjectName } from "../history/pathUtils.ts";
  */
 export async function handleProjectsRequest(c: Context) {
   try {
-    const homeDir = Deno.env.get("HOME");
+    const { runtime } = c.var.config;
+
+    const homeDir = runtime.getEnv("HOME");
     if (!homeDir) {
       return c.json({ error: "HOME environment variable not found" }, 500);
     }
@@ -18,7 +20,7 @@ export async function handleProjectsRequest(c: Context) {
     const claudeConfigPath = `${homeDir}/.claude.json`;
 
     try {
-      const configContent = await Deno.readTextFile(claudeConfigPath);
+      const configContent = await runtime.readTextFile(claudeConfigPath);
       const config = JSON.parse(configContent);
 
       if (config.projects && typeof config.projects === "object") {
@@ -27,7 +29,7 @@ export async function handleProjectsRequest(c: Context) {
         // Get encoded names for each project, only include projects with history
         const projects: ProjectInfo[] = [];
         for (const path of projectPaths) {
-          const encodedName = await getEncodedProjectName(path);
+          const encodedName = await getEncodedProjectName(path, runtime);
           // Only include projects that have history directories
           if (encodedName) {
             projects.push({
@@ -44,7 +46,8 @@ export async function handleProjectsRequest(c: Context) {
         return c.json(response);
       }
     } catch (error) {
-      if (error instanceof Deno.errors.NotFound) {
+      // Handle file not found errors in a cross-platform way
+      if (error instanceof Error && error.message.includes("No such file")) {
         const response: ProjectsResponse = { projects: [] };
         return c.json(response);
       }

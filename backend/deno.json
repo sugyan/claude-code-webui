@@ -1,10 +1,10 @@
 {
   "tasks": {
-    "dev": "deno run --env-file --allow-net --allow-run --allow-read --allow-env --watch main.ts --debug",
-    "build": "deno compile --allow-net --allow-run --allow-read --allow-env --include ./VERSION --include ./dist --output ../dist/claude-code-webui main.ts",
+    "dev": "deno run --env-file --allow-net --allow-run --allow-read --allow-env --watch cli/deno.ts --debug",
+    "build": "deno compile --allow-net --allow-run --allow-read --allow-env --include ./VERSION --include ./dist --output ../dist/claude-code-webui cli/deno.ts",
     "format": "deno fmt",
     "lint": "deno lint",
-    "check": "deno check main.ts args.ts",
+    "check": "deno check",
     "test": "deno test --allow-env --allow-read"
   },
   "imports": {

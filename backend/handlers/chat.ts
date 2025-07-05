@@ -1,19 +1,20 @@
 import { Context } from "hono";
 import { AbortError, query } from "@anthropic-ai/claude-code";
 import type { ChatRequest, StreamResponse } from "../../shared/types.ts";
+import type { Runtime } from "../runtime/types.ts";
 
 /**
  * Automatically determines Claude Code execution configuration
  * Supports symlinks and shell script wrappers (migrate-installer)
  */
-function getClaudeExecutionConfig(claudePath: string) {
+function getClaudeExecutionConfig(claudePath: string, runtime: Runtime) {
   /**
    * Extract actual executable path from bash script
    * Parses 'exec "path"' pattern from migrate-installer wrapper scripts
    */
   const getActualExecutablePath = (scriptPath: string): string => {
     try {
-      const content = Deno.readTextFileSync(scriptPath);
+      const content = runtime.readTextFileSync(scriptPath);
       const match = content.match(/exec\s+"([^"]+)"/);
       return match ? match[1] : scriptPath;
     } catch {
@@ -34,7 +35,7 @@ function getClaudeExecutionConfig(claudePath: string) {
 
   // Handle symlinks (typical npm install: /usr/local/bin/claude -> node_modules/.bin/claude)
   try {
-    const stat = Deno.lstatSync(claudePath);
+    const stat = runtime.lstatSync(claudePath);
     if (stat.isSymlink) {
       return createNodeConfig(claudePath); // Node.js resolves symlinks automatically
     }
@@ -62,6 +63,7 @@ async function* executeClaudeCommand(
   message: string,
   requestId: string,
   requestAbortControllers: Map<string, AbortController>,
+  runtime: Runtime,
   sessionId?: string,
   allowedTools?: string[],
   workingDirectory?: string,
@@ -84,17 +86,18 @@ async function* executeClaudeCommand(
     // For compiled binaries, use system claude command to avoid bundled cli.js issues
     let claudePath: string;
     try {
-      const whichResult = await new Deno.Command("which", {
-        args: ["claude"],
-        stdout: "piped",
-      }).output();
-      claudePath = new TextDecoder().decode(whichResult.stdout).trim();
+      const whichResult = await runtime.runCommand("which", ["claude"]);
+      if (whichResult.success) {
+        claudePath = whichResult.stdout.trim();
+      } else {
+        claudePath = "claude"; // fallback
+      }
     } catch {
       claudePath = "claude"; // fallback
     }
 
     // Get Claude Code execution configuration for migrate-installer compatibility
-    const executionConfig = getClaudeExecutionConfig(claudePath);
+    const executionConfig = getClaudeExecutionConfig(claudePath, runtime);
 
     for await (
       const sdkMessage of query({
@@ -154,7 +157,7 @@ export async function handleChatRequest(
   requestAbortControllers: Map<string, AbortController>,
 ) {
   const chatRequest: ChatRequest = await c.req.json();
-  const { debugMode } = c.var.config;
+  const { debugMode, runtime } = c.var.config;
 
   if (debugMode) {
     console.debug(
@@ -171,6 +174,7 @@ export async function handleChatRequest(
             chatRequest.message,
             chatRequest.requestId,
             requestAbortControllers,
+            runtime,
             chatRequest.sessionId,
             chatRequest.allowedTools,
             chatRequest.workingDirectory,

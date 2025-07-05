@@ -1,11 +1,13 @@
 import { createMiddleware } from "hono/factory";
 import type { AppConfig } from "../types.ts";
+import type { Runtime } from "../runtime/types.ts";
 
 /**
  * Configuration options for the middleware
  */
 interface ConfigOptions {
   debugMode: boolean;
+  runtime: Runtime;
 }
 
 /**
@@ -25,6 +27,7 @@ export function createConfigMiddleware(options: ConfigOptions) {
     // Initialize application configuration
     const config: AppConfig = {
       debugMode: options.debugMode,
+      runtime: options.runtime,
       // Future configuration options can be added here
     };
 

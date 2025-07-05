@@ -47,7 +47,9 @@ This project consists of three main components:
 
 **Key Features**:
 
-- Command line interface with `--port`, `--help`, `--version` options
+- **Runtime Abstraction**: Clean separation between business logic and platform-specific code
+- **Modular Architecture**: CLI, application core, and runtime layers clearly separated
+- Command line interface with `--port`, `--help`, `--version` options  
 - Startup validation to check Claude CLI availability
 - Executes `claude --output-format stream-json --verbose -p <message>`
 - Streams raw Claude JSON responses without modification
@@ -55,6 +57,7 @@ This project consists of three main components:
 - Provides CORS headers for frontend communication
 - Single binary distribution support
 - Session continuity support using Claude Code SDK's resume functionality
+- **Comprehensive Testing**: Mock runtime enables full unit testing without external dependencies
 
 **API Endpoints**:
 
@@ -210,7 +213,7 @@ cd frontend && npm run dev      # Configures proxy to localhost:9000
 #### Alternative Configuration Methods
 
 - **Environment Variable**: `PORT=9000 deno task dev`
-- **CLI Argument**: `deno run --env-file --allow-net --allow-run --allow-read --allow-env main.ts --port 9000`
+- **CLI Argument**: `deno run --env-file --allow-net --allow-run --allow-read --allow-env cli/deno.ts --port 9000`
 - **Frontend Port**: `npm run dev -- --port 4000` (for frontend UI port)
 
 ### Running the Application
@@ -236,13 +239,18 @@ cd frontend && npm run dev      # Configures proxy to localhost:9000
 ### Project Structure
 
 ```
-├── backend/           # Deno backend server
+├── backend/           # Deno backend server with runtime abstraction
 │   ├── deno.json     # Deno configuration with permissions
-│   ├── main.ts       # Main server implementation
-│   ├── args.ts       # CLI argument parsing
+│   ├── app.ts        # Runtime-agnostic core application
 │   ├── types.ts      # Backend-specific type definitions
 │   ├── VERSION       # Version file for releases
-│   ├── handlers/     # Modular API handlers
+│   ├── cli/          # CLI-specific entry points
+│   │   ├── deno.ts           # Deno entry point and server startup
+│   │   └── args.ts           # CLI argument parsing with runtime abstraction
+│   ├── runtime/      # Runtime abstraction layer
+│   │   ├── types.ts          # Runtime interface definitions
+│   │   └── deno.ts           # Deno runtime implementation
+│   ├── handlers/     # API handlers using runtime abstraction
 │   │   ├── abort.ts         # Request abortion handler
 │   │   ├── chat.ts          # Chat streaming handler
 │   │   ├── conversations.ts # Conversation details handler
@@ -255,8 +263,8 @@ cd frontend && npm run dev      # Configures proxy to localhost:9000
 │   │   ├── pathUtils.ts            # Path validation utilities
 │   │   └── timestampRestore.ts     # Restore message timestamps
 │   ├── middleware/   # Middleware modules
-│   │   └── config.ts        # Configuration middleware
-│   ├── pathUtils.test.ts    # Path utility tests
+│   │   └── config.ts        # Configuration middleware with runtime injection
+│   ├── pathUtils.test.ts    # Path utility tests with mock runtime
 │   └── dist/         # Frontend build output (copied during build)
 ├── frontend/         # React frontend application
 │   ├── src/
@@ -322,37 +330,41 @@ cd frontend && npm run dev      # Configures proxy to localhost:9000
 
 ## Key Design Decisions
 
-1. **Raw JSON Streaming**: Backend passes Claude JSON responses without modification to allow frontend flexibility in handling different message types.
+1. **Runtime Abstraction Architecture**: Complete separation between business logic and platform-specific code using a minimal Runtime interface. All handlers, utilities, and CLI components use runtime abstraction instead of direct Deno APIs, enabling comprehensive testing with mock runtime and future platform flexibility.
 
-2. **Configurable Ports**: Backend port configurable via PORT environment variable or CLI argument, frontend port via CLI argument to allow independent development and deployment.
+2. **Modular Entry Points**: CLI-specific code separated into `cli/` directory with `deno.ts` as the main entry point, while `app.ts` contains the runtime-agnostic core application. This enables clean separation of concerns and potential future Node.js implementation.
 
-3. **TypeScript Throughout**: Consistent TypeScript usage across all components with shared type definitions.
+3. **Raw JSON Streaming**: Backend passes Claude JSON responses without modification to allow frontend flexibility in handling different message types.
 
-4. **TailwindCSS Styling**: Uses @tailwindcss/vite plugin for utility-first CSS without separate CSS files.
+4. **Configurable Ports**: Backend port configurable via PORT environment variable or CLI argument, frontend port via CLI argument to allow independent development and deployment.
 
-5. **Theme System**: Light/dark theme toggle with automatic system preference detection and localStorage persistence.
+5. **TypeScript Throughout**: Consistent TypeScript usage across all components with shared type definitions.
 
-6. **Project Directory Selection**: Users choose working directory before starting chat sessions, with support for both configured projects and custom directory selection.
+6. **TailwindCSS Styling**: Uses @tailwindcss/vite plugin for utility-first CSS without separate CSS files.
 
-7. **Routing Architecture**: React Router separates project selection and chat interfaces for better user experience.
+7. **Theme System**: Light/dark theme toggle with automatic system preference detection and localStorage persistence.
 
-8. **Dynamic Working Directory**: Claude commands execute in user-selected project directories for contextual file access.
+8. **Project Directory Selection**: Users choose working directory before starting chat sessions, with support for both configured projects and custom directory selection.
 
-9. **Request Management**: Unique request IDs enable request tracking and abort functionality for better user control.
+9. **Routing Architecture**: React Router separates project selection and chat interfaces for better user experience.
 
-10. **Tool Permission Handling**: Frontend permission dialog allows users to grant/deny tool access with proper state management.
+10. **Dynamic Working Directory**: Claude commands execute in user-selected project directories for contextual file access.
 
-11. **Comprehensive Error Handling**: Enhanced error states and user feedback for better debugging and user experience.
+11. **Request Management**: Unique request IDs enable request tracking and abort functionality for better user control.
 
-12. **Modular Architecture**: Frontend code is organized into specialized hooks and components for better maintainability and testability.
+12. **Tool Permission Handling**: Frontend permission dialog allows users to grant/deny tool access with proper state management.
 
-13. **Separation of Concerns**: Business logic, UI components, and utilities are clearly separated into different modules.
+13. **Comprehensive Error Handling**: Enhanced error states and user feedback for better debugging and user experience.
 
-14. **Configuration Management**: Centralized configuration for API endpoints and application constants.
+14. **Modular Architecture**: Frontend code is organized into specialized hooks and components for better maintainability and testability.
 
-15. **Reusable Components**: Common UI patterns are extracted into reusable components to reduce duplication.
+15. **Separation of Concerns**: Business logic, UI components, and utilities are clearly separated into different modules.
 
-16. **Hook Composition**: Complex functionality is built by composing smaller, focused hooks that each handle a specific concern.
+16. **Configuration Management**: Centralized configuration for API endpoints and application constants.
+
+17. **Reusable Components**: Common UI patterns are extracted into reusable components to reduce duplication.
+
+18. **Hook Composition**: Complex functionality is built by composing smaller, focused hooks that each handle a specific concern.
 
 ## Claude Code SDK Types Reference
 

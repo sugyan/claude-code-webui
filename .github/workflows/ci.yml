@@ -26,7 +26,7 @@ jobs:
         run: cd backend && deno lint
 
       - name: Type check
-        run: cd backend && deno check main.ts
+        run: cd backend && deno check
 
   frontend:
     name: Frontend

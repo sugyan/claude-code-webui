@@ -10,7 +10,7 @@ import { loadConversation } from "../history/conversationLoader.ts";
  */
 export async function handleConversationRequest(c: Context) {
   try {
-    const { debugMode } = c.var.config;
+    const { debugMode, runtime } = c.var.config;
     const encodedProjectName = c.req.param("encodedProjectName");
     const sessionId = c.req.param("sessionId");
 
@@ -36,6 +36,7 @@ export async function handleConversationRequest(c: Context) {
     const conversationHistory = await loadConversation(
       encodedProjectName,
       sessionId,
+      runtime,
     );
 
     if (!conversationHistory) {
