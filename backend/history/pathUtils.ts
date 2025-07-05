@@ -11,10 +11,9 @@ import type { Runtime } from "../runtime/types.ts";
  */
 export async function getEncodedProjectName(
   projectPath: string,
-  runtime?: Runtime,
+  runtime: Runtime,
 ): Promise<string | null> {
-  // If no runtime provided, fall back to Deno APIs for backward compatibility
-  const homeDir = runtime ? runtime.getEnv("HOME") : Deno.env.get("HOME");
+  const homeDir = runtime.getEnv("HOME");
   if (!homeDir) {
     return null;
   }
@@ -24,18 +23,9 @@ export async function getEncodedProjectName(
   try {
     // Read all directories in .claude/projects
     const entries = [];
-    if (runtime) {
-      for await (const entry of runtime.readDir(projectsDir)) {
-        if (entry.isDirectory) {
-          entries.push(entry.name);
-        }
-      }
-    } else {
-      // Fallback for backward compatibility
-      for await (const entry of Deno.readDir(projectsDir)) {
-        if (entry.isDirectory) {
-          entries.push(entry.name);
-        }
+    for await (const entry of runtime.readDir(projectsDir)) {
+      if (entry.isDirectory) {
+        entries.push(entry.name);
       }
     }
 

@@ -1,4 +1,11 @@
+/**
+ * CLI argument parsing using runtime abstraction
+ *
+ * Handles command-line argument parsing in a runtime-agnostic way.
+ */
+
 import { Command } from "@cliffy/command";
+import type { Runtime } from "./runtime/types.ts";
 
 export interface ParsedArgs {
   debug: boolean;
@@ -6,12 +13,12 @@ export interface ParsedArgs {
   host: string;
 }
 
-export async function parseCliArgs(): Promise<ParsedArgs> {
+export async function parseCliArgs(runtime: Runtime): Promise<ParsedArgs> {
   // Read version from VERSION file
   let version = "unknown";
   try {
-    const versionContent = await Deno.readTextFile(
-      import.meta.dirname + "/VERSION",
+    const versionContent = await runtime.readTextFile(
+      new URL("./VERSION", import.meta.url).pathname,
     );
     version = versionContent.trim();
   } catch (error) {
@@ -20,7 +27,7 @@ export async function parseCliArgs(): Promise<ParsedArgs> {
         error instanceof Error ? error.message : String(error)
       }`,
     );
-    Deno.exit(1);
+    runtime.exit(1);
   }
 
   const { options } = await new Command()
@@ -28,7 +35,7 @@ export async function parseCliArgs(): Promise<ParsedArgs> {
     .version(version)
     .description("Claude Code Web UI Backend Server")
     .option("-p, --port <port:number>", "Port to listen on", {
-      default: parseInt(Deno.env.get("PORT") || "8080", 10),
+      default: parseInt(runtime.getEnv("PORT") || "8080", 10),
     })
     .option(
       "--host <host:string>",
@@ -39,7 +46,7 @@ export async function parseCliArgs(): Promise<ParsedArgs> {
     )
     .option("-d, --debug", "Enable debug mode")
     .env("DEBUG=<enable:boolean>", "Enable debug mode")
-    .parse(Deno.args);
+    .parse(runtime.getArgs());
 
   return {
     debug: options.debug || false,

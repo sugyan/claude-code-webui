@@ -8,7 +8,7 @@
 
 import { createApp } from "./app.ts";
 import { DenoRuntime } from "./runtime/deno.ts";
-import { parseCliArgs } from "./cli/args.ts";
+import { parseCliArgs } from "./args.ts";
 
 async function main() {
   // Initialize Deno runtime

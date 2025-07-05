@@ -15,7 +15,7 @@ import { validateEncodedProjectName } from "./pathUtils.ts";
 export async function loadConversation(
   encodedProjectName: string,
   sessionId: string,
-  runtime?: Runtime,
+  runtime: Runtime,
 ): Promise<ConversationHistory | null> {
   // Validate inputs
   if (!validateEncodedProjectName(encodedProjectName)) {
@@ -27,7 +27,7 @@ export async function loadConversation(
   }
 
   // Get home directory
-  const homeDir = runtime ? runtime.getEnv("HOME") : Deno.env.get("HOME");
+  const homeDir = runtime.getEnv("HOME");
   if (!homeDir) {
     throw new Error("HOME environment variable not found");
   }
@@ -59,11 +59,9 @@ export async function loadConversation(
 async function parseConversationFile(
   filePath: string,
   sessionId: string,
-  runtime?: Runtime,
+  runtime: Runtime,
 ): Promise<ConversationHistory> {
-  const content = runtime
-    ? await runtime.readTextFile(filePath)
-    : await Deno.readTextFile(filePath);
+  const content = await runtime.readTextFile(filePath);
   const lines = content.trim().split("\n").filter((line) => line.trim());
 
   if (lines.length === 0) {
@@ -131,7 +129,7 @@ function validateSessionId(sessionId: string): boolean {
 export async function conversationExists(
   encodedProjectName: string,
   sessionId: string,
-  runtime?: Runtime,
+  runtime: Runtime,
 ): Promise<boolean> {
   try {
     const conversation = await loadConversation(

@@ -43,12 +43,10 @@ export interface ConversationFile {
  */
 async function parseHistoryFile(
   filePath: string,
-  runtime?: Runtime,
+  runtime: Runtime,
 ): Promise<ConversationFile | null> {
   try {
-    const content = runtime
-      ? await runtime.readTextFile(filePath)
-      : await Deno.readTextFile(filePath);
+    const content = await runtime.readTextFile(filePath);
     const lines = content.trim().split("\n").filter((line) => line.trim());
 
     if (lines.length === 0) {
@@ -126,22 +124,14 @@ async function parseHistoryFile(
  */
 async function getHistoryFiles(
   historyDir: string,
-  runtime?: Runtime,
+  runtime: Runtime,
 ): Promise<string[]> {
   try {
     const files: string[] = [];
 
-    if (runtime) {
-      for await (const entry of runtime.readDir(historyDir)) {
-        if (entry.isFile && entry.name.endsWith(".jsonl")) {
-          files.push(`${historyDir}/${entry.name}`);
-        }
-      }
-    } else {
-      for await (const entry of Deno.readDir(historyDir)) {
-        if (entry.isFile && entry.name.endsWith(".jsonl")) {
-          files.push(`${historyDir}/${entry.name}`);
-        }
+    for await (const entry of runtime.readDir(historyDir)) {
+      if (entry.isFile && entry.name.endsWith(".jsonl")) {
+        files.push(`${historyDir}/${entry.name}`);
       }
     }
 
@@ -158,7 +148,7 @@ async function getHistoryFiles(
  */
 export async function parseAllHistoryFiles(
   historyDir: string,
-  runtime?: Runtime,
+  runtime: Runtime,
 ): Promise<ConversationFile[]> {
   const filePaths = await getHistoryFiles(historyDir, runtime);
   const results: ConversationFile[] = [];
