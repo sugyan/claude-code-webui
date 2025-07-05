@@ -44,7 +44,10 @@ export function createApp(
   );
 
   // Configuration middleware - makes app settings available to all handlers
-  app.use("*", createConfigMiddleware({ debugMode: config.debugMode }));
+  app.use(
+    "*",
+    createConfigMiddleware({ debugMode: config.debugMode, runtime }),
+  );
 
   // API routes
   app.get("/api/projects", (c) => handleProjectsRequest(c));

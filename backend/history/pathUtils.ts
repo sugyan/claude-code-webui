@@ -3,14 +3,18 @@
  * Handles conversion between project paths and Claude history directory names
  */
 
+import type { Runtime } from "../runtime/types.ts";
+
 /**
  * Get the encoded directory name for a project path by checking what actually exists
  * Example: "/Users/sugyan/tmp/" → "-Users-sugyan-tmp"
  */
 export async function getEncodedProjectName(
   projectPath: string,
+  runtime?: Runtime,
 ): Promise<string | null> {
-  const homeDir = Deno.env.get("HOME");
+  // If no runtime provided, fall back to Deno APIs for backward compatibility
+  const homeDir = runtime ? runtime.getEnv("HOME") : Deno.env.get("HOME");
   if (!homeDir) {
     return null;
   }
@@ -20,9 +24,18 @@ export async function getEncodedProjectName(
   try {
     // Read all directories in .claude/projects
     const entries = [];
-    for await (const entry of Deno.readDir(projectsDir)) {
-      if (entry.isDirectory) {
-        entries.push(entry.name);
+    if (runtime) {
+      for await (const entry of runtime.readDir(projectsDir)) {
+        if (entry.isDirectory) {
+          entries.push(entry.name);
+        }
+      }
+    } else {
+      // Fallback for backward compatibility
+      for await (const entry of Deno.readDir(projectsDir)) {
+        if (entry.isDirectory) {
+          entries.push(entry.name);
+        }
       }
     }
 

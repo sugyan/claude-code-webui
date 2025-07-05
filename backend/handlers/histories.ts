@@ -12,7 +12,7 @@ import { groupConversations } from "../history/grouping.ts";
  */
 export async function handleHistoriesRequest(c: Context) {
   try {
-    const { debugMode } = c.var.config;
+    const { debugMode, runtime } = c.var.config;
     const encodedProjectName = c.req.param("encodedProjectName");
 
     if (!encodedProjectName) {
@@ -30,7 +30,7 @@ export async function handleHistoriesRequest(c: Context) {
     }
 
     // Get home directory
-    const homeDir = Deno.env.get("HOME");
+    const homeDir = runtime.getEnv("HOME");
     if (!homeDir) {
       return c.json({ error: "Server configuration error" }, 500);
     }
@@ -44,18 +44,19 @@ export async function handleHistoriesRequest(c: Context) {
 
     // Check if the directory exists
     try {
-      const dirInfo = await Deno.stat(historyDir);
+      const dirInfo = await runtime.stat(historyDir);
       if (!dirInfo.isDirectory) {
         return c.json({ error: "Project not found" }, 404);
       }
     } catch (error) {
-      if (error instanceof Deno.errors.NotFound) {
+      // Handle file not found errors in a cross-platform way
+      if (error instanceof Error && error.message.includes("No such file")) {
         return c.json({ error: "Project not found" }, 404);
       }
       throw error;
     }
 
-    const conversationFiles = await parseAllHistoryFiles(historyDir);
+    const conversationFiles = await parseAllHistoryFiles(historyDir, runtime);
 
     if (debugMode) {
       console.debug(

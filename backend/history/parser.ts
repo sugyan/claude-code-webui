@@ -7,6 +7,7 @@ import type {
   SDKAssistantMessage,
   SDKUserMessage,
 } from "@anthropic-ai/claude-code";
+import type { Runtime } from "../runtime/types.ts";
 
 // Raw JSONL line structure from Claude history files
 export interface RawHistoryLine {
@@ -42,9 +43,12 @@ export interface ConversationFile {
  */
 async function parseHistoryFile(
   filePath: string,
+  runtime?: Runtime,
 ): Promise<ConversationFile | null> {
   try {
-    const content = await Deno.readTextFile(filePath);
+    const content = runtime
+      ? await runtime.readTextFile(filePath)
+      : await Deno.readTextFile(filePath);
     const lines = content.trim().split("\n").filter((line) => line.trim());
 
     if (lines.length === 0) {
@@ -120,13 +124,24 @@ async function parseHistoryFile(
  * Get all JSONL files in a history directory
  * @private - Internal function used by parseAllHistoryFiles
  */
-async function getHistoryFiles(historyDir: string): Promise<string[]> {
+async function getHistoryFiles(
+  historyDir: string,
+  runtime?: Runtime,
+): Promise<string[]> {
   try {
     const files: string[] = [];
 
-    for await (const entry of Deno.readDir(historyDir)) {
-      if (entry.isFile && entry.name.endsWith(".jsonl")) {
-        files.push(`${historyDir}/${entry.name}`);
+    if (runtime) {
+      for await (const entry of runtime.readDir(historyDir)) {
+        if (entry.isFile && entry.name.endsWith(".jsonl")) {
+          files.push(`${historyDir}/${entry.name}`);
+        }
+      }
+    } else {
+      for await (const entry of Deno.readDir(historyDir)) {
+        if (entry.isFile && entry.name.endsWith(".jsonl")) {
+          files.push(`${historyDir}/${entry.name}`);
+        }
       }
     }
 
@@ -143,12 +158,13 @@ async function getHistoryFiles(historyDir: string): Promise<string[]> {
  */
 export async function parseAllHistoryFiles(
   historyDir: string,
+  runtime?: Runtime,
 ): Promise<ConversationFile[]> {
-  const filePaths = await getHistoryFiles(historyDir);
+  const filePaths = await getHistoryFiles(historyDir, runtime);
   const results: ConversationFile[] = [];
 
   for (const filePath of filePaths) {
-    const parsed = await parseHistoryFile(filePath);
+    const parsed = await parseHistoryFile(filePath, runtime);
     if (parsed) {
       results.push(parsed);
     }

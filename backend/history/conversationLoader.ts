@@ -5,6 +5,7 @@
 
 import type { RawHistoryLine } from "./parser.ts";
 import type { ConversationHistory } from "../../shared/types.ts";
+import type { Runtime } from "../runtime/types.ts";
 import { processConversationMessages } from "./timestampRestore.ts";
 import { validateEncodedProjectName } from "./pathUtils.ts";
 
@@ -14,6 +15,7 @@ import { validateEncodedProjectName } from "./pathUtils.ts";
 export async function loadConversation(
   encodedProjectName: string,
   sessionId: string,
+  runtime?: Runtime,
 ): Promise<ConversationHistory | null> {
   // Validate inputs
   if (!validateEncodedProjectName(encodedProjectName)) {
@@ -25,7 +27,7 @@ export async function loadConversation(
   }
 
   // Get home directory
-  const homeDir = Deno.env.get("HOME");
+  const homeDir = runtime ? runtime.getEnv("HOME") : Deno.env.get("HOME");
   if (!homeDir) {
     throw new Error("HOME environment variable not found");
   }
@@ -38,10 +40,12 @@ export async function loadConversation(
     const conversationHistory = await parseConversationFile(
       filePath,
       sessionId,
+      runtime,
     );
     return conversationHistory;
   } catch (error) {
-    if (error instanceof Deno.errors.NotFound) {
+    // Handle file not found errors in a cross-platform way
+    if (error instanceof Error && error.message.includes("No such file")) {
       return null; // Session not found
     }
     throw error; // Re-throw other errors
@@ -55,8 +59,11 @@ export async function loadConversation(
 async function parseConversationFile(
   filePath: string,
   sessionId: string,
+  runtime?: Runtime,
 ): Promise<ConversationHistory> {
-  const content = await Deno.readTextFile(filePath);
+  const content = runtime
+    ? await runtime.readTextFile(filePath)
+    : await Deno.readTextFile(filePath);
   const lines = content.trim().split("\n").filter((line) => line.trim());
 
   if (lines.length === 0) {
@@ -124,9 +131,14 @@ function validateSessionId(sessionId: string): boolean {
 export async function conversationExists(
   encodedProjectName: string,
   sessionId: string,
+  runtime?: Runtime,
 ): Promise<boolean> {
   try {
-    const conversation = await loadConversation(encodedProjectName, sessionId);
+    const conversation = await loadConversation(
+      encodedProjectName,
+      sessionId,
+      runtime,
+    );
     return conversation !== null;
   } catch {
     return false;
