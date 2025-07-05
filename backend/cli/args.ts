@@ -5,7 +5,7 @@
  */
 
 import { Command } from "@cliffy/command";
-import type { Runtime } from "./runtime/types.ts";
+import type { Runtime } from "../runtime/types.ts";
 
 export interface ParsedArgs {
   debug: boolean;
@@ -18,7 +18,7 @@ export async function parseCliArgs(runtime: Runtime): Promise<ParsedArgs> {
   let version = "unknown";
   try {
     const versionContent = await runtime.readTextFile(
-      new URL("./VERSION", import.meta.url).pathname,
+      new URL("../VERSION", import.meta.url).pathname,
     );
     version = versionContent.trim();
   } catch (error) {
