@@ -9,7 +9,7 @@
   },
   "imports": {
     "@std/assert": "jsr:@std/assert@1",
-    "@cliffy/command": "jsr:@cliffy/command@^1.0.0-rc.7", // TODO: Update to stable version when 1.0.0 is released
+    "commander": "npm:commander@^12.1.0",
     "hono": "jsr:@hono/hono@^4",
     "@anthropic-ai/claude-code": "npm:@anthropic-ai/claude-code@1.0.33"
   }

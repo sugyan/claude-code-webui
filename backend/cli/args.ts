@@ -4,7 +4,7 @@
  * Handles command-line argument parsing in a runtime-agnostic way.
  */
 
-import { Command } from "@cliffy/command";
+import { Command } from "commander";
 import type { Runtime } from "../runtime/types.ts";
 
 export interface ParsedArgs {
@@ -30,26 +30,39 @@ export async function parseCliArgs(runtime: Runtime): Promise<ParsedArgs> {
     runtime.exit(1);
   }
 
-  const { options } = await new Command()
+  const program = new Command()
     .name("claude-code-webui")
     .version(version)
     .description("Claude Code Web UI Backend Server")
-    .option("-p, --port <port:number>", "Port to listen on", {
-      default: parseInt(runtime.getEnv("PORT") || "8080", 10),
-    })
+    .option("-p, --port <port>", "Port to listen on", (value) => {
+      const parsed = parseInt(value, 10);
+      if (isNaN(parsed)) {
+        throw new Error(`Invalid port number: ${value}`);
+      }
+      return parsed;
+    }, parseInt(runtime.getEnv("PORT") || "8080", 10))
     .option(
-      "--host <host:string>",
+      "--host <host>",
       "Host address to bind to (use 0.0.0.0 for all interfaces)",
-      {
-        default: "127.0.0.1",
-      },
+      "127.0.0.1",
     )
-    .option("-d, --debug", "Enable debug mode")
-    .env("DEBUG=<enable:boolean>", "Enable debug mode")
-    .parse(runtime.getArgs());
+    .option("-d, --debug", "Enable debug mode", false);
+
+  const args = runtime.getArgs();
+
+  // Commander.js expects process.argv format: [node, script, ...args]
+  // Deno.args only contains the actual arguments, so we need to prepend dummy values
+  const commanderArgs = ["deno", "cli/deno.ts", ...args];
+
+  program.parse(commanderArgs);
+  const options = program.opts();
+
+  // Handle DEBUG environment variable manually
+  const debugEnv = runtime.getEnv("DEBUG");
+  const debugFromEnv = debugEnv?.toLowerCase() === "true" || debugEnv === "1";
 
   return {
-    debug: options.debug || false,
+    debug: options.debug || debugFromEnv,
     port: options.port,
     host: options.host,
   };
