@@ -4,7 +4,7 @@
  * Handles command-line argument parsing in a runtime-agnostic way.
  */
 
-import { Command } from "commander";
+import { program } from "commander";
 import type { Runtime } from "../runtime/types.ts";
 
 export interface ParsedArgs {
@@ -30,7 +30,11 @@ export async function parseCliArgs(runtime: Runtime): Promise<ParsedArgs> {
     runtime.exit(1);
   }
 
-  const program = new Command()
+  // Get default port from environment
+  const defaultPort = parseInt(runtime.getEnv("PORT") || "8080", 10);
+
+  // Configure program
+  program
     .name("claude-code-webui")
     .version(version)
     .description("Claude Code Web UI Backend Server")
@@ -40,7 +44,7 @@ export async function parseCliArgs(runtime: Runtime): Promise<ParsedArgs> {
         throw new Error(`Invalid port number: ${value}`);
       }
       return parsed;
-    }, parseInt(runtime.getEnv("PORT") || "8080", 10))
+    }, defaultPort)
     .option(
       "--host <host>",
       "Host address to bind to (use 0.0.0.0 for all interfaces)",
@@ -48,13 +52,8 @@ export async function parseCliArgs(runtime: Runtime): Promise<ParsedArgs> {
     )
     .option("-d, --debug", "Enable debug mode", false);
 
-  const args = runtime.getArgs();
-
-  // Commander.js expects process.argv format: [node, script, ...args]
-  // Deno.args only contains the actual arguments, so we need to prepend dummy values
-  const commanderArgs = ["deno", "cli/deno.ts", ...args];
-
-  program.parse(commanderArgs);
+  // Parse arguments - Commander.js v14 handles this automatically
+  program.parse(runtime.getArgs(), { from: "user" });
   const options = program.opts();
 
   // Handle DEBUG environment variable manually
