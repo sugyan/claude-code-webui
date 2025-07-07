@@ -3,6 +3,7 @@
   "specifiers": {
     "jsr:@hono/hono@4": "4.8.2",
     "npm:@anthropic-ai/claude-code@1.0.33": "1.0.33",
+    "npm:@types/node@*": "22.15.15",
     "npm:commander@14": "14.0.0"
   },
   "jsr": {
@@ -94,8 +95,17 @@
       "os": ["win32"],
       "cpu": ["x64"]
     },
+    "@types/node@22.15.15": {
+      "integrity": "sha512-R5muMcZob3/Jjchn5LcO8jdKwSCbzqmPB6ruBxMcf9kbxtniZHP327s6C37iOfuw8mbKK3cAQa7sEl7afLrQ8A==",
+      "dependencies": [
+        "undici-types"
+      ]
+    },
     "commander@14.0.0": {
       "integrity": "sha512-2uM9rYjPvyq39NwLRqaiLtWHyDC1FvryJDa2ATTVims5YAS4PupsEQsDvP14FqhFr0P49CYDugi59xaxJlTXRA=="
+    },
+    "undici-types@6.21.0": {
+      "integrity": "sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ=="
     }
   },
   "remote": {
