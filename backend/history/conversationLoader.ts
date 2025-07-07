@@ -36,6 +36,11 @@ export async function loadConversation(
   const historyDir = `${homeDir}/.claude/projects/${encodedProjectName}`;
   const filePath = `${historyDir}/${sessionId}.jsonl`;
 
+  // Check if file exists before trying to read it
+  if (!(await runtime.exists(filePath))) {
+    return null; // Session not found
+  }
+
   try {
     const conversationHistory = await parseConversationFile(
       filePath,
@@ -44,11 +49,7 @@ export async function loadConversation(
     );
     return conversationHistory;
   } catch (error) {
-    // Handle file not found errors in a cross-platform way
-    if (error instanceof Error && error.message.includes("No such file")) {
-      return null; // Session not found
-    }
-    throw error; // Re-throw other errors
+    throw error; // Re-throw any parsing errors
   }
 }
 

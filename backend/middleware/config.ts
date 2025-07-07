@@ -1,14 +1,5 @@
 import { createMiddleware } from "hono/factory";
 import type { AppConfig } from "../types.ts";
-import type { Runtime } from "../runtime/types.ts";
-
-/**
- * Configuration options for the middleware
- */
-interface ConfigOptions {
-  debugMode: boolean;
-  runtime: Runtime;
-}
 
 /**
  * Creates configuration middleware that makes app-wide settings available to all handlers
@@ -18,21 +9,14 @@ interface ConfigOptions {
  * @param options Configuration options
  * @returns Hono middleware function
  */
-export function createConfigMiddleware(options: ConfigOptions) {
+export function createConfigMiddleware(options: AppConfig) {
   return createMiddleware<{
     Variables: {
       config: AppConfig;
     };
   }>(async (c, next) => {
-    // Initialize application configuration
-    const config: AppConfig = {
-      debugMode: options.debugMode,
-      runtime: options.runtime,
-      // Future configuration options can be added here
-    };
-
     // Set configuration in context for access by handlers
-    c.set("config", config);
+    c.set("config", options);
 
     await next();
   });

@@ -5,9 +5,10 @@ import type { Runtime } from "./runtime/types.ts";
 // Create a mock runtime for testing
 const mockRuntime: Runtime = {
   getEnv: (key: string) => key === "HOME" ? "/mock/home" : undefined,
-  async *readDir() {
+  async *readDir(_path: string) {
     // Mock empty directory - no entries
     // This async generator yields nothing, representing an empty directory
+    // The `_path` parameter is required to match the `Runtime` interface but is not used here.
   },
   getArgs: () => [],
   exit: () => {
