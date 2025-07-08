@@ -13,7 +13,7 @@ export interface StreamingContext {
   setHasReceivedInit?: (received: boolean) => void;
   onPermissionError?: (
     toolName: string,
-    pattern: string,
+    patterns: string[],
     toolUseId: string,
   ) => void;
   onAbortRequest?: () => void;

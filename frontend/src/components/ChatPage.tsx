@@ -101,8 +101,10 @@ export function ChatPage() {
   } = usePermissions();
 
   const handlePermissionError = useCallback(
-    (toolName: string, pattern: string, toolUseId: string) => {
-      showPermissionDialog(toolName, pattern, toolUseId);
+    (toolName: string, patterns: string[], toolUseId: string) => {
+      // For now, join patterns for display - will be updated in PermissionDialog
+      const displayPattern = patterns.join(", ");
+      showPermissionDialog(toolName, displayPattern, toolUseId);
     },
     [showPermissionDialog],
   );
@@ -234,25 +236,16 @@ export function ChatPage() {
   const handlePermissionAllow = useCallback(() => {
     if (!permissionDialog) return;
 
-    const pattern = permissionDialog.pattern;
-    closePermissionDialog();
+    const patterns = permissionDialog.pattern.includes(", ")
+      ? permissionDialog.pattern.split(", ")
+      : [permissionDialog.pattern];
 
-    if (currentSessionId) {
-      sendMessage("continue", allowToolTemporary(pattern), true);
-    }
-  }, [
-    permissionDialog,
-    currentSessionId,
-    sendMessage,
-    allowToolTemporary,
-    closePermissionDialog,
-  ]);
+    // Add all patterns temporarily
+    let updatedAllowedTools = allowedTools;
+    patterns.forEach((pattern) => {
+      updatedAllowedTools = allowToolTemporary(pattern, updatedAllowedTools);
+    });
 
-  const handlePermissionAllowPermanent = useCallback(() => {
-    if (!permissionDialog) return;
-
-    const pattern = permissionDialog.pattern;
-    const updatedAllowedTools = allowToolPermanent(pattern);
     closePermissionDialog();
 
     if (currentSessionId) {
@@ -262,6 +255,34 @@ export function ChatPage() {
     permissionDialog,
     currentSessionId,
     sendMessage,
+    allowedTools,
+    allowToolTemporary,
+    closePermissionDialog,
+  ]);
+
+  const handlePermissionAllowPermanent = useCallback(() => {
+    if (!permissionDialog) return;
+
+    const patterns = permissionDialog.pattern.includes(", ")
+      ? permissionDialog.pattern.split(", ")
+      : [permissionDialog.pattern];
+
+    // Add all patterns permanently
+    let updatedAllowedTools = allowedTools;
+    patterns.forEach((pattern) => {
+      updatedAllowedTools = allowToolPermanent(pattern, updatedAllowedTools);
+    });
+
+    closePermissionDialog();
+
+    if (currentSessionId) {
+      sendMessage("continue", updatedAllowedTools, true);
+    }
+  }, [
+    permissionDialog,
+    currentSessionId,
+    sendMessage,
+    allowedTools,
     allowToolPermanent,
     closePermissionDialog,
   ]);

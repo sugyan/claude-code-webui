@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { extractToolInfo, generateToolPattern } from "../../utils/toolUtils";
+import { extractToolInfo, generateToolPatterns } from "../../utils/toolUtils";
 import { isPermissionError } from "../../utils/messageTypes";
 import type { StreamingContext } from "./useMessageProcessor";
 import type { ToolResultMessage } from "../../types";
@@ -36,17 +36,17 @@ export function useToolHandling() {
       const cachedToolInfo = toolUseCache.get(toolUseId);
 
       // Extract tool information for permission handling
-      const { toolName, command } = extractToolInfo(
+      const { toolName, commands } = extractToolInfo(
         cachedToolInfo?.name,
         cachedToolInfo?.input,
       );
 
-      // Compute pattern based on tool type
-      const pattern = generateToolPattern(toolName, command);
+      // Compute patterns based on tool type
+      const patterns = generateToolPatterns(toolName, commands);
 
       // Notify parent component about permission error
       if (context.onPermissionError) {
-        context.onPermissionError(toolName, pattern, toolUseId);
+        context.onPermissionError(toolName, patterns, toolUseId);
       }
     },
     [toolUseCache],

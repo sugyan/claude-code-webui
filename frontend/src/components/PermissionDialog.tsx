@@ -58,13 +58,49 @@ export function PermissionDialog({
 
         {/* Content */}
         <div className="p-6">
-          <p className="text-slate-600 dark:text-slate-300 mb-4">
-            Claude wants to use the{" "}
-            <span className="font-mono bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded text-sm">
-              {pattern}
-            </span>{" "}
-            tool.
-          </p>
+          {(() => {
+            // Parse patterns to detect multiple commands
+            const patterns = pattern.includes(", ")
+              ? pattern.split(", ")
+              : [pattern];
+            const isMultipleCommands = patterns.length > 1;
+
+            if (isMultipleCommands) {
+              // Extract command names from patterns like "Bash(ls:*)" -> "ls"
+              const commandNames = patterns.map((p) => {
+                const match = p.match(/Bash\(([^:]+):/);
+                return match ? match[1] : p;
+              });
+
+              return (
+                <>
+                  <p className="text-slate-600 dark:text-slate-300 mb-4">
+                    Claude wants to use the following commands:
+                  </p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {commandNames.map((cmd, index) => (
+                      <span
+                        key={index}
+                        className="font-mono bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded text-sm"
+                      >
+                        {cmd}
+                      </span>
+                    ))}
+                  </div>
+                </>
+              );
+            } else {
+              return (
+                <p className="text-slate-600 dark:text-slate-300 mb-4">
+                  Claude wants to use the{" "}
+                  <span className="font-mono bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded text-sm">
+                    {pattern}
+                  </span>{" "}
+                  tool.
+                </p>
+              );
+            }
+          })()}
           <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
             Do you want to proceed?
           </p>
@@ -87,7 +123,32 @@ export function PermissionDialog({
                 "w-full px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors shadow-sm hover:shadow-md",
               )}
             >
-              Yes, and don't ask again for {toolName}
+              {(() => {
+                const patterns = pattern.includes(", ")
+                  ? pattern.split(", ")
+                  : [pattern];
+                const isMultipleCommands = patterns.length > 1;
+
+                // Extract command names from patterns like "Bash(ls:*)" -> "ls"
+                const commandNames = patterns
+                  .map((p) => {
+                    const match = p.match(/Bash\(([^:]+):/);
+                    return match ? match[1] : null;
+                  })
+                  .filter(Boolean);
+
+                if (commandNames.length > 0) {
+                  // Use command names if available
+                  if (isMultipleCommands) {
+                    return `Yes, and don't ask again for ${commandNames.join(" and ")} commands`;
+                  } else {
+                    return `Yes, and don't ask again for ${commandNames[0]} command`;
+                  }
+                } else {
+                  // Fallback to tool name for non-Bash tools
+                  return `Yes, and don't ask again for ${toolName}`;
+                }
+              })()}
             </button>
             <button
               onClick={handleDeny}
