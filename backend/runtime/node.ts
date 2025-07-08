@@ -109,15 +109,16 @@ export class NodeRuntime implements Runtime {
         stdio: ["ignore", "pipe", "pipe"],
       });
 
+      const textDecoder = new TextDecoder();
       let stdout = "";
       let stderr = "";
 
       child.stdout?.on("data", (data: Uint8Array) => {
-        stdout += new TextDecoder().decode(data);
+        stdout += textDecoder.decode(data, { stream: true });
       });
 
       child.stderr?.on("data", (data: Uint8Array) => {
-        stderr += new TextDecoder().decode(data);
+        stderr += textDecoder.decode(data, { stream: true });
       });
 
       child.on("close", (code: number | null) => {

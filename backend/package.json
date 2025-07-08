@@ -9,7 +9,7 @@
     "build": "tsc",
     "start": "node dist/cli/node.js",
     "test": "vitest",
-    "lint": "eslint src/",
+    "lint": "eslint **/*.ts --ignore-pattern dist/",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
