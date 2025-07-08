@@ -69,26 +69,18 @@ function splitCompoundCommand(commandString: string): string[] {
 function extractSingleBashCommand(commandPart: string): string {
   const cmdParts = commandPart.split(/\s+/);
 
-  // Find the first option (starts with -)
-  const optionIndex = cmdParts.findIndex((part) => part.startsWith("-"));
-
-  if (optionIndex > 0) {
-    // Take everything before the first option
-    return cmdParts.slice(0, optionIndex).join(" ");
-  } else {
-    // No options found, take the first part(s)
-    // Handle common patterns like "cargo run", "git log", etc.
-    if (
-      cmdParts.length >= 2 &&
-      TOOL_CONSTANTS.MULTI_WORD_COMMANDS.includes(
-        cmdParts[0] as (typeof TOOL_CONSTANTS.MULTI_WORD_COMMANDS)[number],
-      )
-    ) {
-      return cmdParts.slice(0, 2).join(" ");
-    } else {
-      return cmdParts[0] || "";
-    }
+  // For known multi-word tools, take first 2 words
+  if (
+    cmdParts.length >= 2 &&
+    TOOL_CONSTANTS.MULTI_WORD_COMMANDS.includes(
+      cmdParts[0] as (typeof TOOL_CONSTANTS.MULTI_WORD_COMMANDS)[number],
+    )
+  ) {
+    return cmdParts.slice(0, 2).join(" ");
   }
+
+  // For everything else, take only the command name
+  return cmdParts[0] || "";
 }
 
 // Generate tool patterns for permission checking

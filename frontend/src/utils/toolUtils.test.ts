@@ -72,6 +72,38 @@ describe("toolUtils", () => {
       expect(result.toolName).toBe("Bash");
       expect(result.commands).toEqual([]); // All are builtins
     });
+
+    it("should handle find command with complex arguments", () => {
+      const result = extractToolInfo("Bash", {
+        command: "find . -name '*.txt'",
+      });
+      expect(result.toolName).toBe("Bash");
+      expect(result.commands).toEqual(["find"]);
+    });
+
+    it("should handle grep command with pattern and files", () => {
+      const result = extractToolInfo("Bash", {
+        command: "grep -r 'pattern' /path/to/files",
+      });
+      expect(result.toolName).toBe("Bash");
+      expect(result.commands).toEqual(["grep"]);
+    });
+
+    it("should handle complex compound command with find, grep, and ls", () => {
+      const result = extractToolInfo("Bash", {
+        command: "find . -name '*.txt' | grep pattern && ls -la",
+      });
+      expect(result.toolName).toBe("Bash");
+      expect(result.commands).toEqual(["find", "grep", "ls"]);
+    });
+
+    it("should handle commands with arguments before options", () => {
+      const result = extractToolInfo("Bash", {
+        command: "tar -czf archive.tar.gz /path/to/files",
+      });
+      expect(result.toolName).toBe("Bash");
+      expect(result.commands).toEqual(["tar"]);
+    });
   });
 
   describe("generateToolPatterns", () => {
