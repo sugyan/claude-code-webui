@@ -3,8 +3,7 @@ import { PermissionDialog } from "./PermissionDialog";
 
 interface DemoPermissionDialogWrapperProps {
   isOpen: boolean;
-  toolName: string;
-  pattern: string;
+  patterns: string[];
   onAllow: () => void;
   onAllowPermanent: () => void;
   onDeny: () => void;

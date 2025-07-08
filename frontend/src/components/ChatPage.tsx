@@ -102,9 +102,7 @@ export function ChatPage() {
 
   const handlePermissionError = useCallback(
     (toolName: string, patterns: string[], toolUseId: string) => {
-      // For now, join patterns for display - will be updated in PermissionDialog
-      const displayPattern = patterns.join(", ");
-      showPermissionDialog(toolName, displayPattern, toolUseId);
+      showPermissionDialog(toolName, patterns, toolUseId);
     },
     [showPermissionDialog],
   );
@@ -236,13 +234,9 @@ export function ChatPage() {
   const handlePermissionAllow = useCallback(() => {
     if (!permissionDialog) return;
 
-    const patterns = permissionDialog.pattern.includes(", ")
-      ? permissionDialog.pattern.split(", ")
-      : [permissionDialog.pattern];
-
     // Add all patterns temporarily
     let updatedAllowedTools = allowedTools;
-    patterns.forEach((pattern) => {
+    permissionDialog.patterns.forEach((pattern) => {
       updatedAllowedTools = allowToolTemporary(pattern, updatedAllowedTools);
     });
 
@@ -263,13 +257,9 @@ export function ChatPage() {
   const handlePermissionAllowPermanent = useCallback(() => {
     if (!permissionDialog) return;
 
-    const patterns = permissionDialog.pattern.includes(", ")
-      ? permissionDialog.pattern.split(", ")
-      : [permissionDialog.pattern];
-
     // Add all patterns permanently
     let updatedAllowedTools = allowedTools;
-    patterns.forEach((pattern) => {
+    permissionDialog.patterns.forEach((pattern) => {
       updatedAllowedTools = allowToolPermanent(pattern, updatedAllowedTools);
     });
 
@@ -497,8 +487,7 @@ export function ChatPage() {
       {permissionDialog && (
         <PermissionDialog
           isOpen={permissionDialog.isOpen}
-          toolName={permissionDialog.toolName}
-          pattern={permissionDialog.pattern}
+          patterns={permissionDialog.patterns}
           onAllow={handlePermissionAllow}
           onAllowPermanent={handlePermissionAllowPermanent}
           onDeny={handlePermissionDeny}

@@ -13,13 +13,13 @@ describe("usePermissions", () => {
     const { result } = renderHook(() => usePermissions());
 
     act(() => {
-      result.current.showPermissionDialog("Bash", "Bash(ls:*)", "tool-123");
+      result.current.showPermissionDialog("Bash", ["Bash(ls:*)"], "tool-123");
     });
 
     expect(result.current.permissionDialog).toEqual({
       isOpen: true,
       toolName: "Bash",
-      pattern: "Bash(ls:*)",
+      patterns: ["Bash(ls:*)"],
       toolUseId: "tool-123",
     });
   });
@@ -28,7 +28,7 @@ describe("usePermissions", () => {
     const { result } = renderHook(() => usePermissions());
 
     act(() => {
-      result.current.showPermissionDialog("Bash", "Bash(ls:*)", "tool-123");
+      result.current.showPermissionDialog("Bash", ["Bash(ls:*)"], "tool-123");
     });
 
     act(() => {

@@ -205,7 +205,8 @@ export function DemoPage() {
 
   const handlePermissionAllowPermanent = () => {
     if (!permissionDialog) return;
-    const pattern = permissionDialog.pattern;
+    // For demo purposes, just take the first pattern
+    const pattern = permissionDialog.patterns[0];
     allowToolPermanent(pattern);
     closePermissionDialog();
   };
@@ -318,8 +319,7 @@ export function DemoPage() {
       {permissionDialog && (
         <DemoPermissionDialogWrapper
           isOpen={permissionDialog.isOpen}
-          toolName={permissionDialog.toolName}
-          pattern={permissionDialog.pattern}
+          patterns={permissionDialog.patterns}
           onAllow={handlePermissionAllow}
           onAllowPermanent={handlePermissionAllowPermanent}
           onDeny={handlePermissionDeny}

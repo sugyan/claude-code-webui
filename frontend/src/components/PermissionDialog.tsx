@@ -2,11 +2,68 @@ import {
   XMarkIcon,
   ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
+import type { JSX } from "react";
+
+// Helper function to extract command name from pattern like "Bash(ls:*)" -> "ls"
+function extractCommandName(pattern: string): string {
+  const match = pattern.match(/Bash\(([^:]+):/);
+  return match ? match[1] : pattern;
+}
+
+// Helper function to render permission content based on patterns
+function renderPermissionContent(patterns: string[]): JSX.Element {
+  const isMultipleCommands = patterns.length > 1;
+
+  if (isMultipleCommands) {
+    // Extract command names from patterns like "Bash(ls:*)" -> "ls"
+    const commandNames = patterns.map(extractCommandName);
+
+    return (
+      <>
+        <p className="text-slate-600 dark:text-slate-300 mb-4">
+          Claude wants to use the following commands:
+        </p>
+        <div className="flex flex-wrap gap-2 mb-4">
+          {commandNames.map((cmd, index) => (
+            <span
+              key={index}
+              className="font-mono bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded text-sm"
+            >
+              {cmd}
+            </span>
+          ))}
+        </div>
+      </>
+    );
+  } else {
+    const commandName = extractCommandName(patterns[0]);
+    return (
+      <p className="text-slate-600 dark:text-slate-300 mb-4">
+        Claude wants to use the{" "}
+        <span className="font-mono bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded text-sm">
+          {commandName}
+        </span>{" "}
+        command.
+      </p>
+    );
+  }
+}
+
+// Helper function to render button text for permanent permission
+function renderPermanentButtonText(patterns: string[]): string {
+  const isMultipleCommands = patterns.length > 1;
+  const commandNames = patterns.map(extractCommandName);
+
+  if (isMultipleCommands) {
+    return `Yes, and don't ask again for ${commandNames.join(" and ")} commands`;
+  } else {
+    return `Yes, and don't ask again for ${commandNames[0]} command`;
+  }
+}
 
 interface PermissionDialogProps {
   isOpen: boolean;
-  toolName: string;
-  pattern: string;
+  patterns: string[];
   onAllow: () => void;
   onAllowPermanent: () => void;
   onDeny: () => void;
@@ -20,8 +77,7 @@ interface PermissionDialogProps {
 
 export function PermissionDialog({
   isOpen,
-  toolName,
-  pattern,
+  patterns,
   onAllow,
   onAllowPermanent,
   onDeny,
@@ -58,49 +114,7 @@ export function PermissionDialog({
 
         {/* Content */}
         <div className="p-6">
-          {(() => {
-            // Parse patterns to detect multiple commands
-            const patterns = pattern.includes(", ")
-              ? pattern.split(", ")
-              : [pattern];
-            const isMultipleCommands = patterns.length > 1;
-
-            if (isMultipleCommands) {
-              // Extract command names from patterns like "Bash(ls:*)" -> "ls"
-              const commandNames = patterns.map((p) => {
-                const match = p.match(/Bash\(([^:]+):/);
-                return match ? match[1] : p;
-              });
-
-              return (
-                <>
-                  <p className="text-slate-600 dark:text-slate-300 mb-4">
-                    Claude wants to use the following commands:
-                  </p>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {commandNames.map((cmd, index) => (
-                      <span
-                        key={index}
-                        className="font-mono bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded text-sm"
-                      >
-                        {cmd}
-                      </span>
-                    ))}
-                  </div>
-                </>
-              );
-            } else {
-              return (
-                <p className="text-slate-600 dark:text-slate-300 mb-4">
-                  Claude wants to use the{" "}
-                  <span className="font-mono bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded text-sm">
-                    {pattern}
-                  </span>{" "}
-                  tool.
-                </p>
-              );
-            }
-          })()}
+          {renderPermissionContent(patterns)}
           <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
             Do you want to proceed?
           </p>
@@ -123,32 +137,7 @@ export function PermissionDialog({
                 "w-full px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors shadow-sm hover:shadow-md",
               )}
             >
-              {(() => {
-                const patterns = pattern.includes(", ")
-                  ? pattern.split(", ")
-                  : [pattern];
-                const isMultipleCommands = patterns.length > 1;
-
-                // Extract command names from patterns like "Bash(ls:*)" -> "ls"
-                const commandNames = patterns
-                  .map((p) => {
-                    const match = p.match(/Bash\(([^:]+):/);
-                    return match ? match[1] : null;
-                  })
-                  .filter(Boolean);
-
-                if (commandNames.length > 0) {
-                  // Use command names if available
-                  if (isMultipleCommands) {
-                    return `Yes, and don't ask again for ${commandNames.join(" and ")} commands`;
-                  } else {
-                    return `Yes, and don't ask again for ${commandNames[0]} command`;
-                  }
-                } else {
-                  // Fallback to tool name for non-Bash tools
-                  return `Yes, and don't ask again for ${toolName}`;
-                }
-              })()}
+              {renderPermanentButtonText(patterns)}
             </button>
             <button
               onClick={handleDeny}

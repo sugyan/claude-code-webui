@@ -35,7 +35,7 @@ interface DemoAutomationOptions {
   generateRequestId?: () => string;
   showPermissionDialog?: (
     toolName: string,
-    pattern: string,
+    patterns: string[],
     toolUseId: string,
   ) => void;
 }
@@ -178,7 +178,7 @@ export function useDemoAutomation(
         };
         finalShowPermissionDialog(
           errorData.toolName,
-          errorData.pattern,
+          [errorData.pattern],
           errorData.toolUseId,
         );
         return;

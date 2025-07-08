@@ -3,7 +3,7 @@ import { useState, useCallback } from "react";
 interface PermissionDialog {
   isOpen: boolean;
   toolName: string;
-  pattern: string;
+  patterns: string[];
   toolUseId: string;
 }
 
@@ -13,11 +13,11 @@ export function usePermissions() {
     useState<PermissionDialog | null>(null);
 
   const showPermissionDialog = useCallback(
-    (toolName: string, pattern: string, toolUseId: string) => {
+    (toolName: string, patterns: string[], toolUseId: string) => {
       setPermissionDialog({
         isOpen: true,
         toolName,
-        pattern,
+        patterns,
         toolUseId,
       });
     },
