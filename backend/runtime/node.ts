@@ -12,30 +12,15 @@ import {
   readFileSync,
 } from "node:fs";
 import { spawn } from "node:child_process";
-import { createServer, IncomingMessage, ServerResponse } from "node:http";
+import process from "node:process";
+import { serve } from "@hono/node-server";
+import { Hono } from "hono";
 import type {
   CommandResult,
   DirectoryEntry,
   FileStats,
   Runtime,
 } from "./types.ts";
-
-// Node.js global types for Deno environment
-declare const process: {
-  env: Record<string, string | undefined>;
-  argv: string[];
-  exit(code: number): never;
-};
-
-interface BufferConstructor {
-  concat(chunks: Uint8Array[]): Uint8Array;
-}
-
-declare const Buffer: BufferConstructor;
-
-interface BufferLike {
-  toString(): string;
-}
 
 export class NodeRuntime implements Runtime {
   async readTextFile(path: string): Promise<string> {
@@ -127,12 +112,12 @@ export class NodeRuntime implements Runtime {
       let stdout = "";
       let stderr = "";
 
-      child.stdout?.on("data", (data: BufferLike) => {
-        stdout += data.toString();
+      child.stdout?.on("data", (data: Uint8Array) => {
+        stdout += new TextDecoder().decode(data);
       });
 
-      child.stderr?.on("data", (data: BufferLike) => {
-        stderr += data.toString();
+      child.stderr?.on("data", (data: Uint8Array) => {
+        stderr += new TextDecoder().decode(data);
       });
 
       child.on("close", (code: number | null) => {
@@ -160,76 +145,22 @@ export class NodeRuntime implements Runtime {
     hostname: string,
     handler: (req: Request) => Response | Promise<Response>,
   ): void {
-    // Basic HTTP server implementation for Node.js
-    // This is a placeholder implementation that will be enhanced
-    // when static file serving abstraction is implemented (Issue #128)
-    const server = createServer(
-      async (req: IncomingMessage, res: ServerResponse) => {
-        try {
-          // Convert Node.js request to Web API Request
-          const url = `http://${req.headers.host}${req.url}`;
-          const method = req.method || "GET";
+    // Use Hono with Node.js server to handle Web API Request/Response
+    const app = new Hono();
 
-          // Handle request body for POST requests
-          let body: string | undefined;
-          if (method !== "GET" && method !== "HEAD") {
-            const chunks: Uint8Array[] = [];
-            for await (const chunk of req) {
-              chunks.push(chunk as Uint8Array);
-            }
-            body = Buffer.concat(chunks).toString();
-          }
-
-          const headers: Record<string, string> = {};
-          for (const [key, value] of Object.entries(req.headers)) {
-            if (typeof value === "string") {
-              headers[key] = value;
-            } else if (Array.isArray(value)) {
-              headers[key] = value.join(", ");
-            }
-          }
-
-          const request = new Request(url, {
-            method,
-            headers,
-            body: body ? body : undefined,
-          });
-
-          // Call the handler
-          const response = await handler(request);
-
-          // Convert Web API Response to Node.js response
-          res.statusCode = response.status;
-
-          // Set headers
-          response.headers.forEach((value, key) => {
-            res.setHeader(key, value);
-          });
-
-          // Send response body
-          if (response.body) {
-            const reader = response.body.getReader();
-            try {
-              while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-                res.write(value);
-              }
-            } finally {
-              reader.releaseLock();
-            }
-          }
-          res.end();
-        } catch (error) {
-          console.error("Error handling request:", error);
-          res.statusCode = 500;
-          res.end("Internal Server Error");
-        }
-      },
-    );
-
-    server.listen(port, hostname, () => {
-      console.log(`Node.js server listening on ${hostname}:${port}`);
+    // Route all requests to the provided handler
+    app.all("*", async (c) => {
+      const response = await handler(c.req.raw);
+      return response;
     });
+
+    // Start the server using @hono/node-server
+    serve({
+      fetch: app.fetch,
+      port,
+      hostname,
+    });
+
+    console.log(`Node.js server listening on ${hostname}:${port}`);
   }
 }

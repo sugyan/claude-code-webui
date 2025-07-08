@@ -14,7 +14,7 @@ const mockRuntime: Runtime = {
   exit: () => {
     throw new Error("exit called");
   },
-  readTextFile: () => Promise.resolve(""),
+  readTextFile: () => Promise.resolve("{}"),
   readTextFileSync: () => "",
   readBinaryFile: () => Promise.resolve(new Uint8Array()),
   exists: () => Promise.resolve(false),

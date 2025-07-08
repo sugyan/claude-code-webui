@@ -1,0 +1,38 @@
+{
+  "name": "claude-code-webui-backend",
+  "version": "1.0.0",
+  "description": "Claude Code Web UI Backend Server - Node.js Runtime",
+  "type": "module",
+  "main": "dist/cli/node.js",
+  "scripts": {
+    "dev": "tsx watch cli/node.ts --debug",
+    "build": "tsc",
+    "start": "node dist/cli/node.js",
+    "test": "vitest",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@anthropic-ai/claude-code": "1.0.33",
+    "hono": "^4.0.0",
+    "@hono/node-server": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "tsx": "^4.0.0",
+    "vitest": "^2.0.0",
+    "eslint": "^9.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "claude",
+    "claude-cli",
+    "web-ui",
+    "backend",
+    "nodejs"
+  ],
+  "license": "MIT"
+}
