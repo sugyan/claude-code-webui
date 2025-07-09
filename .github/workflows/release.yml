@@ -33,8 +33,8 @@ jobs:
         with:
           deno-version: v2.x
 
-      - name: Install Deno dependencies
-        run: deno install
+      - name: Cache Deno dependencies
+        run: deno cache cli/deno.ts
         working-directory: backend
 
       - name: Setup Node.js
