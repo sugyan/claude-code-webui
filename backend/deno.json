@@ -1,6 +1,11 @@
 {
+  "compilerOptions": {
+    "lib": ["deno.ns", "deno.window"],
+    "strict": true
+  },
   "exclude": [
     "runtime/node.ts",
+    "cli/node.ts",
     "tests/node/"
   ],
   "tasks": {

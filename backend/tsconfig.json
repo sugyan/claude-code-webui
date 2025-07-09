@@ -1,0 +1,38 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "allowSyntheticDefaultImports": true,
+    "types": ["node", "vitest/globals"],
+    "lib": ["ES2022", "DOM"],
+    "noEmit": true
+  },
+  "include": [
+    "../shared/**/*.ts",
+    "cli/node.ts",
+    "runtime/node.ts",
+    "app.ts",
+    "cli/args.ts",
+    "handlers/**/*.ts",
+    "history/**/*.ts",
+    "middleware/**/*.ts",
+    "runtime/types.ts",
+    "types.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "deno.json",
+    "deno.lock",
+    "runtime/deno.ts",
+    "cli/deno.ts",
+    "pathUtils.test.ts"
+  ]
+}

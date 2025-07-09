@@ -7,7 +7,6 @@
 
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { serveStatic } from "hono/deno";
 import type { Runtime } from "./runtime/types.ts";
 import {
   type ConfigContext,
@@ -24,10 +23,27 @@ export interface AppConfig {
   distPath: string;
 }
 
-export function createApp(
+export async function createApp(
   runtime: Runtime,
   config: AppConfig,
-): Hono<ConfigContext> {
+): Promise<Hono<ConfigContext>> {
+  // Runtime-specific imports
+  // deno-lint-ignore no-explicit-any
+  let serveStatic: any;
+  if (
+    typeof globalThis.process !== "undefined" &&
+    globalThis.process.versions?.node
+  ) {
+    // Node.js environment
+    const { serveStatic: nodeServeStatic } = await import(
+      "@hono/node-server/serve-static"
+    );
+    serveStatic = nodeServeStatic;
+  } else {
+    // Deno environment
+    const { serveStatic: denoServeStatic } = await import("hono/deno");
+    serveStatic = denoServeStatic;
+  }
   const app = new Hono<ConfigContext>();
 
   // Store AbortControllers for each request (shared with chat handler)

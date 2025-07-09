@@ -1320,6 +1320,7 @@
         "npm:@anthropic-ai/claude-code@1.0.33",
         "npm:@hono/node-server@1",
         "npm:@types/node@20",
+        "npm:commander@14",
         "npm:eslint@9",
         "npm:hono@4",
         "npm:tsx@4",
