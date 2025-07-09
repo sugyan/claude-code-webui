@@ -1,6 +1,7 @@
 import { assertEquals } from "https://deno.land/std@0.208.0/assert/mod.ts";
 import { getEncodedProjectName } from "./history/pathUtils.ts";
 import type { Runtime } from "./runtime/types.ts";
+import type { MiddlewareHandler } from "hono";
 
 // Create a mock runtime for testing
 const mockRuntime: Runtime = {
@@ -44,6 +45,9 @@ const mockRuntime: Runtime = {
   runCommand: () =>
     Promise.resolve({ success: false, stdout: "", stderr: "", code: 1 }),
   serve: () => {},
+  createStaticFileMiddleware: (): Promise<MiddlewareHandler> =>
+    Promise.resolve(() => Promise.resolve(new Response())),
+  resolveProjectPath: (relativePath: string): string => relativePath,
 };
 
 Deno.test("pathUtils - getEncodedProjectName with dots and slashes", async () => {

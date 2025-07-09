@@ -54,9 +54,9 @@ async function validateClaudeCli(runtime: DenoRuntime) {
 
 // Run the application
 if (import.meta.main) {
-  const runtime = new DenoRuntime();
   main().catch((error) => {
     console.error("Failed to start server:", error);
+    const runtime = new DenoRuntime();
     runtime.exit(1);
   });
 }

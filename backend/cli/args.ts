@@ -17,23 +17,7 @@ export async function parseCliArgs(runtime: Runtime): Promise<ParsedArgs> {
   // Read version from VERSION file
   let version = "unknown";
   try {
-    // Cross-platform path resolution for VERSION file
-    let versionPath: string;
-    if (
-      typeof globalThis.process !== "undefined" &&
-      globalThis.process.versions?.node
-    ) {
-      // Node.js environment
-      const { fileURLToPath } = await import("node:url");
-      const { dirname, join } = await import("node:path");
-      const __filename = fileURLToPath(import.meta.url);
-      const __dirname = dirname(__filename);
-      versionPath = join(__dirname, "../VERSION");
-    } else {
-      // Deno environment
-      versionPath = new URL("../VERSION", import.meta.url).pathname;
-    }
-
+    const versionPath = runtime.resolveProjectPath("../VERSION");
     const versionContent = await runtime.readTextFile(versionPath);
     version = versionContent.trim();
   } catch (error) {

@@ -21,6 +21,9 @@ import type {
   FileStats,
   Runtime,
 } from "./types.ts";
+import type { MiddlewareHandler } from "hono";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
 
 export class NodeRuntime implements Runtime {
   async readTextFile(path: string): Promise<string> {
@@ -163,5 +166,18 @@ export class NodeRuntime implements Runtime {
     });
 
     console.log(`Node.js server listening on ${hostname}:${port}`);
+  }
+
+  async createStaticFileMiddleware(
+    options: { root: string },
+  ): Promise<MiddlewareHandler> {
+    const { serveStatic } = await import("@hono/node-server/serve-static");
+    return serveStatic(options);
+  }
+
+  resolveProjectPath(relativePath: string): string {
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = dirname(__filename);
+    return join(__dirname, relativePath);
   }
 }

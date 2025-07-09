@@ -5,6 +5,8 @@
  * that are used in the backend application.
  */
 
+import type { MiddlewareHandler } from "hono";
+
 // Command execution result
 export interface CommandResult {
   success: boolean;
@@ -56,4 +58,12 @@ export interface Runtime {
     hostname: string,
     handler: (req: Request) => Response | Promise<Response>,
   ): void;
+
+  // Static file serving
+  createStaticFileMiddleware(
+    options: { root: string },
+  ): Promise<MiddlewareHandler>;
+
+  // Path resolution
+  resolveProjectPath(relativePath: string): string;
 }
