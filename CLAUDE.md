@@ -189,6 +189,7 @@ The application supports conversation continuity within the same chat session us
 - Deno (for backend)
 - Node.js (for frontend)
 - Claude CLI tool installed and configured
+- dotenvx (for .env file processing): `npm install -g @dotenvx/dotenvx`
 
 ### Port Configuration
 
@@ -206,15 +207,16 @@ PORT=9000
 Both backend startup and frontend proxy configuration will automatically use this port:
 
 ```bash
-cd backend && deno task dev     # Starts backend on port 9000
+cd backend && deno task dev     # Uses dotenvx to read ../.env and starts backend on port 9000
 cd frontend && npm run dev      # Configures proxy to localhost:9000
 ```
 
 #### Alternative Configuration Methods
 
 - **Environment Variable**: `PORT=9000 deno task dev`
-- **CLI Argument**: `deno run --env-file --allow-net --allow-run --allow-read --allow-env cli/deno.ts --port 9000`
+- **CLI Argument**: `dotenvx run --env-file=../.env -- deno run --allow-net --allow-run --allow-read --allow-env cli/deno.ts --port 9000`
 - **Frontend Port**: `npm run dev -- --port 4000` (for frontend UI port)
+- **Node.js Backend**: `cd backend && npm run dev` (uses dotenvx to read ../.env)
 
 ### Running the Application
 

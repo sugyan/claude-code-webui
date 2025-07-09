@@ -5,7 +5,7 @@
   "type": "module",
   "main": "dist/cli/node.js",
   "scripts": {
-    "dev": "tsx watch cli/node.ts --debug",
+    "dev": "dotenvx run --env-file=../.env -- tsx watch cli/node.ts --debug",
     "build": "echo 'Node.js backend uses tsx for runtime compilation - no build step needed'",
     "start": "node dist/cli/node.js",
     "test": "vitest",
