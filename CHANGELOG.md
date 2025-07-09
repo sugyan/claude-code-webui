@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.1.26](https://github.com/sugyan/claude-code-webui/compare/v0.1.25...v0.1.26) - 2025-07-09
+- fix: replace unreliable FedericoCarboni/setup-ffmpeg with apt-get install by @sugyan in https://github.com/sugyan/claude-code-webui/pull/121
+- docs: update documentation to reflect current implementation by @sugyan in https://github.com/sugyan/claude-code-webui/pull/123
+- feat: implement runtime abstraction layer and CLI modernization for backend (Phase 1-5) by @sugyan in https://github.com/sugyan/claude-code-webui/pull/125
+- feat: implement Node.js runtime implementation by @sugyan in https://github.com/sugyan/claude-code-webui/pull/139
+- fix: resolve compound command permission loop in issue #140 by @sugyan in https://github.com/sugyan/claude-code-webui/pull/141
+
 ## [v0.1.25](https://github.com/sugyan/claude-code-webui/compare/v0.1.24...v0.1.25) - 2025-07-04
 - Fix compatibility with migrate-installer bash wrapper by @nichiki in https://github.com/sugyan/claude-code-webui/pull/116
 
