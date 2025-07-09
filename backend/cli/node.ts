@@ -8,6 +8,7 @@
 import { createApp } from "../app.js";
 import { NodeRuntime } from "../runtime/node.js";
 import { parseCliArgs } from "./args.js";
+import { validateClaudeCli } from "./validation.js";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
@@ -36,23 +37,6 @@ async function main(runtime: NodeRuntime) {
 
   // Start server
   runtime.serve(args.port, args.host, app.fetch);
-}
-
-async function validateClaudeCli(runtime: NodeRuntime) {
-  try {
-    const result = await runtime.runCommand("claude", ["--version"]);
-
-    if (result.success) {
-      console.log(`✅ Claude CLI found: ${result.stdout.trim()}`);
-    } else {
-      console.warn("⚠️  Claude CLI check failed - some features may not work");
-    }
-  } catch (_error) {
-    console.warn("⚠️  Claude CLI not found - please install claude-code");
-    console.warn(
-      "   Visit: https://claude.ai/code for installation instructions",
-    );
-  }
 }
 
 // Run the application
