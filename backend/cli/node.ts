@@ -15,9 +15,7 @@ import { dirname, join } from "node:path";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-async function main() {
-  // Initialize Node.js runtime
-  const runtime = new NodeRuntime();
+async function main(runtime: NodeRuntime) {
 
   // Parse CLI arguments
   const args = await parseCliArgs(runtime);
@@ -60,7 +58,7 @@ async function validateClaudeCli(runtime: NodeRuntime) {
 
 // Run the application
 const runtime = new NodeRuntime();
-main().catch((error) => {
+main(runtime).catch((error) => {
   console.error("Failed to start server:", error);
   runtime.exit(1);
 });
