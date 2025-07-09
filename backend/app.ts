@@ -23,10 +23,10 @@ export interface AppConfig {
   distPath: string;
 }
 
-export async function createApp(
+export function createApp(
   runtime: Runtime,
   config: AppConfig,
-): Promise<Hono<ConfigContext>> {
+): Hono<ConfigContext> {
   const app = new Hono<ConfigContext>();
 
   // Store AbortControllers for each request (shared with chat handler)
@@ -73,7 +73,7 @@ export async function createApp(
 
   // Static file serving with SPA fallback
   // Serve static assets (CSS, JS, images, etc.)
-  const serveStatic = await runtime.createStaticFileMiddleware({
+  const serveStatic = runtime.createStaticFileMiddleware({
     root: config.distPath,
   });
   app.use("/assets/*", serveStatic);

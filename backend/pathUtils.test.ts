@@ -45,8 +45,8 @@ const mockRuntime: Runtime = {
   runCommand: () =>
     Promise.resolve({ success: false, stdout: "", stderr: "", code: 1 }),
   serve: () => {},
-  createStaticFileMiddleware: (): Promise<MiddlewareHandler> =>
-    Promise.resolve(() => Promise.resolve(new Response())),
+  createStaticFileMiddleware: (): MiddlewareHandler => () =>
+    Promise.resolve(new Response()),
   resolveProjectPath: (relativePath: string): string => relativePath,
 };
 

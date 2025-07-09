@@ -11,6 +11,7 @@ import type {
   Runtime,
 } from "./types.ts";
 import type { MiddlewareHandler } from "hono";
+import { serveStatic } from "hono/deno";
 
 export class DenoRuntime implements Runtime {
   async readTextFile(path: string): Promise<string> {
@@ -115,10 +116,9 @@ export class DenoRuntime implements Runtime {
     Deno.serve({ port, hostname }, handler);
   }
 
-  async createStaticFileMiddleware(
+  createStaticFileMiddleware(
     options: { root: string },
-  ): Promise<MiddlewareHandler> {
-    const { serveStatic } = await import("hono/deno");
+  ): MiddlewareHandler {
     return serveStatic(options);
   }
 

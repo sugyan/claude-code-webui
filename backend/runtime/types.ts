@@ -62,7 +62,7 @@ export interface Runtime {
   // Static file serving
   createStaticFileMiddleware(
     options: { root: string },
-  ): Promise<MiddlewareHandler>;
+  ): MiddlewareHandler;
 
   // Path resolution
   resolveProjectPath(relativePath: string): string;

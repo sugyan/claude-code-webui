@@ -9,10 +9,7 @@ import { createApp } from "../app.ts";
 import { DenoRuntime } from "../runtime/deno.ts";
 import { parseCliArgs } from "./args.ts";
 
-async function main() {
-  // Initialize Deno runtime
-  const runtime = new DenoRuntime();
-
+async function main(runtime: DenoRuntime) {
   // Parse CLI arguments
   const args = await parseCliArgs(runtime);
 
@@ -26,7 +23,7 @@ async function main() {
   }
 
   // Create application
-  const app = await createApp(runtime, {
+  const app = createApp(runtime, {
     debugMode: args.debug,
     distPath: new URL("../dist", import.meta.url).pathname,
   });
@@ -54,9 +51,9 @@ async function validateClaudeCli(runtime: DenoRuntime) {
 
 // Run the application
 if (import.meta.main) {
-  main().catch((error) => {
+  const runtime = new DenoRuntime();
+  main(runtime).catch((error) => {
     console.error("Failed to start server:", error);
-    const runtime = new DenoRuntime();
     runtime.exit(1);
   });
 }

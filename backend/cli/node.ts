@@ -16,7 +16,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 async function main(runtime: NodeRuntime) {
-
   // Parse CLI arguments
   const args = await parseCliArgs(runtime);
 
@@ -30,7 +29,7 @@ async function main(runtime: NodeRuntime) {
   }
 
   // Create application
-  const app = await createApp(runtime, {
+  const app = createApp(runtime, {
     debugMode: args.debug,
     distPath: join(__dirname, "../dist"),
   });
