@@ -25,52 +25,24 @@ export const TOOL_CONSTANTS = {
   MULTI_WORD_COMMANDS: ["cargo", "git", "npm", "yarn", "docker"],
   WILDCARD_COMMAND: "*",
   DEFAULT_TOOL_NAME: "Unknown",
-  // Bash builtin commands that don't require permission
+  // Bash builtin commands that don't require permission (conservative list)
+  // Only include commands that are purely internal navigation/state and never need external access
   BASH_BUILTINS: [
-    "cd",
-    "pwd",
-    "export",
-    "alias",
-    "history",
-    "jobs",
-    "bg",
-    "fg",
-    "kill",
-    "wait",
-    "source",
-    ".",
-    "eval",
-    "exec",
-    "exit",
-    "return",
-    "shift",
-    "break",
-    "continue",
-    "test",
-    "[",
-    "type",
-    "which",
-    "command",
-    "builtin",
-    "enable",
-    "hash",
-    "help",
-    "local",
-    "logout",
-    "mapfile",
-    "printf",
-    "read",
-    "readarray",
-    "readonly",
-    "set",
-    "shopt",
-    "suspend",
-    "times",
-    "trap",
-    "ulimit",
-    "umask",
-    "unalias",
-    "unset",
+    "cd", // Change directory - internal navigation only
+    "pwd", // Print working directory - internal state only
+    "export", // Set environment variables - internal state only
+    "unset", // Unset environment variables - internal state only
+    "alias", // Set command aliases - internal state only
+    "unalias", // Remove command aliases - internal state only
+    "history", // Show command history - internal state only
+    "jobs", // List active jobs - internal state only
+    "bg", // Move jobs to background - internal process control
+    "fg", // Move jobs to foreground - internal process control
+    "exit", // Exit shell - internal control
+    "return", // Return from function - internal control
+    "shift", // Shift positional parameters - internal control
+    "break", // Break from loop - internal control
+    "continue", // Continue loop - internal control
   ],
   // Command separators for compound commands
   COMMAND_SEPARATORS: ["&&", "||", ";", "|"],

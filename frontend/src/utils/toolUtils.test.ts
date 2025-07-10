@@ -73,28 +73,28 @@ describe("toolUtils", () => {
       expect(result.commands).toEqual(["echo"]); // cd and pwd are builtins, echo requires permission
     });
 
-    it("should handle command -v with fallback strategy", () => {
+    it("should handle command -v (no longer a builtin)", () => {
       const result = extractToolInfo("Bash", {
         command: "command -v ls",
       });
       expect(result.toolName).toBe("Bash");
-      expect(result.commands).toEqual(["command"]); // Fallback because "command" is in builtins
+      expect(result.commands).toEqual(["command"]); // command now requires permission
     });
 
-    it("should handle type command with fallback strategy", () => {
+    it("should handle type command (no longer a builtin)", () => {
       const result = extractToolInfo("Bash", {
         command: "type -t ls",
       });
       expect(result.toolName).toBe("Bash");
-      expect(result.commands).toEqual(["type"]); // Fallback because "type" is in builtins
+      expect(result.commands).toEqual(["type"]); // type now requires permission
     });
 
-    it("should handle which command with fallback strategy", () => {
+    it("should handle which command (no longer a builtin)", () => {
       const result = extractToolInfo("Bash", {
         command: "which git",
       });
       expect(result.toolName).toBe("Bash");
-      expect(result.commands).toEqual(["which"]); // Fallback because "which" is in builtins
+      expect(result.commands).toEqual(["which"]); // which now requires permission
     });
 
     it("should use fallback when all commands are builtins", () => {
