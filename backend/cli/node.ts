@@ -18,7 +18,7 @@ const __dirname = dirname(__filename);
 
 async function main(runtime: NodeRuntime) {
   // Parse CLI arguments
-  const args = await parseCliArgs(runtime);
+  const args = parseCliArgs(runtime);
 
   console.log(`🚀 Server starting on ${args.host}:${args.port}`);
 

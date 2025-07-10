@@ -6,6 +6,7 @@
 
 import { program } from "commander";
 import type { Runtime } from "../runtime/types.ts";
+import { VERSION } from "./version.ts";
 
 export interface ParsedArgs {
   debug: boolean;
@@ -13,9 +14,8 @@ export interface ParsedArgs {
   host: string;
 }
 
-export async function parseCliArgs(runtime: Runtime): Promise<ParsedArgs> {
-  // Import version from auto-generated version.ts file
-  const { VERSION } = await import("./version.ts");
+export function parseCliArgs(runtime: Runtime): ParsedArgs {
+  // Use version from auto-generated version.ts file
   const version = VERSION;
 
   // Get default port from environment
