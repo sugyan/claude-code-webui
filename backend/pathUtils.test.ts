@@ -47,7 +47,6 @@ const mockRuntime: Runtime = {
   serve: () => {},
   createStaticFileMiddleware: (): MiddlewareHandler => () =>
     Promise.resolve(new Response()),
-  resolveProjectPath: (relativePath: string): string => relativePath,
 };
 
 Deno.test("pathUtils - getEncodedProjectName with dots and slashes", async () => {

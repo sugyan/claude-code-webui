@@ -121,11 +121,4 @@ export class DenoRuntime implements Runtime {
   ): MiddlewareHandler {
     return serveStatic(options);
   }
-
-  resolveProjectPath(relativePath: string): string {
-    // For Deno runtime, resolve relative to the backend directory
-    // This ensures paths like "package.json" resolve correctly from any CLI entry point
-    const backendDir = new URL("../", import.meta.url).pathname;
-    return new URL(relativePath, `file://${backendDir}`).pathname;
-  }
 }

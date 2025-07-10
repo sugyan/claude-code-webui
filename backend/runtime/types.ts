@@ -63,7 +63,4 @@ export interface Runtime {
   createStaticFileMiddleware(
     options: { root: string },
   ): MiddlewareHandler;
-
-  // Path resolution
-  resolveProjectPath(relativePath: string): string;
 }
