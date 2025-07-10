@@ -10,6 +10,7 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "allowSyntheticDefaultImports": true,
+    "allowImportingTsExtensions": true,
     "types": ["node", "vitest/globals"],
     "lib": ["ES2022", "DOM"],
     "noEmit": true
@@ -20,6 +21,7 @@
     "runtime/node.ts",
     "app.ts",
     "cli/args.ts",
+    "cli/validation.ts",
     "handlers/**/*.ts",
     "history/**/*.ts",
     "middleware/**/*.ts",
@@ -33,6 +35,7 @@
     "deno.lock",
     "runtime/deno.ts",
     "cli/deno.ts",
-    "pathUtils.test.ts"
+    "pathUtils.test.ts",
+    "tests/**/*.ts"
   ]
 }

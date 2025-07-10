@@ -14,20 +14,9 @@ export interface ParsedArgs {
 }
 
 export async function parseCliArgs(runtime: Runtime): Promise<ParsedArgs> {
-  // Read version from VERSION file
-  let version = "unknown";
-  try {
-    const versionPath = runtime.resolveProjectPath("../VERSION");
-    const versionContent = await runtime.readTextFile(versionPath);
-    version = versionContent.trim();
-  } catch (error) {
-    console.error(
-      `Error reading VERSION file: ${
-        error instanceof Error ? error.message : String(error)
-      }`,
-    );
-    runtime.exit(1);
-  }
+  // Import version from auto-generated version.ts file
+  const { VERSION } = await import("./version.ts");
+  const version = VERSION;
 
   // Get default port from environment
   const defaultPort = parseInt(runtime.getEnv("PORT") || "8080", 10);

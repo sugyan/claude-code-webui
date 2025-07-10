@@ -29,3 +29,6 @@ dist-ssr
 
 # TypeScript
 tsconfig.tsbuildinfo
+
+# Auto-generated files
+cli/version.ts

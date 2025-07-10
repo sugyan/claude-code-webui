@@ -123,6 +123,9 @@ export class DenoRuntime implements Runtime {
   }
 
   resolveProjectPath(relativePath: string): string {
-    return new URL(relativePath, import.meta.url).pathname;
+    // For Deno runtime, resolve relative to the backend directory
+    // This ensures paths like "package.json" resolve correctly from any CLI entry point
+    const backendDir = new URL("../", import.meta.url).pathname;
+    return new URL(relativePath, `file://${backendDir}`).pathname;
   }
 }

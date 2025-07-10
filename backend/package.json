@@ -1,39 +1,70 @@
 {
-  "name": "claude-code-webui-backend",
-  "version": "1.0.0",
-  "description": "Claude Code Web UI Backend Server - Node.js Runtime",
+  "name": "claude-code-webui",
+  "version": "0.1.28",
+  "description": "Web-based interface for the Claude Code CLI with streaming chat interface",
+  "keywords": [
+    "claude",
+    "claude-cli",
+    "ai",
+    "web-ui",
+    "chat",
+    "anthropic",
+    "backend",
+    "nodejs"
+  ],
+  "author": "sugyan",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sugyan/claude-code-webui.git",
+    "directory": "backend"
+  },
+  "bugs": {
+    "url": "https://github.com/sugyan/claude-code-webui/issues"
+  },
+  "homepage": "https://github.com/sugyan/claude-code-webui#readme",
   "type": "module",
   "main": "dist/cli/node.js",
+  "bin": {
+    "claude-code-webui": "dist/cli/node.js"
+  },
+  "files": [
+    "dist/",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
+    "predev": "node scripts/generate-version.js",
     "dev": "dotenvx run --env-file=../.env -- tsx watch cli/node.ts --debug",
-    "build": "echo 'Node.js backend uses tsx for runtime compilation - no build step needed'",
+    "prebuild": "node scripts/generate-version.js",
+    "build": "npm run build:clean && npm run build:bundle",
+    "build:clean": "rimraf dist",
+    "build:bundle": "node scripts/build-bundle.js",
     "start": "node dist/cli/node.js",
     "test": "vitest",
     "lint": "eslint **/*.ts --ignore-pattern dist/",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build && npm run test"
   },
   "dependencies": {
-    "@anthropic-ai/claude-code": "1.0.33",
+    "@anthropic-ai/claude-code": ">=1.0.33",
     "@hono/node-server": "^1.0.0",
     "commander": "^14.0.0",
     "hono": "^4.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
+    "esbuild": "^0.25.6",
     "eslint": "^9.0.0",
+    "rimraf": "^6.0.0",
     "tsx": "^4.0.0",
     "typescript": "^5.0.0",
     "vitest": "^2.0.0"
   },
-  "engines": {
-    "node": ">=18.0.0"
-  },
-  "keywords": [
-    "claude",
-    "claude-cli",
-    "web-ui",
-    "backend",
-    "nodejs"
-  ],
-  "license": "MIT"
+  "peerDependencies": {
+    "@anthropic-ai/claude-code": ">=1.0.33"
+  }
 }
