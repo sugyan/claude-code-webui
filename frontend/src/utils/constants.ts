@@ -43,6 +43,7 @@ export const TOOL_CONSTANTS = {
     "shift", // Shift positional parameters - internal control
     "break", // Break from loop - internal control
     "continue", // Continue loop - internal control
+    "which", // Which command - safe builtin that doesn't require permission
   ],
   // Command separators for compound commands
   COMMAND_SEPARATORS: ["&&", "||", ";", "|"],

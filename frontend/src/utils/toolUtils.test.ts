@@ -89,20 +89,12 @@ describe("toolUtils", () => {
       expect(result.commands).toEqual(["type"]); // type now requires permission
     });
 
-    it("should handle which command (no longer a builtin)", () => {
-      const result = extractToolInfo("Bash", {
-        command: "which git",
-      });
-      expect(result.toolName).toBe("Bash");
-      expect(result.commands).toEqual(["which"]); // which now requires permission
-    });
-
     it("should use fallback when all commands are builtins", () => {
       const result = extractToolInfo("Bash", {
-        command: "cd /tmp && pwd && export PATH=/usr/bin",
+        command: "cd /tmp && pwd && which git",
       });
       expect(result.toolName).toBe("Bash");
-      expect(result.commands).toEqual(["cd", "pwd", "export"]); // All are builtins, use fallback
+      expect(result.commands).toEqual(["cd", "pwd", "which"]); // All are builtins, use fallback
     });
 
     it("should handle find command with complex arguments", () => {
