@@ -128,4 +128,37 @@ describe("usePermissions", () => {
     expect(finalAllowedTools).toEqual(["Bash(ls:*)", "Bash(grep:*)"]);
     expect(result.current.allowedTools).toEqual(["Bash(ls:*)", "Bash(grep:*)"]);
   });
+
+  it("should handle empty patterns array gracefully", () => {
+    const { result } = renderHook(() => usePermissions());
+
+    act(() => {
+      result.current.showPermissionDialog("Bash", [], "tool-123");
+    });
+
+    expect(result.current.permissionDialog).toEqual({
+      isOpen: true,
+      toolName: "Bash",
+      patterns: [],
+      toolUseId: "tool-123",
+    });
+  });
+
+  it("should handle fallback patterns for command -v scenario", () => {
+    const { result } = renderHook(() => usePermissions());
+
+    // Simulate command -v case where fallback should provide command pattern
+    const patterns = ["Bash(command:*)"];
+
+    act(() => {
+      result.current.showPermissionDialog("Bash", patterns, "tool-123");
+    });
+
+    expect(result.current.permissionDialog).toEqual({
+      isOpen: true,
+      toolName: "Bash",
+      patterns: ["Bash(command:*)"],
+      toolUseId: "tool-123",
+    });
+  });
 });

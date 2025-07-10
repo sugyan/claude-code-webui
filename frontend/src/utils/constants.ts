@@ -29,7 +29,6 @@ export const TOOL_CONSTANTS = {
   BASH_BUILTINS: [
     "cd",
     "pwd",
-    "echo",
     "export",
     "alias",
     "history",

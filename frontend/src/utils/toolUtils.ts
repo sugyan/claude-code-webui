@@ -37,18 +37,22 @@ function extractBashCommands(commandString: string): string[] {
   const commandParts = splitCompoundCommand(commandString);
 
   // Extract base command from each part
-  const commands = commandParts
+  const rawCommands = commandParts
     .map((part) => extractSingleBashCommand(part.trim()))
-    .filter((cmd) => {
-      // Filter out bash builtins and empty commands
-      return (
-        cmd &&
-        !(TOOL_CONSTANTS.BASH_BUILTINS as readonly string[]).includes(cmd)
-      );
-    });
+    .filter((cmd) => cmd); // Remove empty commands only
+
+  // Filter out bash builtins
+  const filteredCommands = rawCommands.filter((cmd) => {
+    return !(TOOL_CONSTANTS.BASH_BUILTINS as readonly string[]).includes(cmd);
+  });
+
+  // Fallback: if filtering results in empty array, use raw commands
+  // This ensures we don't lose permission requests for edge cases like "command -v"
+  const finalCommands =
+    filteredCommands.length > 0 ? filteredCommands : rawCommands;
 
   // Return unique commands
-  return [...new Set(commands)];
+  return [...new Set(finalCommands)];
 }
 
 // Split compound command by separators

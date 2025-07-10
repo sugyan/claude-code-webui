@@ -6,12 +6,23 @@ import type { JSX } from "react";
 
 // Helper function to extract command name from pattern like "Bash(ls:*)" -> "ls"
 function extractCommandName(pattern: string): string {
+  if (!pattern) return "Unknown";
   const match = pattern.match(/Bash\(([^:]+):/);
   return match ? match[1] : pattern;
 }
 
 // Helper function to render permission content based on patterns
 function renderPermissionContent(patterns: string[]): JSX.Element {
+  // Handle empty patterns array
+  if (patterns.length === 0) {
+    return (
+      <p className="text-slate-600 dark:text-slate-300 mb-4">
+        Claude wants to use bash commands, but the specific commands could not
+        be determined.
+      </p>
+    );
+  }
+
   const isMultipleCommands = patterns.length > 1;
 
   if (isMultipleCommands) {
@@ -51,6 +62,11 @@ function renderPermissionContent(patterns: string[]): JSX.Element {
 
 // Helper function to render button text for permanent permission
 function renderPermanentButtonText(patterns: string[]): string {
+  // Handle empty patterns array
+  if (patterns.length === 0) {
+    return "Yes, and don't ask again for bash commands";
+  }
+
   const isMultipleCommands = patterns.length > 1;
   const commandNames = patterns.map(extractCommandName);
 
