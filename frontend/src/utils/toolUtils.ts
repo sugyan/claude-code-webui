@@ -39,7 +39,7 @@ function extractBashCommands(commandString: string): string[] {
   // Extract base command from each part
   const rawCommands = commandParts
     .map((part) => extractSingleBashCommand(part.trim()))
-    .filter((cmd) => cmd); // Remove empty commands only
+    .filter(Boolean); // Remove empty commands only
 
   // Filter out bash builtins
   const filteredCommands = rawCommands.filter((cmd) => {
