@@ -128,3 +128,75 @@ jobs:
           generate_release_notes: true
           draft: false
           prerelease: false
+
+  npm-publish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          registry-url: "https://registry.npmjs.org"
+          cache: "npm"
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend dependencies
+        run: npm ci
+        working-directory: backend
+
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm ci
+          npm run build
+
+      - name: Copy frontend assets
+        run: node scripts/copy-frontend.js
+        working-directory: backend
+
+      - name: Generate version.ts
+        run: node scripts/generate-version.js
+        working-directory: backend
+
+      - name: Verify version consistency
+        run: |
+          TAG_VERSION=${GITHUB_REF#refs/tags/}
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          echo "Git tag version: $TAG_VERSION"
+          echo "Package.json version: $PACKAGE_VERSION"
+          if [ "$TAG_VERSION" != "v$PACKAGE_VERSION" ]; then
+            echo "Version mismatch! Tag: $TAG_VERSION, Package: v$PACKAGE_VERSION"
+            exit 1
+          fi
+        working-directory: backend
+
+      - name: Build npm package
+        run: npm run build
+        working-directory: backend
+
+      - name: Test npm package
+        run: |
+          npm run test
+          # Test global installation
+          npm pack
+          PACKAGE_FILE=$(ls *.tgz)
+          npm install -g "./$PACKAGE_FILE"
+          # Test CLI functionality
+          claude-code-webui --version
+        working-directory: backend
+
+      - name: Publish to npm (dry-run)
+        run: npm publish --dry-run
+        working-directory: backend
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish to npm
+        run: npm publish
+        working-directory: backend
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
