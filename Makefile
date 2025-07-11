@@ -35,7 +35,7 @@ test: test-frontend test-backend
 test-frontend:
 	cd frontend && npm run test:run
 test-backend:
-	cd backend && deno task test
+	cd backend && npm run test
 
 # Building
 build: build-frontend copy-dist build-backend

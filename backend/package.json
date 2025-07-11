@@ -45,7 +45,7 @@
     "build:bundle": "node scripts/build-bundle.js",
     "build:static": "node scripts/copy-frontend.js",
     "start": "node dist/cli/node.js",
-    "test": "vitest",
+    "test": "vitest --run --reporter=verbose",
     "lint": "eslint **/*.ts --ignore-pattern dist/",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "npm run build && npm run test"

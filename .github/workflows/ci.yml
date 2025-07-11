@@ -14,10 +14,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js (for version generation)
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "22"
+          cache: "npm"
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend dependencies
+        run: cd backend && npm ci
 
       - name: Generate version.ts
         run: cd backend && node scripts/generate-version.js
@@ -27,7 +32,7 @@ jobs:
         with:
           deno-version: v2.x
 
-      - name: Install and cache dependencies
+      - name: Install and cache Deno dependencies
         run: cd backend && deno install && deno cache cli/deno.ts
 
       - name: Format check
@@ -38,6 +43,9 @@ jobs:
 
       - name: Type check
         run: cd backend && deno check
+
+      - name: Test
+        run: cd backend && npm run test
 
   frontend:
     name: Frontend

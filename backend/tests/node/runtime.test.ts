@@ -5,36 +5,16 @@
  * works correctly in a Node.js environment.
  */
 
-import process from "node:process";
-import { NodeRuntime } from "../../runtime/node.ts";
+import { describe, it, expect } from "vitest";
+import { NodeRuntime } from "../../runtime/node.js";
 
-async function runTests() {
-  console.log("🧪 Starting Node.js Runtime Tests...\n");
-
+describe("Node.js Runtime", () => {
   const runtime = new NodeRuntime();
-  let passedTests = 0;
-  let totalTests = 0;
 
-  // Helper function to run individual tests
-  async function test(name: string, testFn: () => Promise<void> | void) {
-    totalTests++;
-    try {
-      await testFn();
-      console.log(`✅ ${name}`);
-      passedTests++;
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error
-        ? error.message
-        : String(error);
-      console.log(`❌ ${name}: ${errorMessage}`);
-    }
-  }
-
-  // Test 1: Interface implementation
-  await test("Runtime interface implementation", () => {
+  it("should implement all required interface methods", () => {
     const requiredMethods = [
       "readTextFile",
-      "readTextFileSync",
+      "readTextFileSync", 
       "readBinaryFile",
       "exists",
       "stat",
@@ -49,90 +29,45 @@ async function runTests() {
     ];
 
     for (const method of requiredMethods) {
-      if (
-        typeof (runtime as unknown as Record<string, unknown>)[method] !==
-          "function"
-      ) {
-        throw new Error(`Missing method: ${method}`);
-      }
+      expect(typeof (runtime as unknown as Record<string, unknown>)[method]).toBe("function");
     }
   });
 
-  // Test 2: Environment variable access
-  await test("Environment variable access", () => {
+  it("should access environment variables", () => {
     const path = runtime.getEnv("PATH");
-    if (typeof path !== "string" || path.length === 0) {
-      throw new Error("PATH environment variable should be accessible");
-    }
+    expect(typeof path).toBe("string");
+    expect(path!.length).toBeGreaterThan(0);
   });
 
-  // Test 3: Command line arguments
-  await test("Command line arguments", () => {
+  it("should return command line arguments as array", () => {
     const args = runtime.getArgs();
-    if (!Array.isArray(args)) {
-      throw new Error("getArgs should return an array");
-    }
+    expect(Array.isArray(args)).toBe(true);
   });
 
-  // Test 4: File existence check
-  await test("File existence check", async () => {
+  it("should check file existence", async () => {
     const exists = await runtime.exists("package.json");
-    if (!exists) {
-      throw new Error("package.json should exist in backend directory");
-    }
+    expect(exists).toBe(true);
   });
 
-  // Test 5: File reading
-  await test("File reading", async () => {
+  it("should read files asynchronously", async () => {
     const content = await runtime.readTextFile("package.json");
-    if (typeof content !== "string" || content.length === 0) {
-      throw new Error("Should be able to read package.json");
-    }
+    expect(typeof content).toBe("string");
+    expect(content.length).toBeGreaterThan(0);
 
     // Verify it's actually JSON
     const parsed = JSON.parse(content);
-    if (parsed.name !== "claude-code-webui-backend") {
-      throw new Error("package.json should contain correct package name");
-    }
+    expect(parsed.name).toBe("claude-code-webui");
   });
 
-  // Test 6: Sync file reading
-  await test("Sync file reading", () => {
+  it("should read files synchronously", () => {
     const content = runtime.readTextFileSync("package.json");
-    if (typeof content !== "string" || content.length === 0) {
-      throw new Error("Should be able to read package.json synchronously");
-    }
+    expect(typeof content).toBe("string");
+    expect(content.length).toBeGreaterThan(0);
   });
 
-  // Test 7: Command execution (simple test)
-  await test("Command execution", async () => {
+  it("should execute commands", async () => {
     const result = await runtime.runCommand("echo", ["test"]);
-    if (typeof result.success !== "boolean") {
-      throw new Error(
-        "runCommand should return CommandResult with success boolean",
-      );
-    }
-    if (typeof result.stdout !== "string") {
-      throw new Error(
-        "runCommand should return CommandResult with stdout string",
-      );
-    }
+    expect(typeof result.success).toBe("boolean");
+    expect(typeof result.stdout).toBe("string");
   });
-
-  // Results
-  console.log(`\n📊 Test Results: ${passedTests}/${totalTests} tests passed`);
-
-  if (passedTests === totalTests) {
-    console.log("🎉 All tests passed! Node.js Runtime is working correctly.");
-    process.exit(0);
-  } else {
-    console.log("❌ Some tests failed. Please check the implementation.");
-    process.exit(1);
-  }
-}
-
-// Run tests
-runTests().catch((error) => {
-  console.error("💥 Test runner failed:", error);
-  process.exit(1);
 });
