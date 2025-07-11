@@ -166,7 +166,7 @@ export class NodeRuntime implements Runtime {
       hostname,
     });
 
-    console.log(`Node.js server listening on ${hostname}:${port}`);
+    console.log(`Listening on http://${hostname}:${port}/`);
   }
 
   createStaticFileMiddleware(

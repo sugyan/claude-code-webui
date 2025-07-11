@@ -32,3 +32,6 @@ tsconfig.tsbuildinfo
 
 # Auto-generated files
 cli/version.ts
+
+# Frontend build output (copied for testing)
+static/
