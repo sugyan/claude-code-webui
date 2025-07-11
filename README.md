@@ -85,6 +85,7 @@ The backend server supports the following command-line options:
 |--------|-------------|---------|
 | `-p, --port <port>` | Port to listen on | 8080 |
 | `--host <host>` | Host address to bind to (use 0.0.0.0 for all interfaces) | 127.0.0.1 |
+| `--claude-path <path>` | Path to claude executable (overrides automatic detection) | Auto-detect |
 | `-d, --debug` | Enable debug mode | false |
 | `-h, --help` | Show help message | - |
 | `-V, --version` | Show version | - |
@@ -108,6 +109,9 @@ The backend server supports the following command-line options:
 
 # Enable debug mode
 ./claude-code-webui --debug
+
+# Custom Claude CLI path (for non-standard installations)
+./claude-code-webui --claude-path /path/to/claude
 
 # Using environment variables
 PORT=9000 DEBUG=true ./claude-code-webui
@@ -226,7 +230,7 @@ Download the latest binary from releases or pull the latest code for development
 <details>
 <summary><strong>Q: What if Claude CLI isn't found?</strong></summary>
 
-Ensure Claude CLI is installed and available in your PATH. Run `claude --version` to verify.
+Ensure Claude CLI is installed and available in your PATH. Run `claude --version` to verify. For custom installations, use the `--claude-path` option to specify the exact path to your Claude executable.
 </details>
 
 ---
