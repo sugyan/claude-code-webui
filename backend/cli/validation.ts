@@ -10,6 +10,7 @@ import type { Runtime } from "../runtime/types.ts";
  * Validates that the Claude CLI is available and working
  * Uses `which` command to ensure proper PATH detection without npm package interference
  * Exits process if Claude CLI is not found or not working
+ * @param runtime - Runtime abstraction for system operations
  * @param customPath - Optional custom path to claude executable to validate
  * @returns Promise<string> - The validated path to claude executable
  */
