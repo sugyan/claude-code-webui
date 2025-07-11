@@ -21,6 +21,7 @@ import { handleAbortRequest } from "./handlers/abort.ts";
 export interface AppConfig {
   debugMode: boolean;
   staticPath: string;
+  claudePath: string; // Now required since validateClaudeCli always returns a path
 }
 
 export function createApp(
@@ -45,7 +46,11 @@ export function createApp(
   // Configuration middleware - makes app settings available to all handlers
   app.use(
     "*",
-    createConfigMiddleware({ debugMode: config.debugMode, runtime }),
+    createConfigMiddleware({
+      debugMode: config.debugMode,
+      runtime,
+      claudePath: config.claudePath,
+    }),
   );
 
   // API routes

@@ -53,6 +53,8 @@ function getClaudeExecutionConfig(claudePath: string, runtime: Runtime) {
  * @param message - User message or command
  * @param requestId - Unique request identifier for abort functionality
  * @param requestAbortControllers - Shared map of abort controllers
+ * @param runtime - Runtime abstraction for system operations
+ * @param claudePath - Path to claude executable (validated at startup)
  * @param sessionId - Optional session ID for conversation continuity
  * @param allowedTools - Optional array of allowed tool names
  * @param workingDirectory - Optional working directory for Claude execution
@@ -64,6 +66,7 @@ async function* executeClaudeCommand(
   requestId: string,
   requestAbortControllers: Map<string, AbortController>,
   runtime: Runtime,
+  claudePath: string,
   sessionId?: string,
   allowedTools?: string[],
   workingDirectory?: string,
@@ -83,18 +86,7 @@ async function* executeClaudeCommand(
     abortController = new AbortController();
     requestAbortControllers.set(requestId, abortController);
 
-    // For compiled binaries, use system claude command to avoid bundled cli.js issues
-    let claudePath: string;
-    try {
-      const whichResult = await runtime.runCommand("which", ["claude"]);
-      if (whichResult.success) {
-        claudePath = whichResult.stdout.trim();
-      } else {
-        claudePath = "claude"; // fallback
-      }
-    } catch {
-      claudePath = "claude"; // fallback
-    }
+    // Use the validated Claude path from startup configuration (passed as parameter)
 
     // Get Claude Code execution configuration for migrate-installer compatibility
     const executionConfig = getClaudeExecutionConfig(claudePath, runtime);
@@ -157,7 +149,7 @@ export async function handleChatRequest(
   requestAbortControllers: Map<string, AbortController>,
 ) {
   const chatRequest: ChatRequest = await c.req.json();
-  const { debugMode, runtime } = c.var.config;
+  const { debugMode, runtime, claudePath } = c.var.config;
 
   if (debugMode) {
     console.debug(
@@ -175,6 +167,7 @@ export async function handleChatRequest(
             chatRequest.requestId,
             requestAbortControllers,
             runtime,
+            claudePath,
             chatRequest.sessionId,
             chatRequest.allowedTools,
             chatRequest.workingDirectory,

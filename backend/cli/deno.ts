@@ -16,8 +16,8 @@ async function main(runtime: DenoRuntime) {
 
   console.log(`🚀 Server starting on ${args.host}:${args.port}`);
 
-  // Validate Claude CLI availability
-  await validateClaudeCli(runtime);
+  // Validate Claude CLI availability and get the validated path
+  const validatedClaudePath = await validateClaudeCli(runtime, args.claudePath);
 
   if (args.debug) {
     console.log("🐛 Debug mode enabled");
@@ -27,6 +27,7 @@ async function main(runtime: DenoRuntime) {
   const app = createApp(runtime, {
     debugMode: args.debug,
     staticPath: new URL("../dist/static", import.meta.url).pathname,
+    claudePath: validatedClaudePath,
   });
 
   // Start server

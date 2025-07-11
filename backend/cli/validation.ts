@@ -10,27 +10,44 @@ import type { Runtime } from "../runtime/types.ts";
  * Validates that the Claude CLI is available and working
  * Uses `which` command to ensure proper PATH detection without npm package interference
  * Exits process if Claude CLI is not found or not working
+ * @param customPath - Optional custom path to claude executable to validate
+ * @returns Promise<string> - The validated path to claude executable
  */
-export async function validateClaudeCli(runtime: Runtime): Promise<void> {
+export async function validateClaudeCli(
+  runtime: Runtime,
+  customPath?: string,
+): Promise<string> {
   try {
-    // First check if claude is in PATH using which command
-    const whichResult = await runtime.runCommand("which", ["claude"]);
+    let claudePath: string;
 
-    if (!whichResult.success || !whichResult.stdout.trim()) {
-      console.error("❌ Claude CLI not found in PATH");
-      console.error("   Please install claude-code globally:");
-      console.error(
-        "   Visit: https://claude.ai/code for installation instructions",
-      );
-      runtime.exit(1);
+    if (customPath) {
+      // Use custom path if provided
+      claudePath = customPath;
+      console.log(`🔍 Validating custom Claude path: ${customPath}`);
+    } else {
+      // Auto-detect using which command
+      const whichResult = await runtime.runCommand("which", ["claude"]);
+
+      if (!whichResult.success || !whichResult.stdout.trim()) {
+        console.error("❌ Claude CLI not found in PATH");
+        console.error("   Please install claude-code globally:");
+        console.error(
+          "   Visit: https://claude.ai/code for installation instructions",
+        );
+        runtime.exit(1);
+      }
+
+      claudePath = whichResult.stdout.trim();
     }
 
-    // If found in PATH, verify it works
-    const versionResult = await runtime.runCommand("claude", ["--version"]);
+    // Verify the claude executable works
+    const versionResult = await runtime.runCommand(claudePath, ["--version"]);
     if (versionResult.success) {
       console.log(`✅ Claude CLI found: ${versionResult.stdout.trim()}`);
+      console.log(`   Path: ${claudePath}`);
+      return claudePath;
     } else {
-      console.error("❌ Claude CLI found in PATH but not working properly");
+      console.error("❌ Claude CLI found but not working properly");
       console.error(
         "   Please reinstall claude-code or check your installation",
       );

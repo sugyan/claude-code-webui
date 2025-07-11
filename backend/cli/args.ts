@@ -12,6 +12,7 @@ export interface ParsedArgs {
   debug: boolean;
   port: number;
   host: string;
+  claudePath?: string;
 }
 
 export function parseCliArgs(runtime: Runtime): ParsedArgs {
@@ -38,6 +39,10 @@ export function parseCliArgs(runtime: Runtime): ParsedArgs {
       "Host address to bind to (use 0.0.0.0 for all interfaces)",
       "127.0.0.1",
     )
+    .option(
+      "--claude-path <path>",
+      "Path to claude executable (overrides automatic detection)",
+    )
     .option("-d, --debug", "Enable debug mode", false);
 
   // Parse arguments - Commander.js v14 handles this automatically
@@ -52,5 +57,6 @@ export function parseCliArgs(runtime: Runtime): ParsedArgs {
     debug: options.debug || debugFromEnv,
     port: options.port,
     host: options.host,
+    claudePath: options.claudePath,
   };
 }
