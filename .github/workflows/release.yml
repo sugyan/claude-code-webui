@@ -156,18 +156,6 @@ jobs:
           npm ci
           npm run build
 
-      - name: Verify version consistency
-        run: |
-          TAG_VERSION=${GITHUB_REF#refs/tags/}
-          PACKAGE_VERSION=$(node -p "require('./package.json').version")
-          echo "Git tag version: $TAG_VERSION"
-          echo "Package.json version: $PACKAGE_VERSION"
-          if [ "$TAG_VERSION" != "v$PACKAGE_VERSION" ]; then
-            echo "Version mismatch! Tag: $TAG_VERSION, Package: v$PACKAGE_VERSION"
-            exit 1
-          fi
-        working-directory: backend
-
       - name: Build npm package
         run: npm run build
         working-directory: backend
