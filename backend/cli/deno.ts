@@ -14,8 +14,6 @@ async function main(runtime: DenoRuntime) {
   // Parse CLI arguments
   const args = parseCliArgs(runtime);
 
-  console.log(`🚀 Server starting on ${args.host}:${args.port}`);
-
   // Validate Claude CLI availability and get the validated path
   const validatedClaudePath = await validateClaudeCli(runtime, args.claudePath);
 
@@ -30,7 +28,8 @@ async function main(runtime: DenoRuntime) {
     claudePath: validatedClaudePath,
   });
 
-  // Start server
+  // Start server (only show this message when everything is ready)
+  console.log(`🚀 Server starting on ${args.host}:${args.port}`);
   runtime.serve(args.port, args.host, app.fetch);
 }
 
