@@ -154,14 +154,6 @@ jobs:
           npm ci
           npm run build
 
-      - name: Copy frontend assets
-        run: node scripts/copy-frontend.js
-        working-directory: backend
-
-      - name: Generate version.ts
-        run: node scripts/generate-version.js
-        working-directory: backend
-
       - name: Verify version consistency
         run: |
           TAG_VERSION=${GITHUB_REF#refs/tags/}
