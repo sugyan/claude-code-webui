@@ -1317,7 +1317,7 @@
     ],
     "packageJson": {
       "dependencies": [
-        "npm:@anthropic-ai/claude-code@>=1.0.33",
+        "npm:@anthropic-ai/claude-code@^1.0.33",
         "npm:@hono/node-server@1",
         "npm:@types/node@20",
         "npm:commander@14",

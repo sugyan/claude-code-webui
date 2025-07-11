@@ -52,13 +52,16 @@ jobs:
         run: npm run build
         working-directory: frontend
 
-      - name: Copy frontend dist to backend
-        run: |
-          rm -rf backend/dist
-          cp -r frontend/dist backend/dist
+      - name: Copy frontend assets
+        run: node scripts/copy-frontend.js
+        working-directory: backend
+
+      - name: Generate version.ts
+        run: node scripts/generate-version.js
+        working-directory: backend
 
       - name: Build backend binary
-        run: deno compile --allow-net --allow-run --allow-read --allow-env --include ./VERSION --include ./dist --target ${{ matrix.target }} --output ../dist/${{ matrix.artifact_name }} cli/deno.ts
+        run: deno compile --allow-net --allow-run --allow-read --allow-env --include ./dist/static --target ${{ matrix.target }} --output ../dist/${{ matrix.artifact_name }} cli/deno.ts
         working-directory: backend
 
       - name: Upload artifact
