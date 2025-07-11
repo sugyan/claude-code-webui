@@ -51,7 +51,7 @@
     "prepublishOnly": "npm run build && npm run test"
   },
   "dependencies": {
-    "@anthropic-ai/claude-code": ">=1.0.33",
+    "@anthropic-ai/claude-code": "^1.0.33",
     "@hono/node-server": "^1.0.0",
     "commander": "^14.0.0",
     "hono": "^4.0.0"
@@ -66,6 +66,6 @@
     "vitest": "^2.0.0"
   },
   "peerDependencies": {
-    "@anthropic-ai/claude-code": ">=1.0.33"
+    "@anthropic-ai/claude-code": "^1.0.33"
   }
 }
