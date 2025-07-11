@@ -77,8 +77,6 @@ export function createApp(
     root: config.staticPath,
   });
   app.use("/assets/*", serveStatic);
-  // Serve root level files (favicon, etc.)
-  app.use("/*", serveStatic);
 
   // SPA fallback - serve index.html for all unmatched routes (except API routes)
   app.get("*", async (c) => {

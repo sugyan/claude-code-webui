@@ -9,12 +9,6 @@ import { createApp } from "../app.ts";
 import { NodeRuntime } from "../runtime/node.ts";
 import { parseCliArgs } from "./args.ts";
 import { validateClaudeCli } from "./validation.ts";
-import { fileURLToPath } from "node:url";
-import { dirname, join } from "node:path";
-
-// Get directory path for this file
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 async function main(runtime: NodeRuntime) {
   // Parse CLI arguments
@@ -32,7 +26,7 @@ async function main(runtime: NodeRuntime) {
   // Create application
   const app = createApp(runtime, {
     debugMode: args.debug,
-    staticPath: join(__dirname, "../static"),
+    staticPath: "./dist/static",
   });
 
   // Start server
