@@ -1,15 +1,6 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
-
-export type EnterBehavior = "send" | "newline";
-
-interface EnterBehaviorContextType {
-  enterBehavior: EnterBehavior;
-  toggleEnterBehavior: () => void;
-}
-
-const EnterBehaviorContext = createContext<
-  EnterBehaviorContextType | undefined
->(undefined);
+import React, { useState, useEffect } from "react";
+import type { EnterBehavior } from "../types/enterBehavior";
+import { EnterBehaviorContext } from "./EnterBehaviorContextDefinition";
 
 export function EnterBehaviorProvider({
   children,
@@ -51,12 +42,3 @@ export function EnterBehaviorProvider({
   );
 }
 
-export function useEnterBehavior() {
-  const context = useContext(EnterBehaviorContext);
-  if (!context) {
-    throw new Error(
-      "useEnterBehavior must be used within an EnterBehaviorProvider",
-    );
-  }
-  return context;
-}
