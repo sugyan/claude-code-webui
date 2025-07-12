@@ -48,6 +48,7 @@
     "test": "vitest --run --reporter=verbose",
     "lint": "eslint **/*.ts --ignore-pattern dist/",
     "typecheck": "tsc --noEmit",
+    "prepack": "cp ../README.md ./ && cp ../LICENSE ./",
     "prepublishOnly": "npm run build && npm run test"
   },
   "dependencies": {
