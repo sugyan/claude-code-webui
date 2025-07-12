@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
 /**
- * Copy frontend build files to dist/static
+ * Copy frontend build files to dist
  *
  * This script copies the built frontend files from ../frontend/dist
- * to dist/static so they can be served by the bundled CLI application.
+ * to dist so they can be served by the bundled CLI application.
  */
 
 import { cpSync, existsSync, mkdirSync } from "node:fs";
@@ -17,7 +17,7 @@ const __dirname = dirname(__filename);
 
 // Paths
 const frontendDistPath = join(__dirname, "../../frontend/dist");
-const backendStaticPath = join(__dirname, "../dist/static");
+const backendStaticPath = join(__dirname, "../dist");
 
 // Check if frontend build exists
 if (!existsSync(frontendDistPath)) {
@@ -35,7 +35,7 @@ try {
     recursive: true,
     force: true,
   });
-  console.log("✅ Frontend files copied to dist/static");
+  console.log("✅ Frontend files copied to dist");
 } catch (error) {
   console.error("❌ Failed to copy frontend files:", error.message);
   process.exit(1);

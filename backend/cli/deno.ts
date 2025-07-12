@@ -24,7 +24,7 @@ async function main(runtime: DenoRuntime) {
   // Create application
   const app = createApp(runtime, {
     debugMode: args.debug,
-    staticPath: new URL("../dist/static", import.meta.url).pathname,
+    staticPath: new URL("../dist", import.meta.url).pathname,
     claudePath: validatedClaudePath,
   });
 

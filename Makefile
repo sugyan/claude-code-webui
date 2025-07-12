@@ -70,4 +70,4 @@ format-files:
 # Clean
 clean:
 	cd frontend && rm -rf node_modules dist
-	cd backend && rm -rf ../dist dist
+	cd backend && rm -rf dist
