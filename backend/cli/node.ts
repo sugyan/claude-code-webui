@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * Node.js-specific entry point
  *
