@@ -11,7 +11,7 @@
   "tasks": {
     "generate-version": "node scripts/generate-version.js",
     "dev": "deno task generate-version && dotenvx run --env-file=../.env -- deno run --allow-net --allow-run --allow-read --allow-env --watch cli/deno.ts --debug",
-    "build": "deno task generate-version && deno compile --allow-net --allow-run --allow-read --allow-env --include ./dist --output ../dist/claude-code-webui cli/deno.ts",
+    "build": "deno task generate-version && deno compile --allow-net --allow-run --allow-read --allow-env --include ./dist/static --output ../dist/claude-code-webui cli/deno.ts",
     "format": "deno fmt",
     "lint": "deno lint",
     "check": "deno check",

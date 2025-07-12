@@ -22,9 +22,6 @@ export function parseCliArgs(runtime: Runtime): ParsedArgs {
   // Get default port from environment
   const defaultPort = parseInt(runtime.getEnv("PORT") || "8080", 10);
 
-  // Get default host from environment
-  const defaultHost = runtime.getEnv("HOST") || "127.0.0.1";
-
   // Configure program
   program
     .name("claude-code-webui")
@@ -40,7 +37,7 @@ export function parseCliArgs(runtime: Runtime): ParsedArgs {
     .option(
       "--host <host>",
       "Host address to bind to (use 0.0.0.0 for all interfaces)",
-      defaultHost,
+      "127.0.0.1",
     )
     .option(
       "--claude-path <path>",
