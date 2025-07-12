@@ -10,6 +10,8 @@ import { createApp } from "../app.ts";
 import { NodeRuntime } from "../runtime/node.ts";
 import { parseCliArgs } from "./args.ts";
 import { validateClaudeCli } from "./validation.ts";
+import { fileURLToPath } from "node:url";
+import { dirname, join, relative } from "node:path";
 
 async function main(runtime: NodeRuntime) {
   // Parse CLI arguments
@@ -22,10 +24,16 @@ async function main(runtime: NodeRuntime) {
     console.log("🐛 Debug mode enabled");
   }
 
+  // Calculate static path relative to current working directory
+  // Node.js 20.11.0+ compatible with fallback for older versions
+  const __dirname = import.meta.dirname ?? dirname(fileURLToPath(import.meta.url));
+  const staticAbsPath = join(__dirname, "../static");
+  const staticRelPath = relative(process.cwd(), staticAbsPath);
+
   // Create application
   const app = createApp(runtime, {
     debugMode: args.debug,
-    staticPath: "./dist/static",
+    staticPath: staticRelPath,
     claudePath: validatedClaudePath,
   });
 
