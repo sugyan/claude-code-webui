@@ -5,7 +5,7 @@ import type { MiddlewareHandler } from "hono";
 
 // Create a mock runtime for testing
 const mockRuntime: Runtime = {
-  getEnv: (key: string) => key === "HOME" ? "/mock/home" : undefined,
+  getEnv: (key: string) => (key === "HOME" ? "/mock/home" : undefined),
   async *readDir(_path: string) {
     // Mock empty directory - no entries
     // This async generator yields nothing, representing an empty directory

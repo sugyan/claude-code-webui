@@ -47,8 +47,8 @@
     "start": "node dist/cli/node.js",
     "test": "vitest --run --reporter=verbose",
     "lint": "eslint **/*.ts --ignore-pattern dist/",
-    "format": "prettier --write \"cli/node.ts\" \"runtime/node.ts\" \"tests/node/**/*.ts\" \"app.ts\" \"cli/args.ts\" \"cli/validation.ts\" \"handlers/**/*.ts\" \"history/**/*.ts\" \"middleware/**/*.ts\" \"runtime/types.ts\" \"types.ts\"",
-    "format:check": "prettier --check \"cli/node.ts\" \"runtime/node.ts\" \"tests/node/**/*.ts\" \"app.ts\" \"cli/args.ts\" \"cli/validation.ts\" \"handlers/**/*.ts\" \"history/**/*.ts\" \"middleware/**/*.ts\" \"runtime/types.ts\" \"types.ts\"",
+    "format": "prettier --write \"**/*.ts\"",
+    "format:check": "prettier --check \"**/*.ts\"",
     "typecheck": "tsc --noEmit",
     "prepack": "cp ../README.md ./ && cp ../LICENSE ./",
     "prepublishOnly": "npm run build && npm run test"
