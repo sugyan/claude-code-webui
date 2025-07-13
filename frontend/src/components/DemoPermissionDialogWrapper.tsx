@@ -38,17 +38,19 @@ export function DemoPermissionDialogWrapper({
   // Auto-click effect with focus sequence animation
   useEffect(() => {
     if (autoClickButton && permissionDialogProps.isOpen) {
+      const timers = timersRef.current;
+
       if (autoClickButton === "allowPermanent") {
         // For allowPermanent: sequence 1st → 2nd button
         setActiveButton("allow");
 
-        timersRef.current.focus = setTimeout(() => {
+        timers.focus = setTimeout(() => {
           setActiveButton("allowPermanent");
         }, 500);
 
-        timersRef.current.action = setTimeout(() => {
+        timers.action = setTimeout(() => {
           setClickedButton("allowPermanent");
-          timersRef.current.clickEffect = setTimeout(() => {
+          timers.clickEffect = setTimeout(() => {
             onAllowPermanent();
           }, 200);
         }, 1200);
@@ -56,19 +58,18 @@ export function DemoPermissionDialogWrapper({
         // For allow: direct focus on button
         setActiveButton("allow");
 
-        timersRef.current.action = setTimeout(() => {
+        timers.action = setTimeout(() => {
           setClickedButton("allow");
-          timersRef.current.clickEffect = setTimeout(() => {
+          timers.clickEffect = setTimeout(() => {
             onAllow();
           }, 200);
         }, 700);
       }
 
       return () => {
-        if (timersRef.current.focus) clearTimeout(timersRef.current.focus);
-        if (timersRef.current.action) clearTimeout(timersRef.current.action);
-        if (timersRef.current.clickEffect)
-          clearTimeout(timersRef.current.clickEffect);
+        if (timers.focus) clearTimeout(timers.focus);
+        if (timers.action) clearTimeout(timers.action);
+        if (timers.clickEffect) clearTimeout(timers.clickEffect);
       };
     }
   }, [

@@ -1,13 +1,19 @@
 import { useEffect, useCallback, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
-import type { ChatRequest, ChatMessage, ProjectInfo } from "../types";
+import type {
+  ChatRequest,
+  ChatMessage,
+  ProjectInfo,
+  StreamResponse,
+} from "../types";
 import { useTheme } from "../hooks/useTheme";
 import { useClaudeStreaming } from "../hooks/useClaudeStreaming";
 import { useChatState } from "../hooks/chat/useChatState";
 import { usePermissions } from "../hooks/chat/usePermissions";
 import { useAbortController } from "../hooks/chat/useAbortController";
 import { useAutoHistoryLoader } from "../hooks/useHistoryLoader";
+import { useNetworkRecovery } from "../hooks/useNetworkRecovery";
 import { ThemeToggle } from "./chat/ThemeToggle";
 import { HistoryButton } from "./chat/HistoryButton";
 import { ChatInput } from "./chat/ChatInput";
@@ -92,6 +98,40 @@ export function ChatPage() {
   });
 
   const {
+    isRecovering,
+    retryCount,
+    trackMessage,
+    resetTracking,
+    handleNetworkError,
+    cleanup: cleanupNetworkRecovery,
+  } = useNetworkRecovery({
+    onNetworkError: () => {
+      console.log("Network error detected, attempting recovery...");
+    },
+    onRecoverySuccess: () => {
+      console.log("Successfully recovered from network error");
+    },
+    onRecoveryFailed: () => {
+      console.error("Failed to recover from network error");
+      addMessage({
+        type: "chat",
+        role: "assistant",
+        content:
+          "Network connection lost and could not be recovered. Please check your connection and try again.",
+        timestamp: Date.now(),
+      });
+      resetRequestState();
+    },
+  });
+
+  // Cleanup network recovery on unmount
+  useEffect(() => {
+    return () => {
+      cleanupNetworkRecovery();
+    };
+  }, [cleanupNetworkRecovery]);
+
+  const {
     allowedTools,
     permissionDialog,
     showPermissionDialog,
@@ -131,6 +171,33 @@ export function ChatPage() {
 
       if (!messageContent) clearInput();
       startRequest();
+      resetTracking(); // Reset message tracking for new request
+
+      // Local state for this streaming session
+      let localHasReceivedInit = false;
+      let shouldAbort = false;
+
+      const streamingContext: StreamingContext = {
+        currentAssistantMessage,
+        setCurrentAssistantMessage,
+        addMessage,
+        updateLastMessage,
+        onSessionId: setCurrentSessionId,
+        shouldShowInitMessage: () => !hasShownInitMessage,
+        onInitMessageShown: () => setHasShownInitMessage(true),
+        get hasReceivedInit() {
+          return localHasReceivedInit;
+        },
+        setHasReceivedInit: (received: boolean) => {
+          localHasReceivedInit = received;
+          setHasReceivedInit(received);
+        },
+        onPermissionError: handlePermissionError,
+        onAbortRequest: async () => {
+          shouldAbort = true;
+          await createAbortHandler(requestId)();
+        },
+      };
 
       try {
         const response = await fetch(getChatUrl(), {
@@ -150,32 +217,6 @@ export function ChatPage() {
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
 
-        // Local state for this streaming session
-        let localHasReceivedInit = false;
-        let shouldAbort = false;
-
-        const streamingContext: StreamingContext = {
-          currentAssistantMessage,
-          setCurrentAssistantMessage,
-          addMessage,
-          updateLastMessage,
-          onSessionId: setCurrentSessionId,
-          shouldShowInitMessage: () => !hasShownInitMessage,
-          onInitMessageShown: () => setHasShownInitMessage(true),
-          get hasReceivedInit() {
-            return localHasReceivedInit;
-          },
-          setHasReceivedInit: (received: boolean) => {
-            localHasReceivedInit = received;
-            setHasReceivedInit(received);
-          },
-          onPermissionError: handlePermissionError,
-          onAbortRequest: async () => {
-            shouldAbort = true;
-            await createAbortHandler(requestId)();
-          },
-        };
-
         while (true) {
           const { done, value } = await reader.read();
           if (done || shouldAbort) break;
@@ -185,6 +226,10 @@ export function ChatPage() {
 
           for (const line of lines) {
             if (shouldAbort) break;
+
+            // Track message for recovery
+            trackMessage(line);
+
             processStreamLine(line, streamingContext);
           }
 
@@ -192,14 +237,33 @@ export function ChatPage() {
         }
       } catch (error) {
         console.error("Failed to send message:", error);
-        addMessage({
-          type: "chat",
-          role: "assistant",
-          content: "Error: Failed to get response",
-          timestamp: Date.now(),
-        });
+
+        // Try network recovery if applicable
+        const recovered = await handleNetworkError(
+          error,
+          requestId,
+          (resumedMessages: StreamResponse[]) => {
+            // Process resumed messages
+            for (const message of resumedMessages) {
+              const line = JSON.stringify(message);
+              processStreamLine(line, streamingContext);
+            }
+          },
+        );
+
+        if (!recovered) {
+          // Non-network error or recovery failed
+          addMessage({
+            type: "chat",
+            role: "assistant",
+            content: "Error: Failed to get response",
+            timestamp: Date.now(),
+          });
+        }
       } finally {
-        resetRequestState();
+        if (!isRecovering) {
+          resetRequestState();
+        }
       }
     },
     [
@@ -223,6 +287,10 @@ export function ChatPage() {
       processStreamLine,
       handlePermissionError,
       createAbortHandler,
+      trackMessage,
+      resetTracking,
+      handleNetworkError,
+      isRecovering,
     ],
   );
 
@@ -469,6 +537,13 @@ export function ChatPage() {
           <>
             {/* Chat Messages */}
             <ChatMessages messages={messages} isLoading={isLoading} />
+
+            {/* Network Recovery Status */}
+            {isRecovering && (
+              <div className="px-4 py-2 text-center text-sm text-gray-500 dark:text-gray-400">
+                Reconnecting... (Attempt {retryCount})
+              </div>
+            )}
 
             {/* Input */}
             <ChatInput

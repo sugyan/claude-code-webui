@@ -79,6 +79,22 @@ export class DenoRuntime implements Runtime {
     }
   }
 
+  async appendTextFile(path: string, content: string): Promise<void> {
+    await Deno.writeTextFile(path, content, { append: true });
+  }
+
+  async ensureDir(path: string): Promise<void> {
+    await Deno.mkdir(path, { recursive: true });
+  }
+
+  async remove(path: string): Promise<void> {
+    await Deno.remove(path);
+  }
+
+  async removeDir(path: string): Promise<void> {
+    await Deno.remove(path, { recursive: true });
+  }
+
   getEnv(key: string): string | undefined {
     return Deno.env.get(key);
   }
@@ -116,9 +132,7 @@ export class DenoRuntime implements Runtime {
     Deno.serve({ port, hostname }, handler);
   }
 
-  createStaticFileMiddleware(
-    options: { root: string },
-  ): MiddlewareHandler {
+  createStaticFileMiddleware(options: { root: string }): MiddlewareHandler {
     return serveStatic(options);
   }
 }

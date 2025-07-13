@@ -9,3 +9,5 @@ frontend/demo-recordings/
 frontend/test-results/
 frontend/playwright-report/
 frontend/playwright/.cache/
+
+backend/.streaming/

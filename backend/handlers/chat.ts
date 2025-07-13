@@ -2,6 +2,10 @@ import { Context } from "hono";
 import { AbortError, query } from "@anthropic-ai/claude-code";
 import type { ChatRequest, StreamResponse } from "../../shared/types.ts";
 import type { Runtime } from "../runtime/types.ts";
+import {
+  appendMessage,
+  initializeStreaming,
+} from "../streaming/streamingFileManager.ts";
 
 /**
  * Automatically determines Claude Code execution configuration
@@ -49,6 +53,16 @@ function getClaudeExecutionConfig(claudePath: string, runtime: Runtime) {
 }
 
 /**
+ * Get encoded project name from working directory
+ */
+function getEncodedProjectName(workingDirectory?: string): string | null {
+  if (!workingDirectory) return null;
+
+  // Encode the directory path to match Claude's project naming convention
+  return encodeURIComponent(workingDirectory.replace(/\//g, "_"));
+}
+
+/**
  * Executes a Claude command and yields streaming responses
  * @param message - User message or command
  * @param requestId - Unique request identifier for abort functionality
@@ -73,6 +87,7 @@ async function* executeClaudeCommand(
   debugMode?: boolean,
 ): AsyncGenerator<StreamResponse> {
   let abortController: AbortController;
+  const encodedProjectName = getEncodedProjectName(workingDirectory);
 
   try {
     // Process commands that start with '/'
@@ -85,6 +100,11 @@ async function* executeClaudeCommand(
     // Create and store AbortController for this request
     abortController = new AbortController();
     requestAbortControllers.set(requestId, abortController);
+
+    // Initialize streaming file if we have a project
+    if (encodedProjectName) {
+      await initializeStreaming(encodedProjectName, requestId, runtime);
+    }
 
     // Use the validated Claude path from startup configuration (passed as parameter)
 
@@ -110,25 +130,64 @@ async function* executeClaudeCommand(
         console.debug("---");
       }
 
-      yield {
+      const response: StreamResponse = {
         type: "claude_json",
         data: sdkMessage,
       };
+
+      // Write to streaming file if we have a project
+      if (encodedProjectName) {
+        await appendMessage(encodedProjectName, requestId, response, runtime);
+      }
+
+      yield response;
     }
 
-    yield { type: "done" };
+    const doneResponse: StreamResponse = { type: "done" };
+
+    // Write done message to streaming file
+    if (encodedProjectName) {
+      await appendMessage(encodedProjectName, requestId, doneResponse, runtime);
+    }
+
+    yield doneResponse;
   } catch (error) {
     // Check if error is due to abort
     if (error instanceof AbortError) {
-      yield { type: "aborted" };
+      const abortedResponse: StreamResponse = { type: "aborted" };
+
+      // Write aborted message to streaming file
+      if (encodedProjectName) {
+        await appendMessage(
+          encodedProjectName,
+          requestId,
+          abortedResponse,
+          runtime,
+        );
+      }
+
+      yield abortedResponse;
     } else {
       if (debugMode) {
         console.error("Claude Code execution failed:", error);
       }
-      yield {
+
+      const errorResponse: StreamResponse = {
         type: "error",
         error: error instanceof Error ? error.message : String(error),
       };
+
+      // Write error message to streaming file
+      if (encodedProjectName) {
+        await appendMessage(
+          encodedProjectName,
+          requestId,
+          errorResponse,
+          runtime,
+        );
+      }
+
+      yield errorResponse;
     }
   } finally {
     // Clean up AbortController from map

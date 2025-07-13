@@ -43,6 +43,10 @@ export interface Runtime {
   lstat(path: string): Promise<FileStats>;
   lstatSync(path: string): FileStats;
   readDir(path: string): AsyncIterable<DirectoryEntry>;
+  appendTextFile(path: string, content: string): Promise<void>;
+  ensureDir(path: string): Promise<void>;
+  remove(path: string): Promise<void>;
+  removeDir(path: string): Promise<void>;
 
   // Environment access
   getEnv(key: string): string | undefined;
@@ -60,7 +64,5 @@ export interface Runtime {
   ): void;
 
   // Static file serving
-  createStaticFileMiddleware(
-    options: { root: string },
-  ): MiddlewareHandler;
+  createStaticFileMiddleware(options: { root: string }): MiddlewareHandler;
 }

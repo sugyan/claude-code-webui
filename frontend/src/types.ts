@@ -5,6 +5,13 @@ import type {
   SDKResultMessage,
 } from "@anthropic-ai/claude-code";
 
+// Re-export shared types for frontend use
+export type {
+  ResumeResponse,
+  StatusResponse,
+  RequestStatus,
+} from "../../shared/types";
+
 // Chat message for user/assistant interactions (not part of SDKMessage)
 export interface ChatMessage {
   type: "chat";

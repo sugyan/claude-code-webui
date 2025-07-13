@@ -461,14 +461,19 @@ export function useDemoAutomation(
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (stepTimeoutRef.current) {
-        clearTimeout(stepTimeoutRef.current);
+      const stepTimeout = stepTimeoutRef.current;
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      const typingTimeout = typingTimeoutRef.current;
+      const typingInterval = typingIntervalRef.current;
+
+      if (stepTimeout) {
+        clearTimeout(stepTimeout);
       }
-      if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current);
+      if (typingTimeout) {
+        clearTimeout(typingTimeout);
       }
-      if (typingIntervalRef.current) {
-        clearTimeout(typingIntervalRef.current);
+      if (typingInterval) {
+        clearTimeout(typingInterval);
       }
     };
   }, []);
@@ -540,8 +545,9 @@ export function useTypingAnimation(
 
   useEffect(() => {
     return () => {
-      if (intervalRef.current) {
-        clearTimeout(intervalRef.current);
+      const interval = intervalRef.current;
+      if (interval) {
+        clearTimeout(interval);
       }
     };
   }, []);

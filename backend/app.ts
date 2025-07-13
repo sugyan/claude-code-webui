@@ -17,6 +17,9 @@ import { handleHistoriesRequest } from "./handlers/histories.ts";
 import { handleConversationRequest } from "./handlers/conversations.ts";
 import { handleChatRequest } from "./handlers/chat.ts";
 import { handleAbortRequest } from "./handlers/abort.ts";
+import { handleResumeRequest } from "./handlers/resume.ts";
+import { handleStatusRequest } from "./handlers/status.ts";
+import { startCleanupInterval } from "./streaming/streamingFileManager.ts";
 
 export interface AppConfig {
   debugMode: boolean;
@@ -32,6 +35,9 @@ export function createApp(
 
   // Store AbortControllers for each request (shared with chat handler)
   const requestAbortControllers = new Map<string, AbortController>();
+
+  // Start cleanup interval for streaming files
+  startCleanupInterval(runtime);
 
   // CORS middleware
   app.use(
@@ -71,10 +77,11 @@ export function createApp(
     (c) => handleAbortRequest(c, requestAbortControllers),
   );
 
-  app.post(
-    "/api/chat",
-    (c) => handleChatRequest(c, requestAbortControllers),
-  );
+  app.post("/api/chat", (c) => handleChatRequest(c, requestAbortControllers));
+
+  app.get("/api/resume/:requestId", (c) => handleResumeRequest(c));
+
+  app.get("/api/status/:requestId", (c) => handleStatusRequest(c));
 
   // Static file serving with SPA fallback
   // Serve static assets (CSS, JS, images, etc.)
