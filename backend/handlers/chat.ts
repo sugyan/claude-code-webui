@@ -39,7 +39,7 @@ function getClaudeExecutionConfig(claudePath: string, runtime: Runtime) {
     if (stat.isSymlink) {
       return createNodeConfig(claudePath); // Node.js resolves symlinks automatically
     }
-  } catch (_error) {
+  } catch {
     // Silently continue if stat check fails
   }
 

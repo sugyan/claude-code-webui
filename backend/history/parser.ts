@@ -136,7 +136,7 @@ async function getHistoryFiles(
     }
 
     return files;
-  } catch (_error) {
+  } catch {
     // Directory doesn't exist or can't be read
     return [];
   }

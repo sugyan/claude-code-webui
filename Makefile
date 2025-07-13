@@ -21,7 +21,7 @@ lint: lint-frontend lint-backend
 lint-frontend:
 	cd frontend && npm run lint
 lint-backend:
-	cd backend && deno task lint
+	cd backend && deno task lint && npm run lint
 
 # Type checking
 typecheck: typecheck-frontend typecheck-backend
