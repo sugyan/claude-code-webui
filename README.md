@@ -1,9 +1,10 @@
 # 🌐 Claude Code Web UI
 
+[![npm Version](https://img.shields.io/npm/v/claude-code-webui)](https://www.npmjs.com/package/claude-code-webui)
+[![npm Downloads](https://img.shields.io/npm/dt/claude-code-webui)](https://www.npmjs.com/package/claude-code-webui)
+[![License](https://img.shields.io/github/license/sugyan/claude-code-webui)](https://github.com/sugyan/claude-code-webui/blob/main/LICENSE)
 [![CI](https://github.com/sugyan/claude-code-webui/actions/workflows/ci.yml/badge.svg)](https://github.com/sugyan/claude-code-webui/actions/workflows/ci.yml)
-[![Release](https://github.com/sugyan/claude-code-webui/actions/workflows/release.yml/badge.svg)](https://github.com/sugyan/claude-code-webui/actions/workflows/release.yml)
-[![Version](https://img.shields.io/github/v/release/sugyan/claude-code-webui)](https://github.com/sugyan/claude-code-webui/releases)
-[![Downloads](https://img.shields.io/github/downloads/sugyan/claude-code-webui/total)](https://github.com/sugyan/claude-code-webui/releases)
+[![GitHub Release](https://img.shields.io/github/v/release/sugyan/claude-code-webui)](https://github.com/sugyan/claude-code-webui/releases)
 
 > **A modern web interface for Claude Code CLI** - Transform your command-line coding experience into an intuitive web-based chat interface
 
@@ -31,12 +32,12 @@
 
 Instead of being limited to command-line interactions, Claude Code Web UI brings you:
 
-| CLI Experience | Web UI Experience |
-|----------------|-------------------|
-| ⌨️ Terminal only | 🌐 Any device with a browser |
-| 📱 Desktop bound | 📱 Mobile-friendly interface |
-| 📝 Plain text output | 🎨 Rich formatted responses |
-| 🗂️ Manual directory switching | 📁 Visual project selection |
+| CLI Experience                | Web UI Experience            |
+| ----------------------------- | ---------------------------- |
+| ⌨️ Terminal only              | 🌐 Any device with a browser |
+| 📱 Desktop bound              | 📱 Mobile-friendly interface |
+| 📝 Plain text output          | 🎨 Rich formatted responses  |
+| 🗂️ Manual directory switching | 📁 Visual project selection  |
 
 ---
 
@@ -44,7 +45,19 @@ Instead of being limited to command-line interactions, Claude Code Web UI brings
 
 Get up and running in under 2 minutes:
 
-### Option 1: Binary Release (Recommended)
+### Option 1: npm Package (Recommended)
+
+```bash
+# Install globally via npm
+npm install -g claude-code-webui
+
+# Start the server
+claude-code-webui
+
+# Open browser to http://localhost:8080
+```
+
+### Option 2: Binary Release
 
 ```bash
 # Download and run (macOS ARM64 example)
@@ -55,7 +68,7 @@ chmod +x claude-code-webui-macos-arm64
 # Open browser to http://localhost:8080
 ```
 
-### Option 2: Development Mode
+### Option 3: Development Mode
 
 ```bash
 # Backend (choose one)
@@ -71,9 +84,9 @@ cd frontend && npm run dev
 ### Prerequisites
 
 - ✅ **Claude CLI** installed and authenticated ([Get it here](https://github.com/anthropics/claude-code))
+- ✅ **Node.js >=18.0.0** (for npm installation) or **Deno** (for development)
 - ✅ **Modern browser** (Chrome, Firefox, Safari, Edge)
 - ✅ **dotenvx** (for development): [Install guide](https://dotenvx.com/docs/install)
-
 
 ---
 
@@ -81,14 +94,14 @@ cd frontend && npm run dev
 
 The backend server supports the following command-line options:
 
-| Option | Description | Default |
-|--------|-------------|---------|
-| `-p, --port <port>` | Port to listen on | 8080 |
-| `--host <host>` | Host address to bind to (use 0.0.0.0 for all interfaces) | 127.0.0.1 |
+| Option                 | Description                                               | Default     |
+| ---------------------- | --------------------------------------------------------- | ----------- |
+| `-p, --port <port>`    | Port to listen on                                         | 8080        |
+| `--host <host>`        | Host address to bind to (use 0.0.0.0 for all interfaces)  | 127.0.0.1   |
 | `--claude-path <path>` | Path to claude executable (overrides automatic detection) | Auto-detect |
-| `-d, --debug` | Enable debug mode | false |
-| `-h, --help` | Show help message | - |
-| `-V, --version` | Show version | - |
+| `-d, --debug`          | Enable debug mode                                         | false       |
+| `-h, --help`           | Show help message                                         | -           |
+| `-V, --version`        | Show version                                              | -           |
 
 ### Environment Variables
 
@@ -150,9 +163,9 @@ echo "PORT=9000" > .env
 ```
 
 Both backend and frontend will automatically use this port:
+
 - Backend: Uses dotenvx to read the `.env` file
 - Frontend: Uses Vite's built-in `.env` support
-
 
 ---
 
@@ -201,36 +214,42 @@ For comprehensive technical documentation, see [CLAUDE.md](./CLAUDE.md) which co
 <summary><strong>Q: Do I need Claude API access?</strong></summary>
 
 Yes, you need the Claude CLI tool installed and authenticated. The web UI is a frontend for the existing Claude CLI.
+
 </details>
 
 <details>
 <summary><strong>Q: Can I use this on mobile?</strong></summary>
 
 Yes! The web interface is fully responsive and works great on mobile devices when connected to your local network.
+
 </details>
 
 <details>
 <summary><strong>Q: Is my code safe?</strong></summary>
 
 Yes, everything runs locally. No data is sent to external servers except Claude's normal API calls through the CLI.
+
 </details>
 
 <details>
 <summary><strong>Q: Can I deploy this to a server?</strong></summary>
 
 While technically possible, it's designed for local use. If deploying remotely, ensure proper authentication and security measures.
+
 </details>
 
 <details>
 <summary><strong>Q: How do I update?</strong></summary>
 
 Download the latest binary from releases or pull the latest code for development mode.
+
 </details>
 
 <details>
 <summary><strong>Q: What if Claude CLI isn't found?</strong></summary>
 
 Ensure Claude CLI is installed and available in your PATH. Run `claude --version` to verify. For custom installations, use the `--claude-path` option to specify the exact path to your Claude executable.
+
 </details>
 
 ---
@@ -240,7 +259,7 @@ Ensure Claude CLI is installed and available in your PATH. Run `claude --version
 We welcome contributions! Please see our [development setup](#-development) and feel free to:
 
 - 🐛 Report bugs
-- ✨ Suggest features  
+- ✨ Suggest features
 - 📝 Improve documentation
 - 🔧 Submit pull requests
 
