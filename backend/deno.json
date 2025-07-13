@@ -13,10 +13,10 @@
     "copy-frontend": "node scripts/copy-frontend.js",
     "dev": "deno task generate-version && dotenvx run --env-file=../.env -- deno run --allow-net --allow-run --allow-read --allow-env --watch cli/deno.ts --debug",
     "build": "deno task generate-version && deno task copy-frontend && deno compile --allow-net --allow-run --allow-read --allow-env --include ./dist/static --output ../dist/claude-code-webui cli/deno.ts",
-    "format": "deno fmt",
-    "format:check": "deno fmt --check",
-    "lint": "deno lint",
-    "check": "deno check",
+    "format": "deno fmt cli/deno.ts runtime/deno.ts",
+    "format:check": "deno fmt --check cli/deno.ts runtime/deno.ts",
+    "lint": "deno lint cli/deno.ts runtime/deno.ts",
+    "check": "deno check cli/deno.ts runtime/deno.ts",
     "test": "deno test --allow-env --allow-read"
   },
   "imports": {

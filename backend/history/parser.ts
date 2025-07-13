@@ -47,7 +47,10 @@ async function parseHistoryFile(
 ): Promise<ConversationFile | null> {
   try {
     const content = await runtime.readTextFile(filePath);
-    const lines = content.trim().split("\n").filter((line) => line.trim());
+    const lines = content
+      .trim()
+      .split("\n")
+      .filter((line) => line.trim());
 
     if (lines.length === 0) {
       return null; // Empty file

@@ -27,13 +27,18 @@ export function parseCliArgs(runtime: Runtime): ParsedArgs {
     .name("claude-code-webui")
     .version(version)
     .description("Claude Code Web UI Backend Server")
-    .option("-p, --port <port>", "Port to listen on", (value) => {
-      const parsed = parseInt(value, 10);
-      if (isNaN(parsed)) {
-        throw new Error(`Invalid port number: ${value}`);
-      }
-      return parsed;
-    }, defaultPort)
+    .option(
+      "-p, --port <port>",
+      "Port to listen on",
+      (value) => {
+        const parsed = parseInt(value, 10);
+        if (isNaN(parsed)) {
+          throw new Error(`Invalid port number: ${value}`);
+        }
+        return parsed;
+      },
+      defaultPort,
+    )
     .option(
       "--host <host>",
       "Host address to bind to (use 0.0.0.0 for all interfaces)",

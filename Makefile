@@ -7,14 +7,14 @@ format: format-frontend format-backend
 format-frontend:
 	cd frontend && npm run format
 format-backend:
-	cd backend && deno task format
+	cd backend && deno task format && npm run format
 
 # Format checking  
 format-check: format-check-frontend format-check-backend
 format-check-frontend:
 	cd frontend && npm run format:check
 format-check-backend:
-	cd backend && deno task format:check
+	cd backend && deno task format:check && npm run format:check
 
 # Linting
 lint: lint-frontend lint-backend
@@ -28,7 +28,7 @@ typecheck: typecheck-frontend typecheck-backend
 typecheck-frontend:
 	cd frontend && npm run typecheck
 typecheck-backend:
-	cd backend && deno task check
+	cd backend && deno task check && npm run typecheck
 
 # Testing
 test: test-frontend test-backend

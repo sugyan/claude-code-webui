@@ -81,9 +81,12 @@ export async function handleHistoriesRequest(c: Context) {
   } catch (error) {
     console.error("Error fetching conversation histories:", error);
 
-    return c.json({
-      error: "Failed to fetch conversation histories",
-      details: error instanceof Error ? error.message : String(error),
-    }, 500);
+    return c.json(
+      {
+        error: "Failed to fetch conversation histories",
+        details: error instanceof Error ? error.message : String(error),
+      },
+      500,
+    );
   }
 }

@@ -167,10 +167,7 @@ export class NodeRuntime implements Runtime {
     console.log(`Listening on http://${hostname}:${port}/`);
   }
 
-  createStaticFileMiddleware(
-    options: { root: string },
-  ): MiddlewareHandler {
+  createStaticFileMiddleware(options: { root: string }): MiddlewareHandler {
     return serveStatic(options);
   }
-
 }

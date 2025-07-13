@@ -91,18 +91,16 @@ async function* executeClaudeCommand(
     // Get Claude Code execution configuration for migrate-installer compatibility
     const executionConfig = getClaudeExecutionConfig(claudePath, runtime);
 
-    for await (
-      const sdkMessage of query({
-        prompt: processedMessage,
-        options: {
-          abortController,
-          ...executionConfig, // Use auto-detected execution configuration
-          ...(sessionId ? { resume: sessionId } : {}),
-          ...(allowedTools ? { allowedTools } : {}),
-          ...(workingDirectory ? { cwd: workingDirectory } : {}),
-        },
-      })
-    ) {
+    for await (const sdkMessage of query({
+      prompt: processedMessage,
+      options: {
+        abortController,
+        ...executionConfig, // Use auto-detected execution configuration
+        ...(sessionId ? { resume: sessionId } : {}),
+        ...(allowedTools ? { allowedTools } : {}),
+        ...(workingDirectory ? { cwd: workingDirectory } : {}),
+      },
+    })) {
       // Debug logging of raw SDK messages
       if (debugMode) {
         console.debug("[DEBUG] Claude SDK Message:");
@@ -161,19 +159,17 @@ export async function handleChatRequest(
   const stream = new ReadableStream({
     async start(controller) {
       try {
-        for await (
-          const chunk of executeClaudeCommand(
-            chatRequest.message,
-            chatRequest.requestId,
-            requestAbortControllers,
-            runtime,
-            claudePath,
-            chatRequest.sessionId,
-            chatRequest.allowedTools,
-            chatRequest.workingDirectory,
-            debugMode,
-          )
-        ) {
+        for await (const chunk of executeClaudeCommand(
+          chatRequest.message,
+          chatRequest.requestId,
+          requestAbortControllers,
+          runtime,
+          claudePath,
+          chatRequest.sessionId,
+          chatRequest.allowedTools,
+          chatRequest.workingDirectory,
+          debugMode,
+        )) {
           const data = JSON.stringify(chunk) + "\n";
           controller.enqueue(new TextEncoder().encode(data));
         }

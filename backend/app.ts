@@ -56,25 +56,19 @@ export function createApp(
   // API routes
   app.get("/api/projects", (c) => handleProjectsRequest(c));
 
-  app.get(
-    "/api/projects/:encodedProjectName/histories",
-    (c) => handleHistoriesRequest(c),
+  app.get("/api/projects/:encodedProjectName/histories", (c) =>
+    handleHistoriesRequest(c),
   );
 
-  app.get(
-    "/api/projects/:encodedProjectName/histories/:sessionId",
-    (c) => handleConversationRequest(c),
+  app.get("/api/projects/:encodedProjectName/histories/:sessionId", (c) =>
+    handleConversationRequest(c),
   );
 
-  app.post(
-    "/api/abort/:requestId",
-    (c) => handleAbortRequest(c, requestAbortControllers),
+  app.post("/api/abort/:requestId", (c) =>
+    handleAbortRequest(c, requestAbortControllers),
   );
 
-  app.post(
-    "/api/chat",
-    (c) => handleChatRequest(c, requestAbortControllers),
-  );
+  app.post("/api/chat", (c) => handleChatRequest(c, requestAbortControllers));
 
   // Static file serving with SPA fallback
   // Serve static assets (CSS, JS, images, etc.)

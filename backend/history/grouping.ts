@@ -30,7 +30,7 @@ export function groupConversations(
   for (const currentConv of sortedConversations) {
     // Check if this conversation's message IDs are a subset of any existing unique conversation
     const isSubsetOfExisting = uniqueConversations.some((existingConv) =>
-      isSubset(currentConv.messageIds, existingConv.messageIds)
+      isSubset(currentConv.messageIds, existingConv.messageIds),
     );
 
     if (!isSubsetOfExisting) {
@@ -41,12 +41,12 @@ export function groupConversations(
 
   // Convert to ConversationSummary format and sort by start time (newest first)
   const summaries = uniqueConversations.map((conv) =>
-    createConversationSummary(conv)
+    createConversationSummary(conv),
   );
 
   // Sort by start time, newest first
-  summaries.sort((a, b) =>
-    new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
+  summaries.sort(
+    (a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime(),
   );
 
   return summaries;

@@ -40,10 +40,13 @@ export async function handleConversationRequest(c: Context) {
     );
 
     if (!conversationHistory) {
-      return c.json({
-        error: "Conversation not found",
-        sessionId,
-      }, 404);
+      return c.json(
+        {
+          error: "Conversation not found",
+          sessionId,
+        },
+        404,
+      );
     }
 
     if (debugMode) {
@@ -59,23 +62,32 @@ export async function handleConversationRequest(c: Context) {
     // Handle specific error types
     if (error instanceof Error) {
       if (error.message.includes("Invalid session ID")) {
-        return c.json({
-          error: "Invalid session ID format",
-          details: error.message,
-        }, 400);
+        return c.json(
+          {
+            error: "Invalid session ID format",
+            details: error.message,
+          },
+          400,
+        );
       }
 
       if (error.message.includes("Invalid encoded project name")) {
-        return c.json({
-          error: "Invalid project name",
-          details: error.message,
-        }, 400);
+        return c.json(
+          {
+            error: "Invalid project name",
+            details: error.message,
+          },
+          400,
+        );
       }
     }
 
-    return c.json({
-      error: "Failed to fetch conversation details",
-      details: error instanceof Error ? error.message : String(error),
-    }, 500);
+    return c.json(
+      {
+        error: "Failed to fetch conversation details",
+        details: error instanceof Error ? error.message : String(error),
+      },
+      500,
+    );
   }
 }

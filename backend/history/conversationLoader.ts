@@ -63,7 +63,10 @@ async function parseConversationFile(
   runtime: Runtime,
 ): Promise<ConversationHistory> {
   const content = await runtime.readTextFile(filePath);
-  const lines = content.trim().split("\n").filter((line) => line.trim());
+  const lines = content
+    .trim()
+    .split("\n")
+    .filter((line) => line.trim());
 
   if (lines.length === 0) {
     throw new Error("Empty conversation file");

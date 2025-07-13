@@ -60,7 +60,5 @@ export interface Runtime {
   ): void;
 
   // Static file serving
-  createStaticFileMiddleware(
-    options: { root: string },
-  ): MiddlewareHandler;
+  createStaticFileMiddleware(options: { root: string }): MiddlewareHandler;
 }

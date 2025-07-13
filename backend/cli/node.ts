@@ -26,12 +26,13 @@ async function main(runtime: NodeRuntime) {
 
   // Calculate static path relative to current working directory
   // Node.js 20.11.0+ compatible with fallback for older versions
-  const __dirname = import.meta.dirname ?? dirname(fileURLToPath(import.meta.url));
+  const __dirname =
+    import.meta.dirname ?? dirname(fileURLToPath(import.meta.url));
   const staticAbsPath = join(__dirname, "../static");
   let staticRelPath = relative(process.cwd(), staticAbsPath);
   // Handle edge case where relative() returns empty string
-  if (staticRelPath === '') {
-    staticRelPath = '.';
+  if (staticRelPath === "") {
+    staticRelPath = ".";
   }
 
   // Create application

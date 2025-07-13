@@ -14,7 +14,7 @@ describe("Node.js Runtime", () => {
   it("should implement all required interface methods", () => {
     const requiredMethods = [
       "readTextFile",
-      "readTextFileSync", 
+      "readTextFileSync",
       "readBinaryFile",
       "exists",
       "stat",
@@ -29,7 +29,9 @@ describe("Node.js Runtime", () => {
     ];
 
     for (const method of requiredMethods) {
-      expect(typeof (runtime as unknown as Record<string, unknown>)[method]).toBe("function");
+      expect(
+        typeof (runtime as unknown as Record<string, unknown>)[method],
+      ).toBe("function");
     }
   });
 

@@ -47,6 +47,8 @@
     "start": "node dist/cli/node.js",
     "test": "vitest --run --reporter=verbose",
     "lint": "eslint **/*.ts --ignore-pattern dist/",
+    "format": "prettier --write \"cli/node.ts\" \"runtime/node.ts\" \"tests/node/**/*.ts\" \"app.ts\" \"cli/args.ts\" \"cli/validation.ts\" \"handlers/**/*.ts\" \"history/**/*.ts\" \"middleware/**/*.ts\" \"runtime/types.ts\" \"types.ts\"",
+    "format:check": "prettier --check \"cli/node.ts\" \"runtime/node.ts\" \"tests/node/**/*.ts\" \"app.ts\" \"cli/args.ts\" \"cli/validation.ts\" \"handlers/**/*.ts\" \"history/**/*.ts\" \"middleware/**/*.ts\" \"runtime/types.ts\" \"types.ts\"",
     "typecheck": "tsc --noEmit",
     "prepack": "cp ../README.md ./ && cp ../LICENSE ./",
     "prepublishOnly": "npm run build && npm run test"
@@ -63,6 +65,7 @@
     "@typescript-eslint/parser": "^8.0.0",
     "esbuild": "^0.25.6",
     "eslint": "^9.0.0",
+    "prettier": "^3.5.3",
     "rimraf": "^6.0.0",
     "tsx": "^4.0.0",
     "typescript": "^5.0.0",

@@ -62,9 +62,7 @@ export function sortMessagesByTimestamp(
 /**
  * Calculate conversation metadata from messages
  */
-export function calculateConversationMetadata(
-  messages: RawHistoryLine[],
-): {
+export function calculateConversationMetadata(messages: RawHistoryLine[]): {
   startTime: string;
   endTime: string;
   messageCount: number;
