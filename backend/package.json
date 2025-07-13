@@ -1,6 +1,6 @@
 {
   "name": "claude-code-webui",
-  "version": "0.1.34",
+  "version": "0.1.35",
   "type": "module",
   "description": "Web-based interface for the Claude Code CLI with streaming chat interface",
   "keywords": [

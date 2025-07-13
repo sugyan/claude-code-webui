@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { ProjectSelector } from "./components/ProjectSelector";
 import { ChatPage } from "./components/ChatPage";
+import { EnterBehaviorProvider } from "./contexts/EnterBehaviorContext";
 
 // Mock fetch globally
 global.fetch = vi.fn();
@@ -33,11 +34,13 @@ describe("App Routing", () => {
 
   it("renders chat page when navigating to projects path", () => {
     render(
-      <MemoryRouter initialEntries={["/projects/test-path"]}>
-        <Routes>
-          <Route path="/projects/*" element={<ChatPage />} />
-        </Routes>
-      </MemoryRouter>,
+      <EnterBehaviorProvider>
+        <MemoryRouter initialEntries={["/projects/test-path"]}>
+          <Routes>
+            <Route path="/projects/*" element={<ChatPage />} />
+          </Routes>
+        </MemoryRouter>
+      </EnterBehaviorProvider>,
     );
 
     expect(screen.getByText("Claude Code Web UI")).toBeInTheDocument();

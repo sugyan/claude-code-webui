@@ -1,6 +1,8 @@
 import React, { useRef, useEffect, useState } from "react";
 import { StopIcon } from "@heroicons/react/24/solid";
 import { UI_CONSTANTS, KEYBOARD_SHORTCUTS } from "../../utils/constants";
+import { useEnterBehavior } from "../../hooks/useEnterBehavior";
+import { EnterModeMenu } from "./EnterModeMenu";
 
 interface ChatInputProps {
   input: string;
@@ -21,6 +23,7 @@ export function ChatInput({
 }: ChatInputProps) {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [isComposing, setIsComposing] = useState(false);
+  const { enterBehavior } = useEnterBehavior();
 
   // Focus input when not loading
   useEffect(() => {
@@ -49,12 +52,36 @@ export function ChatInput({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === KEYBOARD_SHORTCUTS.SUBMIT && !e.shiftKey && !isComposing) {
-      e.preventDefault();
-      onSubmit();
+    if (e.key === KEYBOARD_SHORTCUTS.SUBMIT && !isComposing) {
+      if (enterBehavior === "newline") {
+        handleNewlineModeKeyDown(e);
+      } else {
+        handleSendModeKeyDown(e);
+      }
     }
   };
 
+  const handleNewlineModeKeyDown = (
+    e: React.KeyboardEvent<HTMLTextAreaElement>,
+  ) => {
+    // Newline mode: Enter adds newline, Shift+Enter sends
+    if (e.shiftKey) {
+      e.preventDefault();
+      onSubmit();
+    }
+    // Enter is handled naturally by textarea (adds newline)
+  };
+
+  const handleSendModeKeyDown = (
+    e: React.KeyboardEvent<HTMLTextAreaElement>,
+  ) => {
+    // Send mode: Enter sends, Shift+Enter adds newline
+    if (!e.shiftKey) {
+      e.preventDefault();
+      onSubmit();
+    }
+    // Shift+Enter is handled naturally by textarea (adds newline)
+  };
   const handleCompositionStart = () => {
     setIsComposing(true);
   };
@@ -77,10 +104,12 @@ export function ChatInput({
           placeholder={
             isLoading && currentRequestId
               ? "Processing... (Press ESC to stop)"
-              : "Type your message... (Shift+Enter for new line)"
+              : enterBehavior === "send"
+                ? "Type your message... (Enter to send)"
+                : "Type your message... (Shift+Enter to send)"
           }
           rows={1}
-          className={`w-full px-4 py-3 pr-32 bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 backdrop-blur-sm shadow-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 resize-none overflow-hidden min-h-[48px] max-h-[${UI_CONSTANTS.TEXTAREA_MAX_HEIGHT}px]`}
+          className={`w-full px-4 py-3 pr-40 bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 backdrop-blur-sm shadow-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 resize-none overflow-hidden min-h-[48px] max-h-[${UI_CONSTANTS.TEXTAREA_MAX_HEIGHT}px]`}
           disabled={isLoading}
         />
         <div className="absolute right-2 bottom-3 flex gap-2">
@@ -94,6 +123,7 @@ export function ChatInput({
               <StopIcon className="w-4 h-4" />
             </button>
           )}
+          <EnterModeMenu />
           <button
             type="submit"
             disabled={!input.trim() || isLoading}
