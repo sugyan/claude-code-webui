@@ -93,3 +93,20 @@ jobs:
 
       - name: Build
         run: cd frontend && npm run build
+
+  # Summary job for branch protection rules
+  ci-success:
+    name: CI Success
+    runs-on: ubuntu-latest
+    needs: [backend, frontend]
+    if: always()
+    steps:
+      - name: Check all jobs
+        run: |
+          if [[ "${{ needs.backend.result }}" == "success" && "${{ needs.frontend.result }}" == "success" ]]; then
+            echo "All CI jobs passed"
+            exit 0
+          else
+            echo "Some CI jobs failed"
+            exit 1
+          fi
