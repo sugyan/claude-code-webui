@@ -9,12 +9,12 @@ format-frontend:
 format-backend:
 	cd backend && deno task format
 
-# Format checking
+# Format checking  
 format-check: format-check-frontend format-check-backend
 format-check-frontend:
 	cd frontend && npm run format:check
 format-check-backend:
-	cd backend && deno fmt --check
+	cd backend && deno task format:check
 
 # Linting
 lint: lint-frontend lint-backend

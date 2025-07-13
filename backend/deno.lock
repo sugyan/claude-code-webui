@@ -54,6 +54,8 @@
         "npm:@anthropic-ai/claude-code@1.0.48",
         "npm:@hono/node-server@1",
         "npm:@types/node@20",
+        "npm:@typescript-eslint/eslint-plugin@8",
+        "npm:@typescript-eslint/parser@8",
         "npm:commander@14",
         "npm:esbuild@~0.25.6",
         "npm:eslint@9",

@@ -36,13 +36,16 @@ jobs:
         run: cd backend && deno install && deno cache cli/deno.ts
 
       - name: Format check
-        run: cd backend && deno fmt --check
+        run: cd backend && deno task format:check
 
-      - name: Lint
-        run: cd backend && deno lint
+      - name: Lint (Deno)
+        run: cd backend && deno task lint
+
+      - name: Lint (ESLint)
+        run: cd backend && npm run lint
 
       - name: Type check
-        run: cd backend && deno check
+        run: cd backend && deno task check
 
       - name: Test
         run: cd backend && npm run test

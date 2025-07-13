@@ -22,7 +22,6 @@ import type {
   Runtime,
 } from "./types.ts";
 import type { MiddlewareHandler } from "hono";
-// Removed unused imports
 import { serveStatic } from "@hono/node-server/serve-static";
 
 export class NodeRuntime implements Runtime {
