@@ -1,6 +1,7 @@
 {
   "name": "claude-code-webui",
   "version": "0.1.34",
+  "type": "module",
   "description": "Web-based interface for the Claude Code CLI with streaming chat interface",
   "keywords": [
     "claude",
@@ -23,7 +24,6 @@
     "url": "https://github.com/sugyan/claude-code-webui/issues"
   },
   "homepage": "https://github.com/sugyan/claude-code-webui#readme",
-  "type": "module",
   "main": "dist/cli/node.js",
   "bin": {
     "claude-code-webui": "dist/cli/node.js"
@@ -46,7 +46,7 @@
     "build:static": "node scripts/copy-frontend.js",
     "start": "node dist/cli/node.js",
     "test": "vitest --run --reporter=verbose",
-    "lint": "eslint **/*.ts --ignore-pattern dist/",
+    "lint": "eslint \"**/*.ts\" --ignore-pattern dist/",
     "format": "prettier --write \"**/*.ts\"",
     "format:check": "prettier --check \"**/*.ts\"",
     "typecheck": "tsc --noEmit",
