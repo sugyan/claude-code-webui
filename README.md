@@ -84,7 +84,7 @@ cd frontend && npm run dev
 ### Prerequisites
 
 - ✅ **Claude CLI** installed and authenticated ([Get it here](https://github.com/anthropics/claude-code))
-- ✅ **Node.js >=18.0.0** (for npm installation) or **Deno** (for development)
+- ✅ **Node.js >=20.0.0** (for npm installation) or **Deno** (for development)
 - ✅ **Modern browser** (Chrome, Firefox, Safari, Edge)
 - ✅ **dotenvx** (for development): [Install guide](https://dotenvx.com/docs/install)
 
@@ -251,6 +251,19 @@ Download the latest binary from releases or pull the latest code for development
 Ensure Claude CLI is installed and available in your PATH. Run `claude --version` to verify. For custom installations, use the `--claude-path` option to specify the exact path to your Claude executable.
 
 </details>
+
+---
+
+## 🔗 Related Projects
+
+**Alternative Claude Code Web UIs:**
+
+- **[siteboon/claudecodeui](https://github.com/siteboon/claudecodeui)**
+  - A popular web-based Claude Code interface with mobile and remote management focus
+  - Offers additional features for project and session management
+  - Great alternative if you need more advanced remote access capabilities
+
+Both projects aim to make Claude Code more accessible through web interfaces, each with their own strengths and approach.
 
 ---
 
