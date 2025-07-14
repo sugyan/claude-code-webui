@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getEncodedProjectName } from "./history/pathUtils.js";
+import { getEncodedProjectName } from "./history/pathUtils.ts";
 import type { Runtime } from "./runtime/types.ts";
 import type { MiddlewareHandler } from "hono";
 
@@ -72,7 +72,7 @@ describe("pathUtils", () => {
 
   it("test projects API response", async () => {
     // Import the projects handler
-    const { handleProjectsRequest } = await import("./handlers/projects.js");
+    const { handleProjectsRequest } = await import("./handlers/projects.ts");
 
     // Create a mock Hono context with runtime
     const mockContext = {

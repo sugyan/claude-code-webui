@@ -7,12 +7,50 @@
 import type { Runtime } from "../runtime/types.ts";
 
 /**
+ * Detects if a file is an asdf shim by checking for the asdf exec pattern
+ * @param runtime - Runtime abstraction for system operations
+ * @param filePath - Path to the file to check
+ * @returns boolean - True if file is an asdf shim
+ */
+async function isAsdfShim(
+  runtime: Runtime,
+  filePath: string,
+): Promise<boolean> {
+  try {
+    const content = runtime.readTextFileSync(filePath);
+    return content.includes("asdf exec");
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Resolves the actual executable path for asdf shims
+ * @param runtime - Runtime abstraction for system operations
+ * @param command - The command name (e.g., "claude")
+ * @returns Promise<string> - The resolved path to the actual executable
+ */
+async function resolveAsdfExecutablePath(
+  runtime: Runtime,
+  command: string,
+): Promise<string> {
+  const asdfWhichResult = await runtime.runCommand("asdf", ["which", command]);
+
+  if (!asdfWhichResult.success || !asdfWhichResult.stdout.trim()) {
+    throw new Error(`Failed to resolve asdf executable for ${command}`);
+  }
+
+  return asdfWhichResult.stdout.trim();
+}
+
+/**
  * Validates that the Claude CLI is available and working
  * Uses platform-specific command (`which` on Unix, `where` on Windows) for PATH detection
+ * Resolves asdf shims to actual executable paths for SDK compatibility
  * Exits process if Claude CLI is not found or not working
  * @param runtime - Runtime abstraction for system operations
  * @param customPath - Optional custom path to claude executable to validate
- * @returns Promise<string> - The validated path to claude executable
+ * @returns Promise<string> - The validated path to claude executable (resolved from shims)
  */
 export async function validateClaudeCli(
   runtime: Runtime,
@@ -70,6 +108,25 @@ export async function validateClaudeCli(
         console.error("❌ Custom Claude path not working properly");
         console.error(
           "   Please check your custom path or reinstall claude-code",
+        );
+        runtime.exit(1);
+      }
+    }
+
+    // Check if the path is an asdf shim and resolve to actual executable
+    if (await isAsdfShim(runtime, claudePath)) {
+      console.log(`🔍 Detected asdf shim: ${claudePath}`);
+      try {
+        const resolvedPath = await resolveAsdfExecutablePath(runtime, "claude");
+        console.log(`📍 Resolved to actual executable: ${resolvedPath}`);
+        claudePath = resolvedPath;
+      } catch (error) {
+        console.error("❌ Failed to resolve asdf executable path");
+        console.error(
+          `   Error: ${error instanceof Error ? error.message : String(error)}`,
+        );
+        console.error(
+          "   Make sure claude is installed through asdf and properly configured",
         );
         runtime.exit(1);
       }

@@ -4,8 +4,8 @@ import type { ChatRequest, StreamResponse } from "../../shared/types.ts";
 import type { Runtime } from "../runtime/types.ts";
 
 /**
- * Automatically determines Claude Code execution configuration
- * Supports symlinks and shell script wrappers (migrate-installer)
+ * Creates Claude Code execution configuration for the SDK
+ * Assumes claudePath is already resolved to the actual executable by validation.ts
  */
 function getClaudeExecutionConfig(claudePath: string, runtime: Runtime) {
   /**

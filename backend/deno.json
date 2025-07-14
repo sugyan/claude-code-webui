@@ -16,8 +16,7 @@
     "format": "deno fmt cli/deno.ts runtime/deno.ts",
     "format:check": "deno fmt --check cli/deno.ts runtime/deno.ts",
     "lint": "deno lint cli/deno.ts runtime/deno.ts",
-    "check": "deno check cli/deno.ts runtime/deno.ts",
-    "test": "deno test --allow-env --allow-read"
+    "check": "deno check cli/deno.ts runtime/deno.ts"
   },
   "imports": {
     "@std/assert": "jsr:@std/assert@1",
