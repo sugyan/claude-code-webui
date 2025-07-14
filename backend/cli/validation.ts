@@ -58,6 +58,7 @@ export async function validateClaudeCli(
 ): Promise<string> {
   try {
     let claudePath = "";
+    const platform = runtime.getPlatform();
 
     if (customPath) {
       // Use custom path if provided
@@ -113,8 +114,8 @@ export async function validateClaudeCli(
       }
     }
 
-    // Check if the path is an asdf shim and resolve to actual executable
-    if (await isAsdfShim(runtime, claudePath)) {
+    // Check if the path is an asdf shim and resolve to actual executable (Unix-like systems only)
+    if (platform !== "windows" && (await isAsdfShim(runtime, claudePath))) {
       console.log(`🔍 Detected asdf shim: ${claudePath}`);
       try {
         const resolvedPath = await resolveAsdfExecutablePath(runtime, "claude");
