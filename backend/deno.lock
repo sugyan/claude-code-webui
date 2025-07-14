@@ -46,12 +46,12 @@
     "dependencies": [
       "jsr:@hono/hono@4",
       "jsr:@std/assert@1",
-      "npm:@anthropic-ai/claude-code@1.0.48",
+      "npm:@anthropic-ai/claude-code@1.0.51",
       "npm:commander@14"
     ],
     "packageJson": {
       "dependencies": [
-        "npm:@anthropic-ai/claude-code@1.0.48",
+        "npm:@anthropic-ai/claude-code@1.0.51",
         "npm:@hono/node-server@1",
         "npm:@types/node@20",
         "npm:@typescript-eslint/eslint-plugin@8",
