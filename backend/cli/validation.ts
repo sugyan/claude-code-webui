@@ -19,7 +19,7 @@ export async function validateClaudeCli(
   customPath?: string,
 ): Promise<string> {
   try {
-    let claudePath: string;
+    let claudePath = "";
 
     if (customPath) {
       // Use custom path if provided
@@ -28,19 +28,45 @@ export async function validateClaudeCli(
     } else {
       // Auto-detect using platform-specific command
       const platform = runtime.getPlatform();
-      const command = platform === "windows" ? "where" : "which";
-      const whichResult = await runtime.runCommand(command, ["claude"]);
 
-      if (!whichResult.success || !whichResult.stdout.trim()) {
-        console.error("❌ Claude CLI not found in PATH");
-        console.error("   Please install claude-code globally:");
-        console.error(
-          "   Visit: https://claude.ai/code for installation instructions",
-        );
-        runtime.exit(1);
+      if (platform === "windows") {
+        // Try multiple possible executable names on Windows
+        const candidates = ["claude", "claude.exe", "claude.cmd"];
+        let found = false;
+
+        for (const candidate of candidates) {
+          const result = await runtime.runCommand("where", [candidate]);
+          if (result.success && result.stdout.trim()) {
+            claudePath = result.stdout.trim();
+            found = true;
+            break;
+          }
+        }
+
+        if (!found) {
+          console.error("❌ Claude CLI not found in PATH");
+          console.error("   Searched for: claude, claude.exe, claude.cmd");
+          console.error("   Please install claude-code globally:");
+          console.error(
+            "   Visit: https://claude.ai/code for installation instructions",
+          );
+          runtime.exit(1);
+        }
+      } else {
+        // Unix-like systems (macOS, Linux)
+        const whichResult = await runtime.runCommand("which", ["claude"]);
+
+        if (!whichResult.success || !whichResult.stdout.trim()) {
+          console.error("❌ Claude CLI not found in PATH");
+          console.error("   Please install claude-code globally:");
+          console.error(
+            "   Visit: https://claude.ai/code for installation instructions",
+          );
+          runtime.exit(1);
+        }
+
+        claudePath = whichResult.stdout.trim();
       }
-
-      claudePath = whichResult.stdout.trim();
     }
 
     // Verify the claude executable works
