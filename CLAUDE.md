@@ -38,11 +38,11 @@ The `.lefthook.yml` configuration is tracked in the repository, ensuring consist
 
 This project consists of three main components:
 
-### Backend (Deno)
+### Backend (Deno/Node.js)
 
 - **Location**: `backend/`
 - **Port**: 8080 (configurable via CLI argument or PORT environment variable)
-- **Technology**: Deno with TypeScript + Hono framework
+- **Technology**: TypeScript + Hono framework with runtime abstraction supporting both Deno and Node.js
 - **Purpose**: Executes `claude` commands and streams JSON responses to frontend
 
 **Key Features**:
@@ -106,6 +106,7 @@ This project consists of three main components:
 - Reusable UI components with consistent design patterns
 - **History Management**: View conversation summaries, timestamps, and message previews
 - **Demo Automation**: Automated demo recording and playback for presentations
+- **Enter Key Behavior**: Configurable Enter key behavior (Send vs Newline) with persistent user preference
 
 ### Shared Types
 
@@ -186,8 +187,8 @@ The application supports conversation continuity within the same chat session us
 
 ### Prerequisites
 
-- Deno (for backend)
-- Node.js (for frontend)
+- **Backend**: Either Deno or Node.js (20.0.0+)
+- **Frontend**: Node.js (for development)
 - Claude CLI tool installed and configured
 - dotenvx (for .env file processing): `npm install -g @dotenvx/dotenvx`
 
@@ -207,24 +208,35 @@ PORT=9000
 Both backend startup and frontend proxy configuration will automatically use this port:
 
 ```bash
+# Deno backend
 cd backend && deno task dev     # Uses dotenvx to read ../.env and starts backend on port 9000
+
+# Node.js backend  
+cd backend && npm run dev       # Uses dotenvx to read ../.env and starts backend on port 9000
+
+# Frontend
 cd frontend && npm run dev      # Configures proxy to localhost:9000
 ```
 
 #### Alternative Configuration Methods
 
-- **Environment Variable**: `PORT=9000 deno task dev`
-- **CLI Argument**: `dotenvx run --env-file=../.env -- deno run --allow-net --allow-run --allow-read --allow-env cli/deno.ts --port 9000`
+- **Environment Variable**: `PORT=9000 deno task dev` or `PORT=9000 npm run dev`
+- **CLI Argument (Deno)**: `dotenvx run --env-file=../.env -- deno run --allow-net --allow-run --allow-read --allow-env cli/deno.ts --port 9000`
+- **CLI Argument (Node.js)**: `node dist/cli/node.js --port 9000`
 - **Frontend Port**: `npm run dev -- --port 4000` (for frontend UI port)
-- **Node.js Backend**: `cd backend && npm run dev` (uses dotenvx to read ../.env)
 
 ### Running the Application
 
 1. **Start Backend**:
 
    ```bash
+   # Deno
    cd backend
    deno task dev
+   
+   # Or Node.js
+   cd backend
+   npm run dev
    ```
 
 2. **Start Frontend**:
@@ -241,17 +253,22 @@ cd frontend && npm run dev      # Configures proxy to localhost:9000
 ### Project Structure
 
 ```
-├── backend/           # Deno backend server with runtime abstraction
+├── backend/           # Backend server with runtime abstraction (Deno/Node.js)
 │   ├── deno.json     # Deno configuration with permissions
+│   ├── package.json  # Node.js configuration and dependencies
 │   ├── app.ts        # Runtime-agnostic core application
 │   ├── types.ts      # Backend-specific type definitions
 │   ├── VERSION       # Version file for releases
 │   ├── cli/          # CLI-specific entry points
 │   │   ├── deno.ts           # Deno entry point and server startup
-│   │   └── args.ts           # CLI argument parsing with runtime abstraction
+│   │   ├── node.ts           # Node.js entry point and server startup
+│   │   ├── args.ts           # CLI argument parsing with runtime abstraction
+│   │   ├── validation.ts     # Shared CLI validation utilities
+│   │   └── version.ts        # Version reporting utility
 │   ├── runtime/      # Runtime abstraction layer
 │   │   ├── types.ts          # Runtime interface definitions
-│   │   └── deno.ts           # Deno runtime implementation
+│   │   ├── deno.ts           # Deno runtime implementation
+│   │   └── node.ts           # Node.js runtime implementation
 │   ├── handlers/     # API handlers using runtime abstraction
 │   │   ├── abort.ts         # Request abortion handler
 │   │   ├── chat.ts          # Chat streaming handler
@@ -266,6 +283,13 @@ cd frontend && npm run dev      # Configures proxy to localhost:9000
 │   │   └── timestampRestore.ts     # Restore message timestamps
 │   ├── middleware/   # Middleware modules
 │   │   └── config.ts        # Configuration middleware with runtime injection
+│   ├── scripts/      # Build and packaging scripts
+│   │   ├── build-bundle.js      # Bundle creation for distribution
+│   │   ├── copy-frontend.js     # Frontend static file copying
+│   │   ├── generate-version.js  # Version file generation
+│   │   └── prepack.js           # NPM package preparation
+│   ├── tests/        # Test files
+│   │   └── node/            # Node.js-specific tests
 │   ├── pathUtils.test.ts    # Path utility tests with mock runtime
 │   └── dist/         # Frontend build output (copied during build)
 ├── frontend/         # React frontend application
@@ -289,6 +313,7 @@ cd frontend && npm run dev      # Configures proxy to localhost:9000
 │   │   │   ├── useHistoryLoader.ts    # History loading hook
 │   │   │   ├── useMessageConverter.ts # Message conversion hook
 │   │   │   ├── useDemoAutomation.ts   # Demo automation hook
+│   │   │   ├── useEnterBehavior.ts    # Enter key behavior management
 │   │   │   ├── chat/
 │   │   │   │   ├── useChatState.ts    # Chat state management
 │   │   │   │   ├── usePermissions.ts  # Permission handling logic
@@ -307,15 +332,21 @@ cd frontend && npm run dev      # Configures proxy to localhost:9000
 │   │   │   ├── DemoPage.tsx           # Demo mode page
 │   │   │   ├── DemoPermissionDialogWrapper.tsx # Demo permission wrapper
 │   │   │   ├── chat/
-│   │   │   │   ├── ThemeToggle.tsx    # Theme toggle button
-│   │   │   │   ├── ChatInput.tsx      # Chat input component
-│   │   │   │   ├── ChatMessages.tsx   # Chat messages container
-│   │   │   │   └── HistoryButton.tsx  # History access button
+│   │   │   │   ├── ThemeToggle.tsx          # Theme toggle button
+│   │   │   │   ├── ChatInput.tsx            # Chat input component
+│   │   │   │   ├── ChatMessages.tsx         # Chat messages container
+│   │   │   │   ├── HistoryButton.tsx        # History access button
+│   │   │   │   ├── EnterBehaviorToggle.tsx  # Enter behavior toggle button
+│   │   │   │   └── EnterModeMenu.tsx        # Enter mode selection menu
 │   │   │   └── messages/
 │   │   │       ├── MessageContainer.tsx   # Reusable message wrapper
 │   │   │       └── CollapsibleDetails.tsx # Collapsible content component
 │   │   ├── types/
-│   │   │   └── window.d.ts     # Window type extensions
+│   │   │   ├── window.d.ts      # Window type extensions
+│   │   │   └── enterBehavior.ts # Enter behavior type definitions
+│   │   ├── contexts/           # React contexts
+│   │   │   ├── EnterBehaviorContext.tsx        # Enter behavior context provider
+│   │   │   └── EnterBehaviorContextDefinition.ts # Context definition
 │   │   ├── scripts/            # Demo recording scripts
 │   │   │   ├── record-demo.ts         # Demo recorder
 │   │   │   ├── demo-constants.ts      # Demo configuration
@@ -334,7 +365,7 @@ cd frontend && npm run dev      # Configures proxy to localhost:9000
 
 1. **Runtime Abstraction Architecture**: Complete separation between business logic and platform-specific code using a minimal Runtime interface. All handlers, utilities, and CLI components use runtime abstraction instead of direct Deno APIs, enabling comprehensive testing with mock runtime and future platform flexibility.
 
-2. **Modular Entry Points**: CLI-specific code separated into `cli/` directory with `deno.ts` as the main entry point, while `app.ts` contains the runtime-agnostic core application. This enables clean separation of concerns and potential future Node.js implementation.
+2. **Modular Entry Points**: CLI-specific code separated into `cli/` directory with `deno.ts` and `node.ts` as runtime-specific entry points, while `app.ts` contains the runtime-agnostic core application. This enables clean separation of concerns and cross-platform compatibility.
 
 3. **Raw JSON Streaming**: Backend passes Claude JSON responses without modification to allow frontend flexibility in handling different message types.
 
@@ -367,6 +398,8 @@ cd frontend && npm run dev      # Configures proxy to localhost:9000
 17. **Reusable Components**: Common UI patterns are extracted into reusable components to reduce duplication.
 
 18. **Hook Composition**: Complex functionality is built by composing smaller, focused hooks that each handle a specific concern.
+
+19. **Enter Key Behavior**: Configurable Enter key behavior with persistent user preferences, supporting both traditional (Enter=Send) and modern (Enter=Newline) interaction patterns.
 
 ## Claude Code SDK Types Reference
 
@@ -477,8 +510,10 @@ cd backend && deno task build
 
 Both frontend and backend use **fixed versions** (without caret `^`) to ensure consistency:
 
-- **Frontend**: `frontend/package.json` - `"@anthropic-ai/claude-code": "1.0.33"`
-- **Backend**: `backend/deno.json` imports - `"@anthropic-ai/claude-code": "npm:@anthropic-ai/claude-code@1.0.33"`
+- **Frontend**: `frontend/package.json` - `"@anthropic-ai/claude-code": "1.0.51"`
+- **Backend**: 
+  - Deno: `backend/deno.json` imports - `"@anthropic-ai/claude-code": "npm:@anthropic-ai/claude-code@1.0.51"`
+  - Node.js: `backend/package.json` - `"@anthropic-ai/claude-code": "1.0.51"`
 
 ### Version Update Procedure
 
@@ -502,9 +537,13 @@ When updating to a new Claude Code version (e.g., 1.0.40):
 
 3. **Update Backend**:
    ```bash
-   # Edit backend/deno.json imports - change version number
+   # For Deno: Edit backend/deno.json imports - change version number
    # "@anthropic-ai/claude-code": "npm:@anthropic-ai/claude-code@1.0.XX"
    cd backend && rm deno.lock && deno cache main.ts
+   
+   # For Node.js: Edit backend/package.json - change version number  
+   # "@anthropic-ai/claude-code": "1.0.XX"
+   cd backend && npm install
    ```
 
 4. **Verify and test**:
@@ -514,10 +553,10 @@ When updating to a new Claude Code version (e.g., 1.0.40):
 
 ### Version Consistency Check
 
-Ensure both environments use the same version:
+Ensure all environments use the same version:
 ```bash
-# Should show the same version number
-grep "@anthropic-ai/claude-code" frontend/package.json backend/deno.json
+# Should show the same version number across all package configs
+grep "@anthropic-ai/claude-code" frontend/package.json backend/deno.json backend/package.json
 ```
 
 ## Commands for Claude
