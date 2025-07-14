@@ -101,7 +101,7 @@ The backend server supports the following command-line options:
 | `--claude-path <path>` | Path to claude executable (overrides automatic detection) | Auto-detect |
 | `-d, --debug`          | Enable debug mode                                         | false       |
 | `-h, --help`           | Show help message                                         | -           |
-| `-V, --version`        | Show version                                              | -           |
+| `-v, --version`        | Show version                                              | -           |
 
 ### Environment Variables
 
