@@ -5,47 +5,14 @@ import type { Runtime } from "../runtime/types.ts";
 
 /**
  * Creates Claude Code execution configuration for the SDK
- * Assumes claudePath is already resolved to the actual executable by validation.ts
+ * Uses the pre-resolved executable path from validation.ts (all wrappers already resolved)
  */
-function getClaudeExecutionConfig(claudePath: string, runtime: Runtime) {
-  /**
-   * Extract actual executable path from bash script
-   * Parses 'exec "path"' pattern from migrate-installer wrapper scripts
-   */
-  const getActualExecutablePath = (scriptPath: string): string => {
-    try {
-      const content = runtime.readTextFileSync(scriptPath);
-      const match = content.match(/exec\s+"([^"]+)"/);
-      return match ? match[1] : scriptPath;
-    } catch {
-      return scriptPath;
-    }
+function getClaudeExecutionConfig(claudePath: string) {
+  return {
+    executable: "node" as const,
+    executableArgs: [],
+    pathToClaudeCodeExecutable: claudePath,
   };
-
-  /**
-   * Create Node.js execution configuration for Claude Code SDK
-   */
-  const createNodeConfig = (executablePath: string) => {
-    return {
-      executable: "node" as const,
-      executableArgs: [],
-      pathToClaudeCodeExecutable: executablePath,
-    };
-  };
-
-  // Handle symlinks (typical npm install: /usr/local/bin/claude -> node_modules/.bin/claude)
-  try {
-    const stat = runtime.lstatSync(claudePath);
-    if (stat.isSymlink) {
-      return createNodeConfig(claudePath); // Node.js resolves symlinks automatically
-    }
-  } catch {
-    // Silently continue if stat check fails
-  }
-
-  // Handle shell scripts (migrate-installer: extract actual executable path)
-  const actualPath = getActualExecutablePath(claudePath);
-  return createNodeConfig(actualPath);
 }
 
 /**
@@ -88,8 +55,8 @@ async function* executeClaudeCommand(
 
     // Use the validated Claude path from startup configuration (passed as parameter)
 
-    // Get Claude Code execution configuration for migrate-installer compatibility
-    const executionConfig = getClaudeExecutionConfig(claudePath, runtime);
+    // Get Claude Code execution configuration (claudePath is pre-resolved by validation.ts)
+    const executionConfig = getClaudeExecutionConfig(claudePath);
 
     for await (const sdkMessage of query({
       prompt: processedMessage,

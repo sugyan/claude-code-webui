@@ -44,6 +44,45 @@ async function resolveAsdfExecutablePath(
 }
 
 /**
+ * Extracts actual executable path from bash script
+ * Parses 'exec "path"' pattern from migrate-installer wrapper scripts
+ * @param runtime - Runtime abstraction for system operations
+ * @param scriptPath - Path to the script file
+ * @returns string - The extracted executable path or original path if no match
+ */
+function resolveWrapperScript(runtime: Runtime, scriptPath: string): string {
+  try {
+    const content = runtime.readTextFileSync(scriptPath);
+    const match = content.match(/exec\s+"([^"]+)"/);
+    return match ? match[1] : scriptPath;
+  } catch {
+    return scriptPath;
+  }
+}
+
+/**
+ * Resolves symlinks and wrapper scripts to actual executable paths
+ * @param runtime - Runtime abstraction for system operations
+ * @param claudePath - Initial path to resolve
+ * @returns string - The resolved actual executable path
+ */
+function resolveExecutablePath(runtime: Runtime, claudePath: string): string {
+  // Handle symlinks (typical npm install: /usr/local/bin/claude -> node_modules/.bin/claude)
+  try {
+    const stat = runtime.lstatSync(claudePath);
+    if (stat.isSymlink) {
+      // Node.js resolves symlinks automatically when executing, so we can use the symlink path
+      return claudePath;
+    }
+  } catch {
+    // Silently continue if stat check fails
+  }
+
+  // Handle shell scripts (migrate-installer: extract actual executable path)
+  return resolveWrapperScript(runtime, claudePath);
+}
+
+/**
  * Validates that the Claude CLI is available and working
  * Uses platform-specific command (`which` on Unix, `where` on Windows) for PATH detection
  * Resolves asdf shims to actual executable paths for SDK compatibility
@@ -114,23 +153,35 @@ export async function validateClaudeCli(
       }
     }
 
-    // Check if the path is an asdf shim and resolve to actual executable (Unix-like systems only)
-    if (platform !== "windows" && (await isAsdfShim(runtime, claudePath))) {
-      console.log(`🔍 Detected asdf shim: ${claudePath}`);
-      try {
-        const resolvedPath = await resolveAsdfExecutablePath(runtime, "claude");
-        console.log(`📍 Resolved to actual executable: ${resolvedPath}`);
-        claudePath = resolvedPath;
-      } catch (error) {
-        console.error("❌ Failed to resolve asdf executable path");
-        console.error(
-          `   Error: ${error instanceof Error ? error.message : String(error)}`,
-        );
-        console.error(
-          "   Make sure claude is installed through asdf and properly configured",
-        );
-        runtime.exit(1);
+    // Resolve all types of wrappers to actual executable paths
+    if (platform !== "windows") {
+      // Check if the path is an asdf shim and resolve to actual executable (Unix-like systems only)
+      if (await isAsdfShim(runtime, claudePath)) {
+        console.log(`🔍 Detected asdf shim: ${claudePath}`);
+        try {
+          const resolvedPath = await resolveAsdfExecutablePath(
+            runtime,
+            "claude",
+          );
+          console.log(`📍 Resolved to actual executable: ${resolvedPath}`);
+          claudePath = resolvedPath;
+        } catch (error) {
+          console.error("❌ Failed to resolve asdf executable path");
+          console.error(
+            `   Error: ${error instanceof Error ? error.message : String(error)}`,
+          );
+          console.error(
+            "   Make sure claude is installed through asdf and properly configured",
+          );
+          runtime.exit(1);
+        }
+      } else {
+        // Resolve symlinks and wrapper scripts
+        claudePath = resolveExecutablePath(runtime, claudePath);
       }
+    } else {
+      // Windows: resolve symlinks and wrapper scripts
+      claudePath = resolveExecutablePath(runtime, claudePath);
     }
 
     // Get version for final validation and display
