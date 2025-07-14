@@ -8,7 +8,7 @@ import type { Runtime } from "../runtime/types.ts";
 
 /**
  * Validates that the Claude CLI is available and working
- * Uses `which` command to ensure proper PATH detection without npm package interference
+ * Uses platform-specific command (`which` on Unix, `where` on Windows) for PATH detection
  * Exits process if Claude CLI is not found or not working
  * @param runtime - Runtime abstraction for system operations
  * @param customPath - Optional custom path to claude executable to validate
@@ -26,8 +26,10 @@ export async function validateClaudeCli(
       claudePath = customPath;
       console.log(`🔍 Validating custom Claude path: ${customPath}`);
     } else {
-      // Auto-detect using which command
-      const whichResult = await runtime.runCommand("which", ["claude"]);
+      // Auto-detect using platform-specific command
+      const platform = runtime.getPlatform();
+      const command = platform === "windows" ? "where" : "which";
+      const whichResult = await runtime.runCommand(command, ["claude"]);
 
       if (!whichResult.success || !whichResult.stdout.trim()) {
         console.error("❌ Claude CLI not found in PATH");

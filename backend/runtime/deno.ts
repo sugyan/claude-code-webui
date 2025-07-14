@@ -87,6 +87,20 @@ export class DenoRuntime implements Runtime {
     return Deno.args;
   }
 
+  getPlatform(): "windows" | "darwin" | "linux" {
+    switch (Deno.build.os) {
+      case "windows":
+        return "windows";
+      case "darwin":
+        return "darwin";
+      case "linux":
+        return "linux";
+      default:
+        // Default to linux for unknown platforms
+        return "linux";
+    }
+  }
+
   exit(code: number): never {
     Deno.exit(code);
   }

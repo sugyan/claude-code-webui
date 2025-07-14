@@ -23,6 +23,9 @@ jobs:
           - os: macos-latest
             target: aarch64-apple-darwin
             artifact_name: claude-code-webui-macos-arm64
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            artifact_name: claude-code-webui-windows-x64
 
     steps:
       - name: Checkout code

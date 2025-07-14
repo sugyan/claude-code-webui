@@ -50,11 +50,11 @@
     "format": "prettier --write \"**/*.ts\"",
     "format:check": "prettier --check \"**/*.ts\"",
     "typecheck": "tsc --noEmit",
-    "prepack": "cp ../README.md ./ && cp ../LICENSE ./",
+    "prepack": "node scripts/prepack.js",
     "prepublishOnly": "npm run build && npm run test"
   },
   "dependencies": {
-    "@anthropic-ai/claude-code": "1.0.48",
+    "@anthropic-ai/claude-code": "1.0.51",
     "@hono/node-server": "^1.0.0",
     "commander": "^14.0.0",
     "hono": "^4.0.0"
@@ -72,6 +72,6 @@
     "vitest": "^2.0.0"
   },
   "peerDependencies": {
-    "@anthropic-ai/claude-code": "1.0.48"
+    "@anthropic-ai/claude-code": "1.0.51"
   }
 }

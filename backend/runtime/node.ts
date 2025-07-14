@@ -101,6 +101,20 @@ export class NodeRuntime implements Runtime {
     return process.argv.slice(2);
   }
 
+  getPlatform(): "windows" | "darwin" | "linux" {
+    switch (process.platform) {
+      case "win32":
+        return "windows";
+      case "darwin":
+        return "darwin";
+      case "linux":
+        return "linux";
+      default:
+        // Default to linux for unknown platforms
+        return "linux";
+    }
+  }
+
   exit(code: number): never {
     process.exit(code);
   }
