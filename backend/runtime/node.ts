@@ -115,6 +115,29 @@ export class NodeRuntime implements Runtime {
     }
   }
 
+  getHomeDir(): string | undefined {
+    const platform = this.getPlatform();
+
+    if (platform === "windows") {
+      // Windows: Try USERPROFILE first, then HOMEDRIVE+HOMEPATH
+      const userProfile = process.env.USERPROFILE;
+      if (userProfile) {
+        return userProfile;
+      }
+
+      const homeDrive = process.env.HOMEDRIVE;
+      const homePath = process.env.HOMEPATH;
+      if (homeDrive && homePath) {
+        return `${homeDrive}${homePath}`;
+      }
+
+      return undefined;
+    } else {
+      // Unix-like systems: Use HOME
+      return process.env.HOME;
+    }
+  }
+
   exit(code: number): never {
     process.exit(code);
   }

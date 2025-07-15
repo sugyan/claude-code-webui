@@ -6,12 +6,14 @@ import type { MiddlewareHandler } from "hono";
 // Create a mock runtime for testing
 const mockRuntime: Runtime = {
   getEnv: (key: string) => (key === "HOME" ? "/mock/home" : undefined),
+  getHomeDir: () => "/mock/home",
   async *readDir(_path: string) {
     // Mock empty directory - no entries
     // This async generator yields nothing, representing an empty directory
     // The `_path` parameter is required to match the `Runtime` interface but is not used here.
   },
   getArgs: () => [],
+  getPlatform: () => "linux" as const,
   exit: () => {
     throw new Error("exit called");
   },
@@ -44,6 +46,7 @@ const mockRuntime: Runtime = {
   }),
   runCommand: () =>
     Promise.resolve({ success: false, stdout: "", stderr: "", code: 1 }),
+  findExecutable: () => Promise.resolve([]),
   serve: () => {},
   createStaticFileMiddleware: (): MiddlewareHandler => () =>
     Promise.resolve(new Response()),

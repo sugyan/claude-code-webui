@@ -48,6 +48,7 @@ export interface Runtime {
   getEnv(key: string): string | undefined;
   getArgs(): string[];
   getPlatform(): "windows" | "darwin" | "linux";
+  getHomeDir(): string | undefined;
   exit(code: number): never;
 
   // Process execution

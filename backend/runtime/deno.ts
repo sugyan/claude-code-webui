@@ -101,6 +101,29 @@ export class DenoRuntime implements Runtime {
     }
   }
 
+  getHomeDir(): string | undefined {
+    const platform = this.getPlatform();
+
+    if (platform === "windows") {
+      // Windows: Try USERPROFILE first, then HOMEDRIVE+HOMEPATH
+      const userProfile = Deno.env.get("USERPROFILE");
+      if (userProfile) {
+        return userProfile;
+      }
+
+      const homeDrive = Deno.env.get("HOMEDRIVE");
+      const homePath = Deno.env.get("HOMEPATH");
+      if (homeDrive && homePath) {
+        return `${homeDrive}${homePath}`;
+      }
+
+      return undefined;
+    } else {
+      // Unix-like systems: Use HOME
+      return Deno.env.get("HOME");
+    }
+  }
+
   exit(code: number): never {
     Deno.exit(code);
   }

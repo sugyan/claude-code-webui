@@ -12,9 +12,9 @@ export async function handleProjectsRequest(c: Context) {
   try {
     const { runtime } = c.var.config;
 
-    const homeDir = runtime.getEnv("HOME");
+    const homeDir = runtime.getHomeDir();
     if (!homeDir) {
-      return c.json({ error: "HOME environment variable not found" }, 500);
+      return c.json({ error: "Home directory not found" }, 500);
     }
 
     const claudeConfigPath = `${homeDir}/.claude.json`;

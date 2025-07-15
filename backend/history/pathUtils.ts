@@ -13,7 +13,7 @@ export async function getEncodedProjectName(
   projectPath: string,
   runtime: Runtime,
 ): Promise<string | null> {
-  const homeDir = runtime.getEnv("HOME");
+  const homeDir = runtime.getHomeDir();
   if (!homeDir) {
     return null;
   }
