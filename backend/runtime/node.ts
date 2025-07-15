@@ -12,6 +12,7 @@ import {
   readFileSync,
 } from "node:fs";
 import { spawn } from "node:child_process";
+import { homedir } from "node:os";
 import process from "node:process";
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
@@ -116,25 +117,11 @@ export class NodeRuntime implements Runtime {
   }
 
   getHomeDir(): string | undefined {
-    const platform = this.getPlatform();
-
-    if (platform === "windows") {
-      // Windows: Try USERPROFILE first, then HOMEDRIVE+HOMEPATH
-      const userProfile = process.env.USERPROFILE;
-      if (userProfile) {
-        return userProfile;
-      }
-
-      const homeDrive = process.env.HOMEDRIVE;
-      const homePath = process.env.HOMEPATH;
-      if (homeDrive && homePath) {
-        return `${homeDrive}${homePath}`;
-      }
-
+    try {
+      return homedir();
+    } catch {
+      // Fallback to undefined if os.homedir() fails
       return undefined;
-    } else {
-      // Unix-like systems: Use HOME
-      return process.env.HOME;
     }
   }
 
