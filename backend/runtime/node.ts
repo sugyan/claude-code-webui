@@ -121,9 +121,18 @@ export class NodeRuntime implements Runtime {
 
   runCommand(command: string, args: string[]): Promise<CommandResult> {
     return new Promise((resolve) => {
-      const child = spawn(command, args, {
+      // Windows-specific spawn options
+      const isWindows = this.getPlatform() === "windows";
+      const spawnOptions: any = {
         stdio: ["ignore", "pipe", "pipe"],
-      });
+      };
+
+      // Enable shell on Windows for proper .cmd/.bat execution
+      if (isWindows) {
+        spawnOptions.shell = true;
+      }
+
+      const child = spawn(command, args, spawnOptions);
 
       const textDecoder = new TextDecoder();
       let stdout = "";

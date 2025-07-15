@@ -34,11 +34,18 @@ export async function validateClaudeCli(
         const candidates = ["claude", "claude.exe", "claude.cmd"];
         let found = false;
 
+        console.log("🔍 Windows: Searching for Claude CLI in PATH...");
         for (const candidate of candidates) {
+          console.log(`   Checking: ${candidate}`);
           const result = await runtime.runCommand("where", [candidate]);
+          console.log(
+            `   Result: success=${result.success}, stdout="${result.stdout.trim()}", stderr="${result.stderr.trim()}"`,
+          );
+
           if (result.success && result.stdout.trim()) {
             claudePath = result.stdout.trim();
             found = true;
+            console.log(`✅ Found Claude CLI: ${claudePath}`);
             break;
           }
         }
@@ -70,7 +77,14 @@ export async function validateClaudeCli(
     }
 
     // Verify the claude executable works
+    console.log(`🔍 Testing Claude CLI execution: ${claudePath} --version`);
     const versionResult = await runtime.runCommand(claudePath, ["--version"]);
+    console.log(
+      `   Command result: success=${versionResult.success}, code=${versionResult.code}`,
+    );
+    console.log(`   stdout: "${versionResult.stdout.trim()}"`);
+    console.log(`   stderr: "${versionResult.stderr.trim()}"`);
+
     if (versionResult.success) {
       console.log(`✅ Claude CLI found: ${versionResult.stdout.trim()}`);
       console.log(`   Path: ${claudePath}`);
@@ -80,6 +94,8 @@ export async function validateClaudeCli(
       console.error(
         "   Please reinstall claude-code or check your installation",
       );
+      console.error(`   Exit code: ${versionResult.code}`);
+      console.error(`   Error details: ${versionResult.stderr}`);
       runtime.exit(1);
     }
   } catch (error) {
