@@ -119,6 +119,42 @@ export class NodeRuntime implements Runtime {
     process.exit(code);
   }
 
+  async findExecutable(name: string): Promise<string[]> {
+    const platform = this.getPlatform();
+    const candidates: string[] = [];
+
+    if (platform === "windows") {
+      // Try multiple possible executable names on Windows
+      const executableNames = [
+        name,
+        `${name}.exe`,
+        `${name}.cmd`,
+        `${name}.bat`,
+      ];
+
+      for (const execName of executableNames) {
+        const result = await this.runCommand("where", [execName]);
+        if (result.success && result.stdout.trim()) {
+          // where command can return multiple paths, split by newlines
+          const paths = result.stdout
+            .trim()
+            .split("\n")
+            .map((p) => p.trim())
+            .filter((p) => p);
+          candidates.push(...paths);
+        }
+      }
+    } else {
+      // Unix-like systems (macOS, Linux)
+      const result = await this.runCommand("which", [name]);
+      if (result.success && result.stdout.trim()) {
+        candidates.push(result.stdout.trim());
+      }
+    }
+
+    return candidates;
+  }
+
   runCommand(command: string, args: string[]): Promise<CommandResult> {
     return new Promise((resolve) => {
       // Windows-specific spawn options
@@ -127,12 +163,19 @@ export class NodeRuntime implements Runtime {
         stdio: ["ignore", "pipe", "pipe"],
       };
 
-      // Enable shell on Windows for proper .cmd/.bat execution
-      if (isWindows) {
+      // For Windows .cmd files, use cmd.exe /c for proper execution
+      let actualCommand = command;
+      let actualArgs = args;
+
+      if (isWindows && command.endsWith(".cmd")) {
+        actualCommand = "cmd.exe";
+        actualArgs = ["/c", command, ...args];
+      } else if (isWindows) {
+        // Enable shell on Windows for other cases
         spawnOptions.shell = true;
       }
 
-      const child = spawn(command, args, spawnOptions);
+      const child = spawn(actualCommand, actualArgs, spawnOptions);
 
       const textDecoder = new TextDecoder();
       let stdout = "";

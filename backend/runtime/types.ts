@@ -52,6 +52,7 @@ export interface Runtime {
 
   // Process execution
   runCommand(command: string, args: string[]): Promise<CommandResult>;
+  findExecutable(name: string): Promise<string[]>;
 
   // HTTP server
   serve(
