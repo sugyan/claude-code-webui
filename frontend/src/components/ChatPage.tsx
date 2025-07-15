@@ -47,11 +47,22 @@ export function ChatPage() {
 
   // Get encoded name for current working directory
   const getEncodedName = useCallback(() => {
+    console.log("[DEBUG] getEncodedName called:");
+    console.log("  workingDirectory:", workingDirectory);
+    console.log("  projects.length:", projects.length);
+    console.log("  projects:", projects);
+
     if (!workingDirectory || !projects.length) {
+      console.log(
+        "  → Returning null (missing workingDirectory or empty projects)",
+      );
       return null;
     }
 
     const project = projects.find((p) => p.path === workingDirectory);
+    console.log("  → Found project:", project);
+    console.log("  → Returning encodedName:", project?.encodedName || null);
+
     return project?.encodedName || null;
   }, [workingDirectory, projects]);
 
@@ -290,11 +301,15 @@ export function ChatPage() {
   // Load projects to get encodedName mapping
   useEffect(() => {
     const loadProjects = async () => {
+      console.log("[DEBUG] Loading projects...");
       try {
         const response = await fetch(getProjectsUrl());
+        console.log("  → Projects API response:", response.ok, response.status);
         if (response.ok) {
           const data = await response.json();
+          console.log("  → Projects data:", data);
           setProjects(data.projects || []);
+          console.log("  → Set projects:", data.projects || []);
         }
       } catch (error) {
         console.error("Failed to load projects:", error);
