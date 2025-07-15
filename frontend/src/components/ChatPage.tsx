@@ -59,8 +59,23 @@ export function ChatPage() {
       return null;
     }
 
+    console.log("  → Searching for project with path:", workingDirectory);
+    console.log(
+      "  → Available project paths:",
+      projects.map((p) => p.path),
+    );
+
     const project = projects.find((p) => p.path === workingDirectory);
     console.log("  → Found project:", project);
+
+    // Also try normalized path comparison
+    const normalizedWorking = workingDirectory.replace(/\\/g, "/");
+    const normalizedProject = projects.find(
+      (p) => p.path.replace(/\\/g, "/") === normalizedWorking,
+    );
+    console.log("  → Normalized working directory:", normalizedWorking);
+    console.log("  → Found project with normalized paths:", normalizedProject);
+
     console.log("  → Returning encodedName:", project?.encodedName || null);
 
     return project?.encodedName || null;
