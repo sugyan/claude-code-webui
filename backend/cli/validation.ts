@@ -17,7 +17,7 @@ async function isAsdfShim(
   filePath: string,
 ): Promise<boolean> {
   try {
-    const content = runtime.readTextFileSync(filePath);
+    const content = await runtime.readTextFile(filePath);
     return content.includes("asdf exec");
   } catch {
     return false;
@@ -50,9 +50,12 @@ async function resolveAsdfExecutablePath(
  * @param scriptPath - Path to the script file
  * @returns string - The extracted executable path or original path if no match
  */
-function resolveWrapperScript(runtime: Runtime, scriptPath: string): string {
+async function resolveWrapperScript(
+  runtime: Runtime,
+  scriptPath: string,
+): Promise<string> {
   try {
-    const content = runtime.readTextFileSync(scriptPath);
+    const content = await runtime.readTextFile(scriptPath);
     const match = content.match(/exec\s+"([^"]+)"/);
     return match ? match[1] : scriptPath;
   } catch {
@@ -66,7 +69,10 @@ function resolveWrapperScript(runtime: Runtime, scriptPath: string): string {
  * @param claudePath - Initial path to resolve
  * @returns string - The resolved actual executable path
  */
-function resolveExecutablePath(runtime: Runtime, claudePath: string): string {
+async function resolveExecutablePath(
+  runtime: Runtime,
+  claudePath: string,
+): Promise<string> {
   // Handle symlinks (typical npm install: /usr/local/bin/claude -> node_modules/.bin/claude)
   try {
     const stat = runtime.lstatSync(claudePath);
@@ -79,7 +85,7 @@ function resolveExecutablePath(runtime: Runtime, claudePath: string): string {
   }
 
   // Handle shell scripts (migrate-installer: extract actual executable path)
-  return resolveWrapperScript(runtime, claudePath);
+  return await resolveWrapperScript(runtime, claudePath);
 }
 
 /**
@@ -177,11 +183,11 @@ export async function validateClaudeCli(
         }
       } else {
         // Resolve symlinks and wrapper scripts
-        claudePath = resolveExecutablePath(runtime, claudePath);
+        claudePath = await resolveExecutablePath(runtime, claudePath);
       }
     } else {
       // Windows: resolve symlinks and wrapper scripts
-      claudePath = resolveExecutablePath(runtime, claudePath);
+      claudePath = await resolveExecutablePath(runtime, claudePath);
     }
 
     // Get version for final validation and display

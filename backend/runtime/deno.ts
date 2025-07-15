@@ -18,10 +18,6 @@ export class DenoRuntime implements Runtime {
     return await Deno.readTextFile(path);
   }
 
-  readTextFileSync(path: string): string {
-    return Deno.readTextFileSync(path);
-  }
-
   async readBinaryFile(path: string): Promise<Uint8Array> {
     return await Deno.readFile(path);
   }

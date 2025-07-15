@@ -14,7 +14,6 @@ describe("Node.js Runtime", () => {
   it("should implement all required interface methods", () => {
     const requiredMethods = [
       "readTextFile",
-      "readTextFileSync",
       "readBinaryFile",
       "exists",
       "stat",
@@ -59,12 +58,6 @@ describe("Node.js Runtime", () => {
     // Verify it's actually JSON
     const parsed = JSON.parse(content);
     expect(parsed.name).toBe("claude-code-webui");
-  });
-
-  it("should read files synchronously", () => {
-    const content = runtime.readTextFileSync("package.json");
-    expect(typeof content).toBe("string");
-    expect(content.length).toBeGreaterThan(0);
   });
 
   it("should execute commands", async () => {

@@ -36,7 +36,6 @@ export interface DirectoryEntry {
 export interface Runtime {
   // File operations
   readTextFile(path: string): Promise<string>;
-  readTextFileSync(path: string): string;
   readBinaryFile(path: string): Promise<Uint8Array>;
   exists(path: string): Promise<boolean>;
   stat(path: string): Promise<FileStats>;

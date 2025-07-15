@@ -5,13 +5,8 @@
  * Provides equivalent functionality to the Deno runtime for cross-platform support.
  */
 
-import {
-  constants as fsConstants,
-  lstatSync,
-  promises as fs,
-  readFileSync,
-} from "node:fs";
-import { spawn, type SpawnOptions } from "node:child_process";
+import { constants as fsConstants, lstatSync, promises as fs } from "node:fs";
+import { spawn } from "node:child_process";
 import { homedir } from "node:os";
 import process from "node:process";
 import { serve } from "@hono/node-server";
@@ -28,10 +23,6 @@ import { serveStatic } from "@hono/node-server/serve-static";
 export class NodeRuntime implements Runtime {
   async readTextFile(path: string): Promise<string> {
     return await fs.readFile(path, "utf8");
-  }
-
-  readTextFileSync(path: string): string {
-    return readFileSync(path, "utf8");
   }
 
   async readBinaryFile(path: string): Promise<Uint8Array> {
