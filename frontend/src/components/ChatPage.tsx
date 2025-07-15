@@ -68,17 +68,28 @@ export function ChatPage() {
     const project = projects.find((p) => p.path === workingDirectory);
     console.log("  → Found project:", project);
 
-    // Also try normalized path comparison
-    const normalizedWorking = workingDirectory.replace(/\\/g, "/");
+    // Normalize paths for comparison (handle Windows path issues)
+    const normalizeWindowsPath = (path: string) => {
+      // Remove leading slash from Windows absolute paths like /C:/...
+      return path.replace(/^\/([A-Za-z]:)/, "$1").replace(/\\/g, "/");
+    };
+
+    const normalizedWorking = normalizeWindowsPath(workingDirectory);
     const normalizedProject = projects.find(
-      (p) => p.path.replace(/\\/g, "/") === normalizedWorking,
+      (p) => normalizeWindowsPath(p.path) === normalizedWorking,
     );
     console.log("  → Normalized working directory:", normalizedWorking);
     console.log("  → Found project with normalized paths:", normalizedProject);
 
-    console.log("  → Returning encodedName:", project?.encodedName || null);
+    // Use normalized result if exact match fails
+    const finalProject = project || normalizedProject;
+    console.log("  → Final selected project:", finalProject);
+    console.log(
+      "  → Returning encodedName:",
+      finalProject?.encodedName || null,
+    );
 
-    return project?.encodedName || null;
+    return finalProject?.encodedName || null;
   }, [workingDirectory, projects]);
 
   // Load conversation history if sessionId is provided
