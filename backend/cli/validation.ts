@@ -42,15 +42,10 @@ export async function validateClaudeCli(
       // Try each candidate until one works
       let validPath = "";
       for (const candidate of candidates) {
-        console.log(`🔍 Testing candidate: ${candidate}`);
         const testResult = await runtime.runCommand(candidate, ["--version"]);
-        console.log(
-          `   Test result: success=${testResult.success}, stdout="${testResult.stdout.trim()}", stderr="${testResult.stderr.trim()}"`,
-        );
 
         if (testResult.success) {
           validPath = candidate;
-          console.log(`✅ Found working Claude CLI: ${candidate}`);
           break;
         }
       }
@@ -69,29 +64,22 @@ export async function validateClaudeCli(
 
     // For custom paths, verify they work
     if (customPath) {
-      console.log(`🔍 Testing custom Claude path: ${claudePath} --version`);
       const versionResult = await runtime.runCommand(claudePath, ["--version"]);
-      console.log(
-        `   Command result: success=${versionResult.success}, code=${versionResult.code}`,
-      );
-      console.log(`   stdout: "${versionResult.stdout.trim()}"`);
-      console.log(`   stderr: "${versionResult.stderr.trim()}"`);
 
       if (!versionResult.success) {
         console.error("❌ Custom Claude path not working properly");
         console.error(
           "   Please check your custom path or reinstall claude-code",
         );
-        console.error(`   Exit code: ${versionResult.code}`);
-        console.error(`   Error details: ${versionResult.stderr}`);
         runtime.exit(1);
       }
-
-      console.log(
-        `✅ Custom Claude CLI validated: ${versionResult.stdout.trim()}`,
-      );
     }
 
+    // Get version for final validation and display
+    const versionResult = await runtime.runCommand(claudePath, ["--version"]);
+    if (versionResult.success) {
+      console.log(`✅ Claude CLI found: ${versionResult.stdout.trim()}`);
+    }
     console.log(`   Path: ${claudePath}`);
     return claudePath;
   } catch (error) {

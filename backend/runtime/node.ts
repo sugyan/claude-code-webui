@@ -167,22 +167,18 @@ export class NodeRuntime implements Runtime {
 
   runCommand(command: string, args: string[]): Promise<CommandResult> {
     return new Promise((resolve) => {
-      // Windows-specific spawn options
       const isWindows = this.getPlatform() === "windows";
       const spawnOptions: any = {
         stdio: ["ignore", "pipe", "pipe"],
       };
 
-      // For Windows .cmd files, use cmd.exe /c for proper execution
+      // On Windows, always use cmd.exe /c for all commands
       let actualCommand = command;
       let actualArgs = args;
 
-      if (isWindows && command.endsWith(".cmd")) {
+      if (isWindows) {
         actualCommand = "cmd.exe";
         actualArgs = ["/c", command, ...args];
-      } else if (isWindows) {
-        // Enable shell on Windows for other cases
-        spawnOptions.shell = true;
       }
 
       const child = spawn(actualCommand, actualArgs, spawnOptions);
