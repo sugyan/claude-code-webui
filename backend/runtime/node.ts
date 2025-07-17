@@ -12,6 +12,7 @@ import {
   readFileSync,
 } from "node:fs";
 import { spawn } from "node:child_process";
+import { homedir } from "node:os";
 import process from "node:process";
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
@@ -115,8 +116,53 @@ export class NodeRuntime implements Runtime {
     }
   }
 
+  getHomeDir(): string | undefined {
+    try {
+      return homedir();
+    } catch {
+      // Fallback to undefined if os.homedir() fails
+      return undefined;
+    }
+  }
+
   exit(code: number): never {
     process.exit(code);
+  }
+
+  async findExecutable(name: string): Promise<string[]> {
+    const platform = this.getPlatform();
+    const candidates: string[] = [];
+
+    if (platform === "windows") {
+      // Try multiple possible executable names on Windows
+      const executableNames = [
+        name,
+        `${name}.exe`,
+        `${name}.cmd`,
+        `${name}.bat`,
+      ];
+
+      for (const execName of executableNames) {
+        const result = await this.runCommand("where", [execName]);
+        if (result.success && result.stdout.trim()) {
+          // where command can return multiple paths, split by newlines
+          const paths = result.stdout
+            .trim()
+            .split("\n")
+            .map((p) => p.trim())
+            .filter((p) => p);
+          candidates.push(...paths);
+        }
+      }
+    } else {
+      // Unix-like systems (macOS, Linux)
+      const result = await this.runCommand("which", [name]);
+      if (result.success && result.stdout.trim()) {
+        candidates.push(result.stdout.trim());
+      }
+    }
+
+    return candidates;
   }
 
   runCommand(command: string, args: string[]): Promise<CommandResult> {
