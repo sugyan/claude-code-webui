@@ -146,19 +146,6 @@ export async function validateClaudeCli(
       claudePath = validPath;
     }
 
-    // For custom paths, verify they work
-    if (customPath) {
-      const versionResult = await runtime.runCommand(claudePath, ["--version"]);
-
-      if (!versionResult.success) {
-        console.error("❌ Custom Claude path not working properly");
-        console.error(
-          "   Please check your custom path or reinstall claude-code",
-        );
-        runtime.exit(1);
-      }
-    }
-
     // Resolve all types of wrappers to actual executable paths
     if (platform !== "windows") {
       // Check if the path is an asdf shim and resolve to actual executable (Unix-like systems only)
@@ -190,16 +177,19 @@ export async function validateClaudeCli(
       claudePath = await resolveExecutablePath(runtime, claudePath);
     }
 
-    // Get version for final validation and display
+    // Final validation: verify the resolved path works
+    // For custom paths: needed because original path wasn't tested
+    // For auto-detected paths: needed because path may have been resolved/changed
     const versionResult = await runtime.runCommand(claudePath, ["--version"]);
     if (versionResult.success) {
       console.log(`✅ Claude CLI found: ${versionResult.stdout.trim()}`);
       console.log(`   Path: ${claudePath}`);
       return claudePath;
     } else {
-      console.error("❌ Claude CLI found but not working properly");
+      const pathType = customPath ? "Custom" : "Auto-detected";
+      console.error(`❌ ${pathType} Claude path not working after resolution`);
       console.error(
-        "   Please reinstall claude-code or check your installation",
+        "   Please check your installation or try a different path",
       );
       runtime.exit(1);
     }
