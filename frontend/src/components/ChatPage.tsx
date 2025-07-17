@@ -52,7 +52,22 @@ export function ChatPage() {
     }
 
     const project = projects.find((p) => p.path === workingDirectory);
-    return project?.encodedName || null;
+
+    // Normalize paths for comparison (handle Windows path issues)
+    const normalizeWindowsPath = (path: string) => {
+      // Remove leading slash from Windows absolute paths like /C:/...
+      return path.replace(/^\/([A-Za-z]:)/, "$1").replace(/\\/g, "/");
+    };
+
+    const normalizedWorking = normalizeWindowsPath(workingDirectory);
+    const normalizedProject = projects.find(
+      (p) => normalizeWindowsPath(p.path) === normalizedWorking,
+    );
+
+    // Use normalized result if exact match fails
+    const finalProject = project || normalizedProject;
+
+    return finalProject?.encodedName || null;
   }, [workingDirectory, projects]);
 
   // Load conversation history if sessionId is provided
