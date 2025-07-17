@@ -26,62 +26,62 @@ export async function validateClaudeCli(
       claudePath = customPath;
       console.log(`🔍 Validating custom Claude path: ${customPath}`);
     } else {
-      // Auto-detect using platform-specific command
-      const platform = runtime.getPlatform();
+      // Auto-detect using runtime's findExecutable method
+      console.log("🔍 Searching for Claude CLI in PATH...");
+      const candidates = await runtime.findExecutable("claude");
 
-      if (platform === "windows") {
-        // Try multiple possible executable names on Windows
-        const candidates = ["claude", "claude.exe", "claude.cmd"];
-        let found = false;
+      if (candidates.length === 0) {
+        console.error("❌ Claude CLI not found in PATH");
+        console.error("   Please install claude-code globally:");
+        console.error(
+          "   Visit: https://claude.ai/code for installation instructions",
+        );
+        runtime.exit(1);
+      }
 
-        for (const candidate of candidates) {
-          const result = await runtime.runCommand("where", [candidate]);
-          if (result.success && result.stdout.trim()) {
-            claudePath = result.stdout.trim();
-            found = true;
-            break;
-          }
+      // Try each candidate until one works
+      let validPath = "";
+      for (const candidate of candidates) {
+        const testResult = await runtime.runCommand(candidate, ["--version"]);
+
+        if (testResult.success) {
+          validPath = candidate;
+          break;
         }
+      }
 
-        if (!found) {
-          console.error("❌ Claude CLI not found in PATH");
-          console.error("   Searched for: claude, claude.exe, claude.cmd");
-          console.error("   Please install claude-code globally:");
-          console.error(
-            "   Visit: https://claude.ai/code for installation instructions",
-          );
-          runtime.exit(1);
-        }
-      } else {
-        // Unix-like systems (macOS, Linux)
-        const whichResult = await runtime.runCommand("which", ["claude"]);
+      if (!validPath) {
+        console.error("❌ Claude CLI found but none are working properly");
+        console.error("   Found candidates:", candidates);
+        console.error(
+          "   Please reinstall claude-code or check your installation",
+        );
+        runtime.exit(1);
+      }
 
-        if (!whichResult.success || !whichResult.stdout.trim()) {
-          console.error("❌ Claude CLI not found in PATH");
-          console.error("   Please install claude-code globally:");
-          console.error(
-            "   Visit: https://claude.ai/code for installation instructions",
-          );
-          runtime.exit(1);
-        }
+      claudePath = validPath;
+    }
 
-        claudePath = whichResult.stdout.trim();
+    // For custom paths, verify they work
+    if (customPath) {
+      const versionResult = await runtime.runCommand(claudePath, ["--version"]);
+
+      if (!versionResult.success) {
+        console.error("❌ Custom Claude path not working properly");
+        console.error(
+          "   Please check your custom path or reinstall claude-code",
+        );
+        runtime.exit(1);
       }
     }
 
-    // Verify the claude executable works
+    // Get version for final validation and display
     const versionResult = await runtime.runCommand(claudePath, ["--version"]);
     if (versionResult.success) {
       console.log(`✅ Claude CLI found: ${versionResult.stdout.trim()}`);
-      console.log(`   Path: ${claudePath}`);
-      return claudePath;
-    } else {
-      console.error("❌ Claude CLI found but not working properly");
-      console.error(
-        "   Please reinstall claude-code or check your installation",
-      );
-      runtime.exit(1);
     }
+    console.log(`   Path: ${claudePath}`);
+    return claudePath;
   } catch (error) {
     console.error("❌ Failed to validate Claude CLI");
     console.error(

@@ -13,7 +13,7 @@ export async function getEncodedProjectName(
   projectPath: string,
   runtime: Runtime,
 ): Promise<string | null> {
-  const homeDir = runtime.getEnv("HOME");
+  const homeDir = runtime.getHomeDir();
   if (!homeDir) {
     return null;
   }
@@ -31,8 +31,8 @@ export async function getEncodedProjectName(
 
     // Convert project path to expected encoded format for comparison
     const normalizedPath = projectPath.replace(/\/$/, "");
-    // Claude converts both '/' and '.' to '-'
-    const expectedEncoded = normalizedPath.replace(/[/.]/g, "-");
+    // Claude converts '/', '\', ':', and '.' to '-'
+    const expectedEncoded = normalizedPath.replace(/[/\\:.]/g, "-");
 
     // Find exact match - if not found, return null
     if (entries.includes(expectedEncoded)) {

@@ -30,9 +30,9 @@ export async function handleHistoriesRequest(c: Context) {
     }
 
     // Get home directory
-    const homeDir = runtime.getEnv("HOME");
+    const homeDir = runtime.getHomeDir();
     if (!homeDir) {
-      return c.json({ error: "Server configuration error" }, 500);
+      return c.json({ error: "Home directory not found" }, 500);
     }
 
     // Build history directory path directly from encoded name

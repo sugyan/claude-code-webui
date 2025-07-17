@@ -27,9 +27,9 @@ export async function loadConversation(
   }
 
   // Get home directory
-  const homeDir = runtime.getEnv("HOME");
+  const homeDir = runtime.getHomeDir();
   if (!homeDir) {
-    throw new Error("HOME environment variable not found");
+    throw new Error("Home directory not found");
   }
 
   // Build file path
