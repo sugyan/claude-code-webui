@@ -6,7 +6,7 @@
  */
 
 import { constants as fsConstants, lstatSync, promises as fs } from "node:fs";
-import { spawn } from "node:child_process";
+import { spawn, type SpawnOptions } from "node:child_process";
 import { homedir } from "node:os";
 import process from "node:process";
 import { serve } from "@hono/node-server";
