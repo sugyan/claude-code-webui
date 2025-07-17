@@ -47,26 +47,11 @@ export function ChatPage() {
 
   // Get encoded name for current working directory
   const getEncodedName = useCallback(() => {
-    console.log("[DEBUG] getEncodedName called:");
-    console.log("  workingDirectory:", workingDirectory);
-    console.log("  projects.length:", projects.length);
-    console.log("  projects:", projects);
-
     if (!workingDirectory || !projects.length) {
-      console.log(
-        "  → Returning null (missing workingDirectory or empty projects)",
-      );
       return null;
     }
 
-    console.log("  → Searching for project with path:", workingDirectory);
-    console.log(
-      "  → Available project paths:",
-      projects.map((p) => p.path),
-    );
-
     const project = projects.find((p) => p.path === workingDirectory);
-    console.log("  → Found project:", project);
 
     // Normalize paths for comparison (handle Windows path issues)
     const normalizeWindowsPath = (path: string) => {
@@ -78,16 +63,9 @@ export function ChatPage() {
     const normalizedProject = projects.find(
       (p) => normalizeWindowsPath(p.path) === normalizedWorking,
     );
-    console.log("  → Normalized working directory:", normalizedWorking);
-    console.log("  → Found project with normalized paths:", normalizedProject);
 
     // Use normalized result if exact match fails
     const finalProject = project || normalizedProject;
-    console.log("  → Final selected project:", finalProject);
-    console.log(
-      "  → Returning encodedName:",
-      finalProject?.encodedName || null,
-    );
 
     return finalProject?.encodedName || null;
   }, [workingDirectory, projects]);
@@ -327,15 +305,11 @@ export function ChatPage() {
   // Load projects to get encodedName mapping
   useEffect(() => {
     const loadProjects = async () => {
-      console.log("[DEBUG] Loading projects...");
       try {
         const response = await fetch(getProjectsUrl());
-        console.log("  → Projects API response:", response.ok, response.status);
         if (response.ok) {
           const data = await response.json();
-          console.log("  → Projects data:", data);
           setProjects(data.projects || []);
-          console.log("  → Set projects:", data.projects || []);
         }
       } catch (error) {
         console.error("Failed to load projects:", error);

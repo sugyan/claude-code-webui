@@ -17,16 +17,10 @@ export function HistoryView({ encodedName }: HistoryViewProps) {
 
   useEffect(() => {
     const loadConversations = async () => {
-      console.log("[DEBUG] HistoryView loadConversations called:");
-      console.log("  encodedName:", encodedName);
-
       if (!encodedName) {
-        console.log("  → No encodedName, staying in loading state");
         // Keep loading state when encodedName is not available yet
         return;
       }
-
-      console.log("  → Calling API with URL:", getHistoriesUrl(encodedName));
 
       try {
         setLoading(true);
