@@ -79,9 +79,15 @@ export async function validateClaudeCli(
     const versionResult = await runtime.runCommand(claudePath, ["--version"]);
     if (versionResult.success) {
       console.log(`✅ Claude CLI found: ${versionResult.stdout.trim()}`);
+      console.log(`   Path: ${claudePath}`);
+      return claudePath;
+    } else {
+      console.error("❌ Claude CLI found but not working properly");
+      console.error(
+        "   Please reinstall claude-code or check your installation",
+      );
+      runtime.exit(1);
     }
-    console.log(`   Path: ${claudePath}`);
-    return claudePath;
   } catch (error) {
     console.error("❌ Failed to validate Claude CLI");
     console.error(

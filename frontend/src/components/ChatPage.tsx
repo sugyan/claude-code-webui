@@ -16,6 +16,7 @@ import { PermissionDialog } from "./PermissionDialog";
 import { HistoryView } from "./HistoryView";
 import { getChatUrl, getProjectsUrl } from "../config/api";
 import { KEYBOARD_SHORTCUTS } from "../utils/constants";
+import { normalizeWindowsPath } from "../utils/pathUtils";
 import type { StreamingContext } from "../hooks/streaming/useMessageProcessor";
 
 export function ChatPage() {
@@ -54,11 +55,6 @@ export function ChatPage() {
     const project = projects.find((p) => p.path === workingDirectory);
 
     // Normalize paths for comparison (handle Windows path issues)
-    const normalizeWindowsPath = (path: string) => {
-      // Remove leading slash from Windows absolute paths like /C:/...
-      return path.replace(/^\/([A-Za-z]:)/, "$1").replace(/\\/g, "/");
-    };
-
     const normalizedWorking = normalizeWindowsPath(workingDirectory);
     const normalizedProject = projects.find(
       (p) => normalizeWindowsPath(p.path) === normalizedWorking,

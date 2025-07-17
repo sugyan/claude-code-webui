@@ -11,7 +11,7 @@ import {
   promises as fs,
   readFileSync,
 } from "node:fs";
-import { spawn } from "node:child_process";
+import { spawn, type SpawnOptions } from "node:child_process";
 import { homedir } from "node:os";
 import process from "node:process";
 import { serve } from "@hono/node-server";
@@ -168,7 +168,7 @@ export class NodeRuntime implements Runtime {
   runCommand(command: string, args: string[]): Promise<CommandResult> {
     return new Promise((resolve) => {
       const isWindows = this.getPlatform() === "windows";
-      const spawnOptions: any = {
+      const spawnOptions: SpawnOptions = {
         stdio: ["ignore", "pipe", "pipe"],
       };
 
