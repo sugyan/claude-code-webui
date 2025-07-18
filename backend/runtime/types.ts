@@ -37,11 +37,19 @@ export interface Runtime {
   // File operations
   readTextFile(path: string): Promise<string>;
   readBinaryFile(path: string): Promise<Uint8Array>;
+  writeTextFile(
+    path: string,
+    content: string,
+    options?: { mode?: number },
+  ): Promise<void>;
   exists(path: string): Promise<boolean>;
   stat(path: string): Promise<FileStats>;
   lstat(path: string): Promise<FileStats>;
   lstatSync(path: string): FileStats;
   readDir(path: string): AsyncIterable<DirectoryEntry>;
+
+  // Temporary directory operations
+  withTempDir<T>(callback: (tempDir: string) => Promise<T>): Promise<T>;
 
   // Environment access
   getEnv(key: string): string | undefined;
@@ -51,7 +59,11 @@ export interface Runtime {
   exit(code: number): never;
 
   // Process execution
-  runCommand(command: string, args: string[]): Promise<CommandResult>;
+  runCommand(
+    command: string,
+    args: string[],
+    options?: { env?: Record<string, string> },
+  ): Promise<CommandResult>;
   findExecutable(name: string): Promise<string[]>;
 
   // HTTP server

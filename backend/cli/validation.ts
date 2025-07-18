@@ -89,6 +89,107 @@ async function resolveExecutablePath(
 }
 
 /**
+ * Detects the actual Claude script path by tracing node execution
+ * Uses a temporary node wrapper to capture the actual script path being executed by Claude CLI
+ * @param runtime - Runtime abstraction for system operations
+ * @param claudePath - Path to the claude executable
+ * @returns Promise<string> - The actual Claude script path or empty string if detection fails
+ */
+export async function detectClaudeCliPath(
+  runtime: Runtime,
+  claudePath: string,
+): Promise<string> {
+  const platform = runtime.getPlatform();
+
+  try {
+    return await runtime.withTempDir(async (tempDir) => {
+      const traceFile = `${tempDir}/trace.log`;
+
+      // Find the original node executable
+      const nodeExecutables = await runtime.findExecutable("node");
+      if (nodeExecutables.length === 0) {
+        // Silently return empty string - this is not a critical error
+        return "";
+      }
+
+      const originalNodePath = nodeExecutables[0];
+
+      // Create platform-specific wrapper script
+      const wrapperFileName = platform === "windows" ? "node.bat" : "node";
+      const wrapperScript =
+        platform === "windows"
+          ? `@echo off\necho %* >> "${traceFile}"\n"${originalNodePath}" %*`
+          : `#!/bin/bash\necho "$@" >> "${traceFile}"\nexec "${originalNodePath}" "$@"`;
+
+      await runtime.writeTextFile(
+        `${tempDir}/${wrapperFileName}`,
+        wrapperScript,
+        platform === "windows" ? undefined : { mode: 0o755 },
+      );
+
+      // Execute claude with modified PATH to intercept node calls
+      const currentPath = runtime.getEnv("PATH") || "";
+      const modifiedPath =
+        platform === "windows"
+          ? `${tempDir};${currentPath}`
+          : `${tempDir}:${currentPath}`;
+
+      const executionResult = await runtime.runCommand(
+        claudePath,
+        ["--version"],
+        {
+          env: { PATH: modifiedPath },
+        },
+      );
+
+      // Verify command executed successfully
+      if (!executionResult.success) {
+        return "";
+      }
+
+      // Parse trace file to extract script path
+      let traceContent: string;
+      try {
+        traceContent = await runtime.readTextFile(traceFile);
+      } catch {
+        // Trace file might not exist or be readable
+        return "";
+      }
+
+      if (!traceContent.trim()) {
+        // Empty trace file indicates no node execution was captured
+        return "";
+      }
+
+      const traceLines = traceContent
+        .split("\n")
+        .map((line) => line.trim())
+        .filter((line) => line.length > 0);
+
+      // Find the Claude script path from traced node executions
+      for (const traceLine of traceLines) {
+        const commandArguments = traceLine.split(" ");
+        if (commandArguments.length > 0) {
+          const scriptPath = commandArguments[0];
+          if (scriptPath) {
+            return scriptPath;
+          }
+        }
+      }
+
+      // No Claude script path found in trace
+      return "";
+    });
+  } catch (error) {
+    // Log error for debugging but don't crash the application
+    console.error(
+      `Failed to detect Claude CLI path: ${error instanceof Error ? error.message : String(error)}`,
+    );
+    return "";
+  }
+}
+
+/**
  * Validates that the Claude CLI is available and working
  * Uses platform-specific command (`which` on Unix, `where` on Windows) for PATH detection
  * Resolves asdf shims to actual executable paths for SDK compatibility
