@@ -8,6 +8,6 @@ import type { Runtime } from "./runtime/types.ts";
 export interface AppConfig {
   debugMode: boolean;
   runtime: Runtime;
-  claudePath: string; // Now required since validateClaudeCli always returns a path
+  cliPath: string; // Path to actual CLI script detected by validateClaudeCli
   // Future configuration options can be added here
 }

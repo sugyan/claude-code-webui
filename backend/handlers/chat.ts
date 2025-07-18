@@ -7,7 +7,7 @@ import type { ChatRequest, StreamResponse } from "../../shared/types.ts";
  * @param message - User message or command
  * @param requestId - Unique request identifier for abort functionality
  * @param requestAbortControllers - Shared map of abort controllers
- * @param claudePath - Path to claude executable (validated at startup)
+ * @param cliPath - Path to actual CLI script (detected by validateClaudeCli)
  * @param sessionId - Optional session ID for conversation continuity
  * @param allowedTools - Optional array of allowed tool names
  * @param workingDirectory - Optional working directory for Claude execution
@@ -18,7 +18,7 @@ async function* executeClaudeCommand(
   message: string,
   requestId: string,
   requestAbortControllers: Map<string, AbortController>,
-  claudePath: string,
+  cliPath: string,
   sessionId?: string,
   allowedTools?: string[],
   workingDirectory?: string,
@@ -44,7 +44,7 @@ async function* executeClaudeCommand(
         abortController,
         executable: "node" as const,
         executableArgs: [],
-        pathToClaudeCodeExecutable: claudePath,
+        pathToClaudeCodeExecutable: cliPath,
         ...(sessionId ? { resume: sessionId } : {}),
         ...(allowedTools ? { allowedTools } : {}),
         ...(workingDirectory ? { cwd: workingDirectory } : {}),
@@ -96,7 +96,7 @@ export async function handleChatRequest(
   requestAbortControllers: Map<string, AbortController>,
 ) {
   const chatRequest: ChatRequest = await c.req.json();
-  const { debugMode, claudePath } = c.var.config;
+  const { debugMode, cliPath } = c.var.config;
 
   if (debugMode) {
     console.debug(
@@ -112,7 +112,7 @@ export async function handleChatRequest(
           chatRequest.message,
           chatRequest.requestId,
           requestAbortControllers,
-          claudePath,
+          cliPath, // Use detected CLI path from validateClaudeCli
           chatRequest.sessionId,
           chatRequest.allowedTools,
           chatRequest.workingDirectory,

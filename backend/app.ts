@@ -21,7 +21,7 @@ import { handleAbortRequest } from "./handlers/abort.ts";
 export interface AppConfig {
   debugMode: boolean;
   staticPath: string;
-  claudePath: string; // Now required since validateClaudeCli always returns a path
+  cliPath: string; // Actual CLI script path detected by validateClaudeCli
 }
 
 export function createApp(
@@ -49,7 +49,7 @@ export function createApp(
     createConfigMiddleware({
       debugMode: config.debugMode,
       runtime,
-      claudePath: config.claudePath,
+      cliPath: config.cliPath,
     }),
   );
 
