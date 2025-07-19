@@ -28,8 +28,17 @@ const mockRuntime: Runtime = {
       size: 0,
       mtime: null,
     }),
-  runCommand: () =>
-    Promise.resolve({ success: false, stdout: "", stderr: "", code: 1 }),
+  writeTextFile: () => Promise.resolve(),
+  withTempDir: async <T>(
+    callback: (tempDir: string) => Promise<T>,
+  ): Promise<T> => {
+    return await callback("/mock/temp");
+  },
+  runCommand: (
+    _command: string,
+    _args: string[],
+    _options?: { env?: Record<string, string> },
+  ) => Promise.resolve({ success: false, stdout: "", stderr: "", code: 1 }),
   findExecutable: () => Promise.resolve([]),
   serve: () => {},
   createStaticFileMiddleware: (): MiddlewareHandler => () =>

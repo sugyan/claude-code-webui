@@ -11,12 +11,12 @@ import type { Runtime } from "../runtime/types.ts";
  * Uses a temporary node wrapper to capture the actual script path being executed by Claude CLI
  * @param runtime - Runtime abstraction for system operations
  * @param claudePath - Path to the claude executable
- * @returns Promise<string> - The actual Claude script path or empty string if detection fails
+ * @returns Promise<{scriptPath: string, versionOutput: string}> - The actual Claude script path and version output, or empty strings if detection fails
  */
 export async function detectClaudeCliPath(
   runtime: Runtime,
   claudePath: string,
-): Promise<string> {
+): Promise<{ scriptPath: string; versionOutput: string }> {
   const platform = runtime.getPlatform();
 
   try {
@@ -26,8 +26,8 @@ export async function detectClaudeCliPath(
       // Find the original node executable
       const nodeExecutables = await runtime.findExecutable("node");
       if (nodeExecutables.length === 0) {
-        // Silently return empty string - this is not a critical error
-        return "";
+        // Silently return empty strings - this is not a critical error
+        return { scriptPath: "", versionOutput: "" };
       }
 
       const originalNodePath = nodeExecutables[0];
@@ -36,8 +36,8 @@ export async function detectClaudeCliPath(
       const wrapperFileName = platform === "windows" ? "node.bat" : "node";
       const wrapperScript =
         platform === "windows"
-          ? `@echo off\necho %* >> "${traceFile}"\n"${originalNodePath}" %*`
-          : `#!/bin/bash\necho "$@" >> "${traceFile}"\nexec "${originalNodePath}" "$@"`;
+          ? `@echo off\necho %1 >> "${traceFile}"\n"${originalNodePath}" %*`
+          : `#!/bin/bash\necho "$1" >> "${traceFile}"\nexec "${originalNodePath}" "$@"`;
 
       await runtime.writeTextFile(
         `${tempDir}/${wrapperFileName}`,
@@ -62,8 +62,10 @@ export async function detectClaudeCliPath(
 
       // Verify command executed successfully
       if (!executionResult.success) {
-        return "";
+        return { scriptPath: "", versionOutput: "" };
       }
+
+      const versionOutput = executionResult.stdout.trim();
 
       // Parse trace file to extract script path
       let traceContent: string;
@@ -71,12 +73,12 @@ export async function detectClaudeCliPath(
         traceContent = await runtime.readTextFile(traceFile);
       } catch {
         // Trace file might not exist or be readable
-        return "";
+        return { scriptPath: "", versionOutput };
       }
 
       if (!traceContent.trim()) {
         // Empty trace file indicates no node execution was captured
-        return "";
+        return { scriptPath: "", versionOutput };
       }
 
       const traceLines = traceContent
@@ -86,24 +88,21 @@ export async function detectClaudeCliPath(
 
       // Find the Claude script path from traced node executions
       for (const traceLine of traceLines) {
-        const commandArguments = traceLine.split(" ");
-        if (commandArguments.length > 0) {
-          const scriptPath = commandArguments[0];
-          if (scriptPath) {
-            return scriptPath;
-          }
+        const scriptPath = traceLine.trim();
+        if (scriptPath) {
+          return { scriptPath, versionOutput };
         }
       }
 
       // No Claude script path found in trace
-      return "";
+      return { scriptPath: "", versionOutput };
     });
   } catch (error) {
     // Log error for debugging but don't crash the application
     console.error(
       `Failed to detect Claude CLI path: ${error instanceof Error ? error.message : String(error)}`,
     );
-    return "";
+    return { scriptPath: "", versionOutput: "" };
   }
 }
 
@@ -146,16 +145,22 @@ export async function validateClaudeCli(
 
     // Detect the actual CLI script path using tracing approach
     console.log("🔍 Detecting actual Claude CLI script path...");
-    const detectedCliPath = await detectClaudeCliPath(runtime, claudePath);
+    const detection = await detectClaudeCliPath(runtime, claudePath);
 
-    if (detectedCliPath) {
-      console.log(`✅ Claude CLI script detected: ${detectedCliPath}`);
-      return detectedCliPath;
+    if (detection.scriptPath) {
+      console.log(`✅ Claude CLI script detected: ${detection.scriptPath}`);
+      if (detection.versionOutput) {
+        console.log(`✅ Claude CLI found: ${detection.versionOutput}`);
+      }
+      return detection.scriptPath;
     } else {
       // Fallback to the original path if detection fails
       console.log(
         `⚠️  CLI script detection failed, using original path: ${claudePath}`,
       );
+      if (detection.versionOutput) {
+        console.log(`✅ Claude CLI found: ${detection.versionOutput}`);
+      }
       return claudePath;
     }
   } catch (error) {

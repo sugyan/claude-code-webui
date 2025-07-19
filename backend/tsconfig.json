@@ -34,8 +34,6 @@
     "deno.json",
     "deno.lock",
     "runtime/deno.ts",
-    "cli/deno.ts",
-    "pathUtils.test.ts",
-    "tests/**/*.ts"
+    "cli/deno.ts"
   ]
 }
