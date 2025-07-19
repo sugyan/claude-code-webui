@@ -7,6 +7,26 @@
 import type { Runtime } from "../runtime/types.ts";
 
 /**
+ * Generates Windows batch wrapper script
+ * @param traceFile - Path to trace output file
+ * @param nodePath - Path to original node executable
+ * @returns Windows batch script content
+ */
+function getWindowsWrapperScript(traceFile: string, nodePath: string): string {
+  return `@echo off\necho %1 >> "${traceFile}"\n"${nodePath}" %*`;
+}
+
+/**
+ * Generates Unix shell wrapper script
+ * @param traceFile - Path to trace output file
+ * @param nodePath - Path to original node executable
+ * @returns Unix shell script content
+ */
+function getUnixWrapperScript(traceFile: string, nodePath: string): string {
+  return `#!/bin/bash\necho "$1" >> "${traceFile}"\nexec "${nodePath}" "$@"`;
+}
+
+/**
  * Detects the actual Claude script path by tracing node execution
  * Uses a temporary node wrapper to capture the actual script path being executed by Claude CLI
  * @param runtime - Runtime abstraction for system operations
@@ -31,26 +51,25 @@ export async function detectClaudeCliPath(
       }
 
       const originalNodePath = nodeExecutables[0];
+      const isWindows = platform === "windows";
 
       // Create platform-specific wrapper script
-      const wrapperFileName = platform === "windows" ? "node.bat" : "node";
-      const wrapperScript =
-        platform === "windows"
-          ? `@echo off\necho %1 >> "${traceFile}"\n"${originalNodePath}" %*`
-          : `#!/bin/bash\necho "$1" >> "${traceFile}"\nexec "${originalNodePath}" "$@"`;
+      const wrapperFileName = isWindows ? "node.bat" : "node";
+      const wrapperScript = isWindows
+        ? getWindowsWrapperScript(traceFile, originalNodePath)
+        : getUnixWrapperScript(traceFile, originalNodePath);
 
       await runtime.writeTextFile(
         `${tempDir}/${wrapperFileName}`,
         wrapperScript,
-        platform === "windows" ? undefined : { mode: 0o755 },
+        isWindows ? undefined : { mode: 0o755 },
       );
 
       // Execute claude with modified PATH to intercept node calls
       const currentPath = runtime.getEnv("PATH") || "";
-      const modifiedPath =
-        platform === "windows"
-          ? `${tempDir};${currentPath}`
-          : `${tempDir}:${currentPath}`;
+      const modifiedPath = isWindows
+        ? `${tempDir};${currentPath}`
+        : `${tempDir}:${currentPath}`;
 
       const executionResult = await runtime.runCommand(
         claudePath,
