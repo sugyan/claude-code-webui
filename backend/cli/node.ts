@@ -34,7 +34,7 @@ async function main(runtime: NodeRuntime) {
   const app = createApp(runtime, {
     debugMode: args.debug,
     staticPath,
-    cliPath: cliPath,
+    cliPath,
   });
 
   // Start server (only show this message when everything is ready)
