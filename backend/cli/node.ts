@@ -33,7 +33,7 @@ async function main(runtime: NodeRuntime) {
   // Create application
   const app = createApp(runtime, {
     debugMode: args.debug,
-    staticPath: staticPath,
+    staticPath,
     cliPath: cliPath,
   });
 
