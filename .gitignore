@@ -1,4 +1,5 @@
 .claude/
+!.claude/settings.json
 
 # Build artifacts
 dist/
