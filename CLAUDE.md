@@ -50,6 +50,7 @@ This project consists of three main components:
 - **Runtime Abstraction**: Clean separation between business logic and platform-specific code
 - **Modular Architecture**: CLI, application core, and runtime layers clearly separated
 - Command line interface with `--port`, `--help`, `--version` options  
+- Universal Claude CLI path detection with tracing-based approach
 - Startup validation to check Claude CLI availability
 - Executes `claude --output-format stream-json --verbose -p <message>`
 - Streams raw Claude JSON responses without modification
@@ -157,6 +158,34 @@ The SDK returns three types of JSON messages:
 1. **System messages** (`type: "system"`) - Initialization and setup information
 2. **Assistant messages** (`type: "assistant"`) - Actual response content
 3. **Result messages** (`type: "result"`) - Execution summary with costs and usage
+
+### Claude CLI Path Detection
+
+The application includes robust Claude CLI path detection to handle various installation methods:
+
+#### Universal Detection Approach
+- **Tracing-based detection**: Uses temporary node wrapper to capture actual script paths
+- **Cross-platform support**: Handles Windows (.bat), macOS, and Linux installations
+- **Installation method agnostic**: Works with npm, pnpm, asdf, yarn, and other package managers
+
+#### Detection Process
+1. **Auto-discovery**: Searches for `claude` in system PATH using `runtime.findExecutable()`
+2. **Script path tracing**: Creates temporary node wrapper to intercept and trace node execution
+3. **Version validation**: Executes `claude --version` to verify functionality and capture version info
+4. **Fallback handling**: Uses original path if detection fails, with appropriate logging
+
+#### Supported Installation Scenarios
+- **npm global**: `/usr/local/bin/claude` → actual script in `node_modules`
+- **pnpm global**: Similar to npm but with pnpm-specific paths
+- **asdf**: Version-managed installations with shim resolution
+- **yarn global**: Yarn-managed global installations
+- **Custom paths**: Manual installations via `--claude-path` option
+
+#### Technical Implementation
+- **File**: `backend/cli/validation.ts`
+- **Key functions**: `detectClaudeCliPath()`, `validateClaudeCli()`
+- **Platform abstraction**: Uses Runtime interface for cross-platform compatibility
+- **Temporary directory**: Automatic cleanup of trace files and wrapper scripts
 
 ## Session Continuity
 
@@ -367,39 +396,41 @@ cd frontend && npm run dev      # Configures proxy to localhost:9000
 
 2. **Modular Entry Points**: CLI-specific code separated into `cli/` directory with `deno.ts` and `node.ts` as runtime-specific entry points, while `app.ts` contains the runtime-agnostic core application. This enables clean separation of concerns and cross-platform compatibility.
 
-3. **Raw JSON Streaming**: Backend passes Claude JSON responses without modification to allow frontend flexibility in handling different message types.
+3. **Universal CLI Path Detection**: Tracing-based approach using temporary node wrappers to detect actual Claude script paths regardless of installation method (npm, pnpm, asdf, yarn). This eliminates complex installation-specific logic and works universally across all package managers and platforms.
 
-4. **Configurable Ports**: Backend port configurable via PORT environment variable or CLI argument, frontend port via CLI argument to allow independent development and deployment.
+4. **Raw JSON Streaming**: Backend passes Claude JSON responses without modification to allow frontend flexibility in handling different message types.
 
-5. **TypeScript Throughout**: Consistent TypeScript usage across all components with shared type definitions.
+5. **Configurable Ports**: Backend port configurable via PORT environment variable or CLI argument, frontend port via CLI argument to allow independent development and deployment.
 
-6. **TailwindCSS Styling**: Uses @tailwindcss/vite plugin for utility-first CSS without separate CSS files.
+6. **TypeScript Throughout**: Consistent TypeScript usage across all components with shared type definitions.
 
-7. **Theme System**: Light/dark theme toggle with automatic system preference detection and localStorage persistence.
+7. **TailwindCSS Styling**: Uses @tailwindcss/vite plugin for utility-first CSS without separate CSS files.
 
-8. **Project Directory Selection**: Users choose working directory before starting chat sessions, with support for both configured projects and custom directory selection.
+8. **Theme System**: Light/dark theme toggle with automatic system preference detection and localStorage persistence.
 
-9. **Routing Architecture**: React Router separates project selection and chat interfaces for better user experience.
+9. **Project Directory Selection**: Users choose working directory before starting chat sessions, with support for both configured projects and custom directory selection.
 
-10. **Dynamic Working Directory**: Claude commands execute in user-selected project directories for contextual file access.
+10. **Routing Architecture**: React Router separates project selection and chat interfaces for better user experience.
 
-11. **Request Management**: Unique request IDs enable request tracking and abort functionality for better user control.
+11. **Dynamic Working Directory**: Claude commands execute in user-selected project directories for contextual file access.
 
-12. **Tool Permission Handling**: Frontend permission dialog allows users to grant/deny tool access with proper state management.
+12. **Request Management**: Unique request IDs enable request tracking and abort functionality for better user control.
 
-13. **Comprehensive Error Handling**: Enhanced error states and user feedback for better debugging and user experience.
+13. **Tool Permission Handling**: Frontend permission dialog allows users to grant/deny tool access with proper state management.
 
-14. **Modular Architecture**: Frontend code is organized into specialized hooks and components for better maintainability and testability.
+14. **Comprehensive Error Handling**: Enhanced error states and user feedback for better debugging and user experience.
 
-15. **Separation of Concerns**: Business logic, UI components, and utilities are clearly separated into different modules.
+15. **Modular Architecture**: Frontend code is organized into specialized hooks and components for better maintainability and testability.
 
-16. **Configuration Management**: Centralized configuration for API endpoints and application constants.
+16. **Separation of Concerns**: Business logic, UI components, and utilities are clearly separated into different modules.
 
-17. **Reusable Components**: Common UI patterns are extracted into reusable components to reduce duplication.
+17. **Configuration Management**: Centralized configuration for API endpoints and application constants.
 
-18. **Hook Composition**: Complex functionality is built by composing smaller, focused hooks that each handle a specific concern.
+18. **Reusable Components**: Common UI patterns are extracted into reusable components to reduce duplication.
 
-19. **Enter Key Behavior**: Configurable Enter key behavior with persistent user preferences, supporting both traditional (Enter=Send) and modern (Enter=Newline) interaction patterns.
+19. **Hook Composition**: Complex functionality is built by composing smaller, focused hooks that each handle a specific concern.
+
+20. **Enter Key Behavior**: Configurable Enter key behavior with persistent user preferences, supporting both traditional (Enter=Send) and modern (Enter=Newline) interaction patterns.
 
 ## Claude Code SDK Types Reference
 
