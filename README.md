@@ -123,7 +123,7 @@ The backend server supports the following command-line options:
 # Enable debug mode
 ./claude-code-webui --debug
 
-# Custom Claude CLI path (for non-standard installations)
+# Custom Claude CLI path (for non-standard installations or aliases)
 ./claude-code-webui --claude-path /path/to/claude
 
 # Using environment variables
@@ -248,7 +248,7 @@ Download the latest binary from releases or pull the latest code for development
 <details>
 <summary><strong>Q: What if Claude CLI isn't found?</strong></summary>
 
-Ensure Claude CLI is installed and available in your PATH. Run `claude --version` to verify. For custom installations, use the `--claude-path` option to specify the exact path to your Claude executable.
+Ensure Claude CLI is installed and available in your PATH. Run `claude --version` to verify. For custom installations or shell aliases (e.g., `alias claude="/path/to/claude"`), use the `--claude-path` option to specify the exact path to your Claude executable.
 
 </details>
 

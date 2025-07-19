@@ -17,8 +17,6 @@ describe("Node.js Runtime", () => {
       "readBinaryFile",
       "exists",
       "stat",
-      "lstat",
-      "lstatSync",
       "readDir",
       "getEnv",
       "getArgs",

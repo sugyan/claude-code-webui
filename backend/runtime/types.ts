@@ -44,8 +44,6 @@ export interface Runtime {
   ): Promise<void>;
   exists(path: string): Promise<boolean>;
   stat(path: string): Promise<FileStats>;
-  lstat(path: string): Promise<FileStats>;
-  lstatSync(path: string): FileStats;
   readDir(path: string): AsyncIterable<DirectoryEntry>;
 
   // Temporary directory operations

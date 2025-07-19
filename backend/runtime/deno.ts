@@ -53,28 +53,6 @@ export class DenoRuntime implements Runtime {
     };
   }
 
-  async lstat(path: string): Promise<FileStats> {
-    const info = await Deno.lstat(path);
-    return {
-      isFile: info.isFile,
-      isDirectory: info.isDirectory,
-      isSymlink: info.isSymlink,
-      size: info.size,
-      mtime: info.mtime,
-    };
-  }
-
-  lstatSync(path: string): FileStats {
-    const info = Deno.lstatSync(path);
-    return {
-      isFile: info.isFile,
-      isDirectory: info.isDirectory,
-      isSymlink: info.isSymlink,
-      size: info.size,
-      mtime: info.mtime,
-    };
-  }
-
   async *readDir(path: string): AsyncIterable<DirectoryEntry> {
     for await (const entry of Deno.readDir(path)) {
       yield {

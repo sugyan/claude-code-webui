@@ -5,7 +5,7 @@
  * Provides equivalent functionality to the Deno runtime for cross-platform support.
  */
 
-import { constants as fsConstants, lstatSync, promises as fs } from "node:fs";
+import { constants as fsConstants, promises as fs } from "node:fs";
 import { spawn, type SpawnOptions } from "node:child_process";
 import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
@@ -53,28 +53,6 @@ export class NodeRuntime implements Runtime {
 
   async stat(path: string): Promise<FileStats> {
     const stats = await fs.stat(path);
-    return {
-      isFile: stats.isFile(),
-      isDirectory: stats.isDirectory(),
-      isSymlink: stats.isSymbolicLink(),
-      size: stats.size,
-      mtime: stats.mtime,
-    };
-  }
-
-  async lstat(path: string): Promise<FileStats> {
-    const stats = await fs.lstat(path);
-    return {
-      isFile: stats.isFile(),
-      isDirectory: stats.isDirectory(),
-      isSymlink: stats.isSymbolicLink(),
-      size: stats.size,
-      mtime: stats.mtime,
-    };
-  }
-
-  lstatSync(path: string): FileStats {
-    const stats = lstatSync(path);
     return {
       isFile: stats.isFile(),
       isDirectory: stats.isDirectory(),

@@ -28,21 +28,6 @@ const mockRuntime: Runtime = {
       size: 0,
       mtime: null,
     }),
-  lstat: () =>
-    Promise.resolve({
-      isFile: false,
-      isDirectory: false,
-      isSymlink: false,
-      size: 0,
-      mtime: null,
-    }),
-  lstatSync: () => ({
-    isFile: false,
-    isDirectory: false,
-    isSymlink: false,
-    size: 0,
-    mtime: null,
-  }),
   runCommand: () =>
     Promise.resolve({ success: false, stdout: "", stderr: "", code: 1 }),
   findExecutable: () => Promise.resolve([]),
