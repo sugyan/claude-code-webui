@@ -6,6 +6,9 @@
 
 import type { Runtime } from "../runtime/types.ts";
 
+// Regex to fix double backslashes that might occur during Windows path string processing
+const DOUBLE_BACKSLASH_REGEX = /\\\\/g;
+
 /**
  * Generates Windows batch wrapper script
  * @param traceFile - Path to trace output file
@@ -113,7 +116,7 @@ export async function detectClaudeCliPath(
         if (scriptPath) {
           // Fix double backslashes that might occur during string processing
           if (isWindows) {
-            scriptPath = scriptPath.replace(/\\\\/g, "\\");
+            scriptPath = scriptPath.replace(DOUBLE_BACKSLASH_REGEX, "\\");
           }
         }
 
