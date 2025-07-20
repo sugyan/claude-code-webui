@@ -33,7 +33,8 @@ export function ChatPage() {
     // URL decode the path
     const decodedPath = decodeURIComponent(rawPath);
 
-    return decodedPath;
+    // Normalize Windows paths (remove leading slash from /C:/... format)
+    return normalizeWindowsPath(decodedPath);
   })();
 
   // Get current view and sessionId from query parameters

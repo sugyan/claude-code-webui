@@ -13,7 +13,7 @@ import type { Runtime } from "../runtime/types.ts";
  * @returns Windows batch script content
  */
 function getWindowsWrapperScript(traceFile: string, nodePath: string): string {
-  return `@echo off\necho %1 >> "${traceFile}"\n"${nodePath}" %*`;
+  return `@echo off\necho %~1 >> "${traceFile}"\n"${nodePath}" %*`;
 }
 
 /**
@@ -107,7 +107,16 @@ export async function detectClaudeCliPath(
 
       // Find the Claude script path from traced node executions
       for (const traceLine of traceLines) {
-        const scriptPath = traceLine.trim();
+        let scriptPath = traceLine.trim();
+
+        // Clean up the script path
+        if (scriptPath) {
+          // Fix double backslashes that might occur during string processing
+          if (isWindows) {
+            scriptPath = scriptPath.replace(/\\\\/g, "\\");
+          }
+        }
+
         if (scriptPath) {
           return { scriptPath, versionOutput };
         }
