@@ -9,6 +9,7 @@ import { createApp } from "../app.ts";
 import { DenoRuntime } from "../runtime/deno.ts";
 import { parseCliArgs } from "./args.ts";
 import { validateClaudeCli } from "./validation.ts";
+import { dirname, fromFileUrl, join } from "https://deno.land/std/path/mod.ts";
 
 async function main(runtime: DenoRuntime) {
   // Parse CLI arguments
@@ -22,9 +23,12 @@ async function main(runtime: DenoRuntime) {
   }
 
   // Create application
+  const __dirname = dirname(fromFileUrl(import.meta.url));
+  const staticPath = join(__dirname, "../dist/static");
+
   const app = createApp(runtime, {
     debugMode: args.debug,
-    staticPath: new URL("../dist/static", import.meta.url).pathname,
+    staticPath,
     cliPath: cliPath,
   });
 
