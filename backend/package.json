@@ -57,7 +57,7 @@
     "@anthropic-ai/claude-code": "1.0.51",
     "@hono/node-server": "^1.0.0",
     "commander": "^14.0.0",
-    "hono": "^4.0.0"
+    "hono": "^4.8.5"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
