@@ -38,7 +38,7 @@
   },
   "scripts": {
     "predev": "node scripts/generate-version.js",
-    "dev": "dotenvx run --env-file=../.env -- tsx watch cli/node.ts --debug",
+    "dev": "tsx watch cli/node.ts --debug",
     "prebuild": "node scripts/generate-version.js",
     "build": "npm run build:clean && npm run build:bundle && npm run build:static",
     "build:clean": "rimraf dist",

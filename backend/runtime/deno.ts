@@ -102,11 +102,13 @@ export class DenoRuntime implements Runtime {
   getHomeDir(): string | undefined {
     try {
       // Deno provides os.homedir() equivalent
-      return Deno.env.get("HOME") ||
+      return (
+        Deno.env.get("HOME") ||
         Deno.env.get("USERPROFILE") ||
         (Deno.env.get("HOMEDRIVE") && Deno.env.get("HOMEPATH")
           ? `${Deno.env.get("HOMEDRIVE")}${Deno.env.get("HOMEPATH")}`
-          : undefined);
+          : undefined)
+      );
     } catch {
       return undefined;
     }
@@ -133,7 +135,10 @@ export class DenoRuntime implements Runtime {
         const result = await this.runCommand("where", [execName]);
         if (result.success && result.stdout.trim()) {
           // where command can return multiple paths, split by newlines
-          const paths = result.stdout.trim().split("\n").map((p) => p.trim())
+          const paths = result.stdout
+            .trim()
+            .split("\n")
+            .map((p) => p.trim())
             .filter((p) => p);
           candidates.push(...paths);
         }
@@ -154,8 +159,19 @@ export class DenoRuntime implements Runtime {
     args: string[],
     options?: { env?: Record<string, string> },
   ): Promise<CommandResult> {
-    const cmd = new Deno.Command(command, {
-      args,
+    const platform = this.getPlatform();
+
+    // On Windows, always use cmd.exe /c for all commands
+    let actualCommand = command;
+    let actualArgs = args;
+
+    if (platform === "windows") {
+      actualCommand = "cmd.exe";
+      actualArgs = ["/c", command, ...args];
+    }
+
+    const cmd = new Deno.Command(actualCommand, {
+      args: actualArgs,
       stdout: "piped",
       stderr: "piped",
       env: options?.env,
@@ -179,9 +195,7 @@ export class DenoRuntime implements Runtime {
     Deno.serve({ port, hostname }, handler);
   }
 
-  createStaticFileMiddleware(
-    options: { root: string },
-  ): MiddlewareHandler {
+  createStaticFileMiddleware(options: { root: string }): MiddlewareHandler {
     return serveStatic(options);
   }
 }

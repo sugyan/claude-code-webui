@@ -162,10 +162,25 @@ Create `.env` file in project root:
 echo "PORT=9000" > .env
 ```
 
-Both backend and frontend will automatically use this port:
+Run with dotenvx to use the `.env` file:
 
-- Backend: Uses dotenvx to read the `.env` file
-- Frontend: Uses Vite's built-in `.env` support
+```bash
+# Backend
+cd backend
+dotenvx run --env-file=../.env -- deno task dev    # Deno
+dotenvx run --env-file=../.env -- npm run dev      # Node.js
+
+# Frontend (uses Vite's built-in .env support)
+cd frontend
+npm run dev
+```
+
+Alternative: Set environment variables directly:
+
+```bash
+PORT=9000 deno task dev     # Deno
+PORT=9000 npm run dev       # Node.js
+```
 
 ---
 
