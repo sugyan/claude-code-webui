@@ -1,0 +1,189 @@
+name: 📚 Documentation Issue
+description: Report an issue with documentation or suggest improvements
+title: "[Docs]: "
+labels: ["documentation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for helping improve our documentation! Please provide the following information about the documentation issue or improvement.
+
+  - type: checkboxes
+    id: labels
+    attributes:
+      label: Issue Type
+      description: Please select the appropriate labels for this issue
+      options:
+        - label: 📚 `documentation` - Documentation update
+        - label: 🖥️ `backend` - Backend documentation
+        - label: 🎨 `frontend` - Frontend documentation
+
+  - type: dropdown
+    id: doc-type
+    attributes:
+      label: Documentation Type
+      description: Which type of documentation is affected?
+      options:
+        - README.md
+        - CLAUDE.md (Technical documentation)
+        - API Documentation
+        - Setup/Installation Guide
+        - Development Guide
+        - Contributing Guidelines
+        - Code Comments
+        - GitHub Issue/PR Templates
+        - Build/Deployment Documentation
+        - Other (please specify below)
+    validations:
+      required: true
+
+  - type: input
+    id: doc-location
+    attributes:
+      label: Document Location
+      description: Please provide the specific file path or URL where the issue is located
+      placeholder: e.g., README.md, frontend/src/components/ChatPage.tsx, https://github.com/user/repo/blob/main/docs/api.md
+
+  - type: dropdown
+    id: issue-category
+    attributes:
+      label: Issue Category
+      description: What type of documentation issue is this?
+      options:
+        - Missing information
+        - Incorrect/outdated information
+        - Unclear/confusing explanation
+        - Broken links
+        - Formatting issues
+        - Typos/grammar errors
+        - Missing examples
+        - Code examples not working
+        - Inconsistent information
+        - Other (please specify below)
+    validations:
+      required: true
+
+  - type: textarea
+    id: current-content
+    attributes:
+      label: Current Content (if applicable)
+      description: Quote the current text or describe the current state that needs to be changed
+      placeholder: |
+        If reporting incorrect information, paste the current text here.
+        If reporting missing information, describe what section/area needs content.
+      render: markdown
+
+  - type: textarea
+    id: issue-description
+    attributes:
+      label: Issue Description
+      description: Describe the documentation issue in detail
+      placeholder: |
+        Clearly explain:
+        - What is wrong/missing/unclear
+        - Why it's problematic
+        - How it affects users
+        - What confusion it might cause
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggested-improvement
+    attributes:
+      label: Suggested Improvement
+      description: How would you improve this documentation?
+      placeholder: |
+        Provide specific suggestions:
+        - Corrected text (if applicable)
+        - Additional information to include
+        - Better explanations or examples
+        - Structural improvements
+        - Links to add or fix
+    validations:
+      required: true
+
+  - type: dropdown
+    id: user-level
+    attributes:
+      label: User Level
+      description: From what perspective are you reporting this issue?
+      options:
+        - New user/beginner
+        - Intermediate user
+        - Advanced user/developer
+        - Contributor/maintainer
+        - Not applicable
+    validations:
+      required: true
+
+  - type: textarea
+    id: user-impact
+    attributes:
+      label: User Impact
+      description: How does this documentation issue affect users?
+      placeholder: |
+        Describe the impact:
+        - Does it prevent users from completing tasks?
+        - Does it cause confusion or mistakes?
+        - Does it waste time?
+        - Does it affect adoption or onboarding?
+
+  - type: textarea
+    id: examples
+    attributes:
+      label: Examples or References
+      description: Any examples, links, or references that support your suggestion?
+      placeholder: |
+        Include:
+        - Links to good documentation examples from other projects
+        - Screenshots showing the issue
+        - Code examples that should be included
+        - References to related documentation
+
+  - type: checkboxes
+    id: context
+    attributes:
+      label: Context
+      description: Additional context (check all that apply)
+      options:
+        - label: This affects new users trying to get started
+        - label: This affects developers contributing to the project
+        - label: This affects users trying to troubleshoot issues
+        - label: This affects users trying to understand advanced features
+        - label: This inconsistency exists across multiple documents
+        - label: This affects non-English speakers or translation efforts
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Any other context, suggestions, or information
+      placeholder: |
+        Additional information:
+        - Related issues or discussions
+        - Platform-specific considerations
+        - Accessibility considerations
+        - Internationalization considerations
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      description: Are you interested in helping with this documentation improvement?
+      options:
+        - label: I would be willing to submit a PR with the suggested changes
+        - label: I would be willing to help review documentation changes
+        - label: I would be willing to test updated documentation
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      description: Please confirm the following
+      options:
+        - label: I have searched existing issues to make sure this is not a duplicate
+          required: true
+        - label: I have provided specific location and clear description of the issue
+          required: true
+        - label: I have provided constructive suggestions for improvement
+          required: true

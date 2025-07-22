@@ -1,0 +1,191 @@
+name: 🐛 Bug Report
+description: Report a bug or unexpected behavior
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting a bug! Please provide the following information to help us diagnose and fix the issue.
+
+  - type: checkboxes
+    id: labels
+    attributes:
+      label: Issue Type
+      description: Please select the appropriate labels for this issue
+      options:
+        - label: 🐛 `bug` - Bug fix (non-breaking change which fixes an issue)
+        - label: 🖥️ `backend` - Backend-related issue
+        - label: 🎨 `frontend` - Frontend-related issue
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      description: Which component is affected?
+      options:
+        - Frontend (React/UI)
+        - Backend (Server/API)
+        - Both Frontend and Backend
+        - Claude CLI Integration
+        - Installation/Setup
+        - Not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is
+      placeholder: Describe the issue you're experiencing...
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: Steps to reproduce the behavior
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. Scroll down to '...'
+        4. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: A clear and concise description of what you expected to happen
+      placeholder: What should have happened?
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: A clear and concise description of what actually happened
+      placeholder: What actually happened?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating System
+      description: What operating system are you using?
+      options:
+        - Windows (x64)
+        - Windows (ARM64)
+        - macOS (Intel)
+        - macOS (Apple Silicon)
+        - Linux (x64)
+        - Linux (ARM64)
+        - Other (please specify in additional context)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: installation
+    attributes:
+      label: Installation Method
+      description: How did you install Claude Code Web UI?
+      options:
+        - npm install -g @anthropic-ai/claude-code-webui
+        - Downloaded binary from GitHub Releases
+        - Built from source (Deno)
+        - Built from source (Node.js)
+        - Other (please specify in additional context)
+    validations:
+      required: true
+
+  - type: input
+    id: node-version
+    attributes:
+      label: Node.js Version
+      description: What version of Node.js are you using? (run `node --version`)
+      placeholder: e.g., v20.11.0
+
+  - type: input
+    id: deno-version
+    attributes:
+      label: Deno Version (if applicable)
+      description: What version of Deno are you using? (run `deno --version`)
+      placeholder: e.g., deno 1.40.0
+
+  - type: input
+    id: claude-version
+    attributes:
+      label: Claude CLI Version
+      description: What version of Claude CLI are you using? (run `claude --version`)
+      placeholder: e.g., 1.0.54
+    validations:
+      required: true
+
+  - type: input
+    id: claude-path
+    attributes:
+      label: Claude CLI Installation Path
+      description: Where is Claude CLI installed? (run `which claude` or `where claude`)
+      placeholder: e.g., /usr/local/bin/claude
+
+  - type: input
+    id: browser
+    attributes:
+      label: Browser (for frontend issues)
+      description: What browser and version are you using?
+      placeholder: e.g., Chrome 120.0.0.0, Firefox 121.0, Safari 17.2
+
+  - type: textarea
+    id: console-logs
+    attributes:
+      label: Console Logs/Error Messages
+      description: Please include any relevant console logs, error messages, or stack traces
+      placeholder: |
+        Include:
+        - Browser console errors (for frontend issues)
+        - Backend server logs
+        - Claude CLI command output
+        - Any error messages you see
+      render: shell
+
+  - type: textarea
+    id: config
+    attributes:
+      label: Configuration
+      description: Please share relevant configuration details
+      placeholder: |
+        Include (remove sensitive information):
+        - Port configuration (if custom)
+        - Environment variables used
+        - Browser settings (if relevant)
+        - Network/proxy settings (if relevant)
+      render: yaml
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Add any other context about the problem here
+      placeholder: |
+        - Screenshots (if applicable)
+        - Workarounds you've tried
+        - Related issues you've found
+        - Any other relevant information
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      description: Please confirm the following
+      options:
+        - label: I have searched existing issues to make sure this is not a duplicate
+          required: true
+        - label: I have provided all the required information above
+          required: true
+        - label: I have removed any sensitive information from logs and configuration
+          required: true

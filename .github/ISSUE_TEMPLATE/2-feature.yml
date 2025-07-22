@@ -1,0 +1,168 @@
+name: ✨ Feature Request
+description: Suggest an idea or enhancement for this project
+title: "[Feature]: "
+labels: ["feature"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting a new feature! Please provide the following information to help us understand and evaluate your request.
+
+  - type: checkboxes
+    id: labels
+    attributes:
+      label: Issue Type
+      description: Please select the appropriate labels for this request
+      options:
+        - label: ✨ `feature` - New feature (non-breaking change which adds functionality)
+        - label: ⚡ `performance` - Performance improvement
+        - label: 🖥️ `backend` - Backend-related feature
+        - label: 🎨 `frontend` - Frontend-related feature
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component Scope
+      description: Which component(s) would this feature affect?
+      options:
+        - Frontend (React/UI)
+        - Backend (Server/API)
+        - Both Frontend and Backend
+        - Claude CLI Integration
+        - Build/Development Tools
+        - Documentation
+        - Not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: What problem does this feature solve? What is the motivation for this request?
+      placeholder: |
+        Is your feature request related to a problem? Please describe.
+        A clear and concise description of what the problem is.
+        Example: I'm always frustrated when [...]
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: Describe the solution you'd like to see implemented
+      placeholder: |
+        A clear and concise description of what you want to happen.
+        Include specific details about:
+        - How the feature should work
+        - User interface changes (if applicable)
+        - API changes (if applicable)
+        - Expected behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: use-cases
+    attributes:
+      label: Use Cases
+      description: Describe specific use cases or scenarios where this feature would be valuable
+      placeholder: |
+        Examples of how this feature would be used:
+        1. Use case 1: [Description]
+        2. Use case 2: [Description]
+        3. Use case 3: [Description]
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Describe alternative solutions or features you've considered
+      placeholder: |
+        A clear and concise description of any alternative solutions or features you've considered.
+        Why would the proposed solution be better than these alternatives?
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is this feature to you?
+      options:
+        - Low - Nice to have
+        - Medium - Would significantly improve my workflow
+        - High - Critical for my use case
+        - Not sure
+    validations:
+      required: true
+
+  - type: dropdown
+    id: complexity
+    attributes:
+      label: Implementation Complexity (if known)
+      description: Do you have a sense of how complex this feature might be to implement?
+      options:
+        - Simple - Small change or addition
+        - Medium - Moderate development effort
+        - Complex - Significant development effort
+        - Not sure
+
+  - type: textarea
+    id: implementation
+    attributes:
+      label: Implementation Considerations
+      description: Any thoughts on implementation details, technical considerations, or potential challenges?
+      placeholder: |
+        If you have thoughts on implementation:
+        - Technical approach
+        - Dependencies that might be needed
+        - Potential breaking changes
+        - Performance considerations
+        - Security considerations
+
+  - type: textarea
+    id: examples
+    attributes:
+      label: Examples or Mockups
+      description: Any examples, mockups, screenshots, or references that help illustrate the feature?
+      placeholder: |
+        Include:
+        - Links to similar features in other tools
+        - Mockups or wireframes
+        - Code examples
+        - Screenshots or diagrams
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      description: Are you interested in contributing to this feature?
+      options:
+        - label: I would be willing to implement this feature myself
+        - label: I would be willing to help test this feature
+        - label: I would be willing to help with documentation
+        - label: I would be willing to provide feedback during development
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Add any other context, links, or information about the feature request here
+      placeholder: |
+        Any additional information that might be helpful:
+        - Related issues or discussions
+        - Links to relevant documentation
+        - Community feedback you've received
+        - Urgency or timeline considerations
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      description: Please confirm the following
+      options:
+        - label: I have searched existing issues and feature requests to make sure this is not a duplicate
+          required: true
+        - label: I have provided a clear problem statement and proposed solution
+          required: true
+        - label: I understand that feature requests are prioritized based on community needs and maintainer capacity
+          required: true
