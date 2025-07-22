@@ -9,7 +9,7 @@ import { createApp } from "../app.ts";
 import { DenoRuntime } from "../runtime/deno.ts";
 import { parseCliArgs } from "./args.ts";
 import { validateClaudeCli } from "./validation.ts";
-import { dirname, fromFileUrl, join } from "https://deno.land/std/path/mod.ts";
+import { dirname, fromFileUrl, join } from "@std/path";
 
 async function main(runtime: DenoRuntime) {
   // Parse CLI arguments

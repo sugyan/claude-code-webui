@@ -16,6 +16,7 @@
   },
   "imports": {
     "@std/assert": "jsr:@std/assert@1",
+    "@std/path": "jsr:@std/path@1",
     "commander": "npm:commander@^14.0.0",
     "hono": "jsr:@hono/hono@^4.8.5",
     "@anthropic-ai/claude-code": "npm:@anthropic-ai/claude-code@1.0.51"
