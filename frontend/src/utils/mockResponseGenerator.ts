@@ -218,8 +218,22 @@ export const DEMO_SCENARIOS = {
         },
       },
       {
+        type: "button_focus" as const,
+        delay: 500,
+        data: {
+          buttonType: "permission_allow",
+        },
+      },
+      {
+        type: "button_click" as const,
+        delay: 700,
+        data: {
+          buttonType: "permission_allow",
+        },
+      },
+      {
         type: "assistant" as const,
-        delay: 2000,
+        delay: 1000,
         data: createAssistantMessage(
           "I can see this is the main App.tsx file for the Claude Code Web UI project. It's a React application that uses React Router for navigation between a project selector page and the main chat interface. The app includes theme management with light/dark mode support, and provides a web-based interface for interacting with the Claude CLI tool. The routing system allows users to first select a working directory, then engage in conversations with Claude within that project context.",
           "demo-session-files",
@@ -264,8 +278,22 @@ export const DEMO_SCENARIOS = {
         },
       },
       {
+        type: "button_focus" as const,
+        delay: 500,
+        data: {
+          buttonType: "permission_allow",
+        },
+      },
+      {
+        type: "button_click" as const,
+        delay: 700,
+        data: {
+          buttonType: "permission_allow",
+        },
+      },
+      {
         type: "assistant" as const,
-        delay: 2200,
+        delay: 1000,
         data: createToolUseMessage(
           "Read",
           { file_path: "/Users/demo/claude-code-webui/frontend/src" },
