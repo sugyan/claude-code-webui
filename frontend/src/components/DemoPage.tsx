@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import { type Theme } from "../hooks/useTheme";
 import { useChatState } from "../hooks/chat/useChatState";
@@ -14,7 +14,7 @@ export function DemoPage() {
   const location = useLocation();
   const isDemo = true;
 
-  // Check for control parameter, scenario, and theme
+  // Check for control parameter, scenario, theme, and pauseAt
   const searchParams = new URLSearchParams(location.search);
   const showControls = searchParams.get("control") === "true";
   const scenarioParam = searchParams.get(
@@ -22,6 +22,10 @@ export function DemoPage() {
   ) as keyof typeof DEMO_SCENARIOS;
   const selectedScenario =
     scenarioParam && DEMO_SCENARIOS[scenarioParam] ? scenarioParam : "basic";
+
+  // Parse pauseAt parameter
+  const pauseAtParam = searchParams.get("pauseAt");
+  const pauseAtStep = pauseAtParam ? parseInt(pauseAtParam, 10) : undefined;
 
   // Get theme from URL or use system default
   const themeParam = searchParams.get("theme");
@@ -116,6 +120,62 @@ export function DemoPage() {
     showPermissionDialog,
   } = usePermissions();
 
+  // Permission dialog handlers (for demo)
+  const handlePermissionAllow = useCallback(() => {
+    if (!permissionDialog) return;
+    closePermissionDialog();
+  }, [permissionDialog, closePermissionDialog]);
+
+  const handlePermissionAllowPermanent = useCallback(() => {
+    if (!permissionDialog) return;
+    // For demo purposes, just take the first pattern
+    const pattern = permissionDialog.patterns[0];
+    allowToolPermanent(pattern);
+    closePermissionDialog();
+  }, [permissionDialog, allowToolPermanent, closePermissionDialog]);
+
+  const handlePermissionDeny = useCallback(() => {
+    closePermissionDialog();
+  }, [closePermissionDialog]);
+
+  // Handle button focus from demo automation
+  const handleButtonFocus = useCallback((buttonType: string) => {
+    console.log(`Demo button focus: ${buttonType}`);
+
+    // Map button types to internal names
+    if (buttonType === "permission_allow") {
+      setActiveButton("allow");
+    } else if (buttonType === "permission_allow_permanent") {
+      setActiveButton("allowPermanent");
+    } else if (buttonType === "permission_deny") {
+      setActiveButton("deny");
+    }
+  }, []);
+
+  // Handle button clicks from demo automation
+  const handleButtonClick = useCallback(
+    (buttonType: string) => {
+      console.log(`Demo button click: ${buttonType}`);
+
+      // Set clicked effect first
+      if (buttonType === "permission_allow") {
+        setClickedButton("allow");
+        setTimeout(() => handlePermissionAllow(), 200);
+      } else if (buttonType === "permission_allow_permanent") {
+        setClickedButton("allowPermanent");
+        setTimeout(() => handlePermissionAllowPermanent(), 200);
+      } else if (buttonType === "permission_deny") {
+        setClickedButton("deny");
+        setTimeout(() => handlePermissionDeny(), 200);
+      }
+    },
+    [
+      handlePermissionAllow,
+      handlePermissionAllowPermanent,
+      handlePermissionDeny,
+    ],
+  );
+
   // Demo automation
   const {
     currentStep,
@@ -131,6 +191,7 @@ export function DemoPage() {
     autoStart: true,
     typingSpeed: 25,
     scenarioKey: selectedScenario,
+    pauseAtStep: pauseAtStep,
     onStepComplete: (step) => {
       console.log(`Demo step ${step} completed`);
     },
@@ -145,48 +206,21 @@ export function DemoPage() {
     resetRequestState,
     generateRequestId,
     showPermissionDialog,
+    onButtonFocus: handleButtonFocus,
+    onButtonClick: handleButtonClick,
   });
 
   // Demo state
   const demoWorkingDirectory = "/Users/demo/claude-code-webui";
-  const [autoClickButton, setAutoClickButton] = useState<
-    "allow" | "allowPermanent" | null
-  >(null);
+  const [activeButton, setActiveButton] = useState<string | null>(null);
+  const [clickedButton, setClickedButton] = useState<string | null>(null);
   const permissionDialogCountRef = useRef(0);
-  const hasHandledDialogRef = useRef(false);
 
-  // Auto-allow permissions for demo after 1 second with visual effect
-  useEffect(() => {
-    if (
-      permissionDialog &&
-      permissionDialog.isOpen &&
-      !hasHandledDialogRef.current
-    ) {
-      hasHandledDialogRef.current = true; // Mark this dialog as handled
-
-      // Increment dialog count when a new dialog opens
-      const currentCount = permissionDialogCountRef.current;
-      permissionDialogCountRef.current += 1;
-
-      const timer = setTimeout(() => {
-        // First dialog: use allowPermanent, Second+ dialog: use allow
-        const buttonToClick = currentCount === 0 ? "allowPermanent" : "allow";
-        setAutoClickButton(buttonToClick);
-        // That's it! PermissionDialog will handle the rest
-      }, 1000); // Auto-allow after 1 second for demo
-
-      return () => {
-        clearTimeout(timer);
-        hasHandledDialogRef.current = false;
-      };
-    }
-  }, [permissionDialog]);
-
-  // Reset autoClickButton when dialog closes
+  // Reset states when dialog closes
   useEffect(() => {
     if (!permissionDialog || !permissionDialog.isOpen) {
-      setAutoClickButton(null);
-      hasHandledDialogRef.current = false;
+      setActiveButton(null);
+      setClickedButton(null);
     }
   }, [permissionDialog]);
 
@@ -196,24 +230,6 @@ export function DemoPage() {
       permissionDialogCountRef.current = 0;
     }
   }, [currentStep]);
-
-  // Permission dialog handlers (for demo)
-  const handlePermissionAllow = () => {
-    if (!permissionDialog) return;
-    closePermissionDialog();
-  };
-
-  const handlePermissionAllowPermanent = () => {
-    if (!permissionDialog) return;
-    // For demo purposes, just take the first pattern
-    const pattern = permissionDialog.patterns[0];
-    allowToolPermanent(pattern);
-    closePermissionDialog();
-  };
-
-  const handlePermissionDeny = () => {
-    closePermissionDialog();
-  };
 
   // Fake send message for demo (input is controlled by automation)
   const handleSendMessage = () => {
@@ -324,7 +340,8 @@ export function DemoPage() {
           onAllowPermanent={handlePermissionAllowPermanent}
           onDeny={handlePermissionDeny}
           onClose={closePermissionDialog}
-          autoClickButton={autoClickButton}
+          activeButton={activeButton}
+          clickedButton={clickedButton}
         />
       )}
     </div>

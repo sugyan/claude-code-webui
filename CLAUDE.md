@@ -7,22 +7,24 @@ A web-based interface for the `claude` command line tool that provides streaming
 This project uses automated quality checks to ensure consistent code standards:
 
 - **Lefthook**: Git hooks manager that runs `make check` before every commit
-- **Quality Commands**: Use `make check` to run all quality checks manually  
+- **Quality Commands**: Use `make check` to run all quality checks manually
 - **CI/CD**: GitHub Actions runs the same quality checks on every push
 
 The pre-commit hook prevents commits with formatting, linting, or test failures.
 
 ### Setup for New Contributors
 
-1. **Install Lefthook**: 
+1. **Install Lefthook**:
+
    ```bash
    # macOS
    brew install lefthook
-   
+
    # Or download from https://github.com/evilmartians/lefthook/releases
    ```
 
 2. **Install hooks**:
+
    ```bash
    lefthook install
    ```
@@ -49,7 +51,7 @@ This project consists of three main components:
 
 - **Runtime Abstraction**: Clean separation between business logic and platform-specific code
 - **Modular Architecture**: CLI, application core, and runtime layers clearly separated
-- Command line interface with `--port`, `--help`, `--version` options  
+- Command line interface with `--port`, `--help`, `--version` options
 - Universal Claude CLI path detection with tracing-based approach
 - Startup validation to check Claude CLI availability
 - Executes `claude --output-format stream-json --verbose -p <message>`
@@ -164,17 +166,20 @@ The SDK returns three types of JSON messages:
 The application includes robust Claude CLI path detection to handle various installation methods:
 
 #### Universal Detection Approach
+
 - **Tracing-based detection**: Uses temporary node wrapper to capture actual script paths
 - **Cross-platform support**: Handles Windows (.bat), macOS, and Linux installations
 - **Installation method agnostic**: Works with npm, pnpm, asdf, yarn, and other package managers
 
 #### Detection Process
+
 1. **Auto-discovery**: Searches for `claude` in system PATH using `runtime.findExecutable()`
 2. **Script path tracing**: Creates temporary node wrapper to intercept and trace node execution
 3. **Version validation**: Executes `claude --version` to verify functionality and capture version info
 4. **Fallback handling**: Uses original path if detection fails, with appropriate logging
 
 #### Supported Installation Scenarios
+
 - **npm global**: `/usr/local/bin/claude` → actual script in `node_modules`
 - **pnpm global**: Similar to npm but with pnpm-specific paths
 - **asdf**: Version-managed installations with shim resolution
@@ -182,6 +187,7 @@ The application includes robust Claude CLI path detection to handle various inst
 - **Custom paths**: Manual installations via `--claude-path` option
 
 #### Technical Implementation
+
 - **File**: `backend/cli/validation.ts`
 - **Key functions**: `detectClaudeCliPath()`, `validateClaudeCli()`
 - **Platform abstraction**: Uses Runtime interface for cross-platform compatibility
@@ -212,6 +218,83 @@ The application supports conversation continuity within the same chat session us
 - **Efficient**: Leverages Claude Code SDK's native session management
 - **Seamless**: Works automatically without user configuration
 
+## MCP Integration (Model Context Protocol)
+
+This project includes Playwright MCP server integration to enable automated browser testing and demo verification capabilities.
+
+### Playwright MCP Server
+
+The project is configured with Microsoft's official Playwright MCP server, providing Claude Code with browser automation capabilities:
+
+- **Automated Demo Testing**: Take screenshots and verify demo page functionality
+- **Interactive Browser Control**: Navigate, click, fill forms, and interact with web elements
+- **Visual Verification**: Capture screenshots at different states for manual review
+- **Authentication Support**: Manual login in visible browser window with persistent sessions
+
+### Configuration
+
+The Playwright MCP server is configured at project level in `.mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "playwright": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["@playwright/mcp@latest"],
+      "env": {}
+    }
+  }
+}
+```
+
+This configuration is shared across all project contributors and automatically loaded when using Claude Code in this directory.
+
+### Usage Instructions
+
+1. **Initial Setup**: The MCP server is already configured - no additional setup required
+2. **Explicit Usage**: When first using browser automation, explicitly say "**playwright mcp**" in your request
+3. **Browser Window**: A visible Chrome browser window will open that you can see and interact with
+4. **Authentication**: If authentication is needed, you can manually log in through the visible browser window
+
+### Available Tools
+
+The Playwright MCP server provides 25 browser automation tools including:
+
+- **Navigation**: `goto()`, `goBack()`, `goForward()`, `reload()`
+- **Interaction**: `click()`, `fill()`, `select()`, `hover()`, `dragAndDrop()`
+- **Screenshots**: `screenshot()` for full page or element-specific captures
+- **Content**: `getPageContent()`, `evaluate()` for JavaScript execution
+- **File Operations**: `upload()`, `download()`
+- **Tab Management**: `newPage()`, `closePage()`, `switchToPage()`
+- **Dialog Handling**: Handle alerts, confirmss, prompts
+
+### Demo Page Testing Workflow
+
+Common workflow for testing the demo page:
+
+1. **Start Application**: Ensure frontend and backend are running
+2. **Request Browser Test**: Ask Claude Code to test demo page functionality using "playwright mcp"
+3. **Automated Navigation**: Claude will open browser, navigate to `http://localhost:3000`
+4. **Interactive Testing**: Claude can simulate user interactions (clicking, typing, etc.)
+5. **Screenshot Verification**: Take screenshots at key states for visual confirmation
+6. **Automated Validation**: Verify expected elements and behaviors are working
+
+### Example Usage
+
+```
+Please use playwright mcp to test our demo page. Navigate to http://localhost:3000,
+take a screenshot of the initial state, then test the basic demo interaction flow
+and take another screenshot to verify it works correctly.
+```
+
+### Technical Notes
+
+- **Accessibility Tree**: Uses Chrome accessibility tree for reliable element interaction (not pixel-based)
+- **No Vision Models**: Operates purely on structured data, avoiding screenshot interpretation ambiguity
+- **Session Persistence**: Cookies and session data persist for the duration of the browser session
+- **Cross-Platform**: Works on macOS, Linux, and Windows (wherever Playwright is supported)
+
 ## Development
 
 ### Prerequisites
@@ -240,7 +323,7 @@ Both backend startup and frontend proxy configuration will automatically use thi
 # Deno backend
 cd backend && deno task dev     # Uses dotenvx to read ../.env and starts backend on port 9000
 
-# Node.js backend  
+# Node.js backend
 cd backend && npm run dev       # Uses dotenvx to read ../.env and starts backend on port 9000
 
 # Frontend
@@ -262,7 +345,7 @@ cd frontend && npm run dev      # Configures proxy to localhost:9000
    # Deno
    cd backend
    deno task dev
-   
+
    # Or Node.js
    cd backend
    npm run dev
@@ -437,6 +520,7 @@ cd frontend && npm run dev      # Configures proxy to localhost:9000
 **SDK Types**: `frontend/node_modules/@anthropic-ai/claude-code/sdk.d.ts`
 
 ### Common Patterns
+
 ```typescript
 // Type extraction
 const systemMsg = sdkMessage as Extract<SDKMessage, { type: "system" }>;
@@ -457,8 +541,9 @@ console.log(systemMsg.cwd); // Direct access, no nesting
 ```
 
 ### Key Points
+
 - **System**: Fields directly on object (`systemMsg.cwd`, `systemMsg.tools`)
-- **Assistant**: Content nested under `message.content` 
+- **Assistant**: Content nested under `message.content`
 - **Result**: Has `subtype` field (`success` | `error_max_turns` | `error_during_execution`)
 - **Type Safety**: Always use `Extract<SDKMessage, { type: "..." }>` for narrowing
 
@@ -467,26 +552,31 @@ console.log(systemMsg.cwd); // Direct access, no nesting
 The modular frontend architecture provides several key benefits:
 
 ### Code Organization
+
 - **Reduced File Size**: Main App.tsx reduced from 467 to 262 lines (44% reduction)
 - **Focused Responsibilities**: Each file has a single, clear purpose
 - **Logical Grouping**: Related functionality is organized into coherent modules
 
 ### Maintainability
+
 - **Easier Debugging**: Issues can be isolated to specific modules
 - **Simplified Testing**: Individual components and hooks can be tested in isolation
 - **Clear Dependencies**: Import structure clearly shows component relationships
 
 ### Reusability
+
 - **Shared Components**: `MessageContainer` and `CollapsibleDetails` reduce UI duplication
 - **Utility Functions**: Common operations are centralized and reusable
 - **Configuration**: API endpoints and constants are easily configurable
 
 ### Developer Experience
+
 - **Type Safety**: Enhanced TypeScript coverage with stricter type definitions
 - **IntelliSense**: Better IDE support with smaller, focused modules
 - **Hot Reload**: Faster development cycles with smaller change surfaces
 
 ### Performance
+
 - **Bundle Optimization**: Tree-shaking is more effective with modular code
 - **Code Splitting**: Easier to implement lazy loading for large features
 - **Memory Efficiency**: Reduced memory footprint with focused hooks
@@ -502,7 +592,7 @@ The project includes comprehensive test suites for both frontend and backend com
 - **Location**: Tests are co-located with source files (`*.test.ts`, `*.test.tsx`)
 - **Run**: `make test-frontend` or `cd frontend && npm run test:run`
 
-### Backend Testing  
+### Backend Testing
 
 - **Framework**: Deno's built-in test runner with std/assert
 - **Coverage**: Path encoding utilities, API handlers, and integration tests
@@ -542,7 +632,7 @@ cd backend && deno task build
 Both frontend and backend use **fixed versions** (without caret `^`) to ensure consistency:
 
 - **Frontend**: `frontend/package.json` - `"@anthropic-ai/claude-code": "1.0.51"`
-- **Backend**: 
+- **Backend**:
   - Deno: `backend/deno.json` imports - `"@anthropic-ai/claude-code": "npm:@anthropic-ai/claude-code@1.0.51"`
   - Node.js: `backend/package.json` - `"@anthropic-ai/claude-code": "1.0.51"`
 
@@ -551,15 +641,17 @@ Both frontend and backend use **fixed versions** (without caret `^`) to ensure c
 When updating to a new Claude Code version (e.g., 1.0.40):
 
 1. **Check current versions**:
+
    ```bash
    # Frontend
    grep "@anthropic-ai/claude-code" frontend/package.json
-   
-   # Backend  
+
+   # Backend
    grep "@anthropic-ai/claude-code" backend/deno.json
    ```
 
 2. **Update Frontend**:
+
    ```bash
    # Edit frontend/package.json - change version number
    # "@anthropic-ai/claude-code": "1.0.XX"
@@ -567,12 +659,13 @@ When updating to a new Claude Code version (e.g., 1.0.40):
    ```
 
 3. **Update Backend**:
+
    ```bash
    # For Deno: Edit backend/deno.json imports - change version number
    # "@anthropic-ai/claude-code": "npm:@anthropic-ai/claude-code@1.0.XX"
    cd backend && rm deno.lock && deno cache main.ts
-   
-   # For Node.js: Edit backend/package.json - change version number  
+
+   # For Node.js: Edit backend/package.json - change version number
    # "@anthropic-ai/claude-code": "1.0.XX"
    cd backend && npm install
    ```
@@ -585,6 +678,7 @@ When updating to a new Claude Code version (e.g., 1.0.40):
 ### Version Consistency Check
 
 Ensure all environments use the same version:
+
 ```bash
 # Should show the same version number across all package configs
 grep "@anthropic-ai/claude-code" frontend/package.json backend/deno.json backend/package.json
@@ -704,6 +798,7 @@ gh api repos/owner/repo/issues/PARENT_ISSUE_NUMBER/sub_issues
 ```
 
 **Key points**:
+
 - Use issue **ID** (not number) for `sub_issue_id` parameter
 - Endpoint is `/sub_issues` (plural) for POST operations
 - Parent issue will show `sub_issues_summary` with total/completed counts
@@ -722,6 +817,7 @@ gh api repos/sugyan/claude-code-webui/pulls/39/comments
 ```
 
 **Why this matters**:
+
 - Copilot provides valuable code improvement suggestions
 - These comments include security, performance, and code quality feedback
 - They appear as inline comments on specific lines of code

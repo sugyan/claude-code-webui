@@ -1,4 +1,3 @@
-import { useState, useEffect, useRef } from "react";
 import { PermissionDialog } from "./PermissionDialog";
 
 interface DemoPermissionDialogWrapperProps {
@@ -8,7 +7,8 @@ interface DemoPermissionDialogWrapperProps {
   onAllowPermanent: () => void;
   onDeny: () => void;
   onClose: () => void;
-  autoClickButton?: "allow" | "allowPermanent" | null;
+  activeButton?: string | null;
+  clickedButton?: string | null;
 }
 
 /**
@@ -21,71 +21,13 @@ interface DemoPermissionDialogWrapperProps {
  * 4. Visual feedback included (highlight effects)
  */
 export function DemoPermissionDialogWrapper({
-  autoClickButton,
+  activeButton,
+  clickedButton,
   onAllow,
   onAllowPermanent,
   onDeny,
   ...permissionDialogProps
 }: DemoPermissionDialogWrapperProps) {
-  const [activeButton, setActiveButton] = useState<string | null>(null);
-  const [clickedButton, setClickedButton] = useState<string | null>(null);
-  const timersRef = useRef<{
-    focus?: NodeJS.Timeout;
-    action?: NodeJS.Timeout;
-    clickEffect?: NodeJS.Timeout;
-  }>({});
-
-  // Auto-click effect with focus sequence animation
-  useEffect(() => {
-    if (autoClickButton && permissionDialogProps.isOpen) {
-      if (autoClickButton === "allowPermanent") {
-        // For allowPermanent: sequence 1st → 2nd button
-        setActiveButton("allow");
-
-        timersRef.current.focus = setTimeout(() => {
-          setActiveButton("allowPermanent");
-        }, 500);
-
-        timersRef.current.action = setTimeout(() => {
-          setClickedButton("allowPermanent");
-          timersRef.current.clickEffect = setTimeout(() => {
-            onAllowPermanent();
-          }, 200);
-        }, 1200);
-      } else if (autoClickButton === "allow") {
-        // For allow: direct focus on button
-        setActiveButton("allow");
-
-        timersRef.current.action = setTimeout(() => {
-          setClickedButton("allow");
-          timersRef.current.clickEffect = setTimeout(() => {
-            onAllow();
-          }, 200);
-        }, 700);
-      }
-
-      return () => {
-        if (timersRef.current.focus) clearTimeout(timersRef.current.focus);
-        if (timersRef.current.action) clearTimeout(timersRef.current.action);
-        if (timersRef.current.clickEffect)
-          clearTimeout(timersRef.current.clickEffect);
-      };
-    }
-  }, [
-    autoClickButton,
-    permissionDialogProps.isOpen,
-    onAllow,
-    onAllowPermanent,
-  ]);
-
-  // Reset states when dialog closes
-  useEffect(() => {
-    if (!permissionDialogProps.isOpen) {
-      setActiveButton(null);
-      setClickedButton(null);
-    }
-  }, [permissionDialogProps.isOpen]);
-
   // Button class enhancement function
   const getButtonClassName = (
     buttonType: "allow" | "allowPermanent" | "deny",
