@@ -12,7 +12,6 @@ import { ThemeToggle } from "./chat/ThemeToggle";
 import { HistoryButton } from "./chat/HistoryButton";
 import { ChatInput } from "./chat/ChatInput";
 import { ChatMessages } from "./chat/ChatMessages";
-import { PermissionDialog } from "./PermissionDialog";
 import { HistoryView } from "./HistoryView";
 import { getChatUrl, getProjectsUrl } from "../config/api";
 import { KEYBOARD_SHORTCUTS } from "../utils/constants";
@@ -105,18 +104,19 @@ export function ChatPage() {
 
   const {
     allowedTools,
-    permissionDialog,
-    showPermissionDialog,
-    closePermissionDialog,
+    permissionRequest,
+    showPermissionRequest,
+    closePermissionRequest,
     allowToolTemporary,
     allowToolPermanent,
+    isPermissionMode,
   } = usePermissions();
 
   const handlePermissionError = useCallback(
     (toolName: string, patterns: string[], toolUseId: string) => {
-      showPermissionDialog(toolName, patterns, toolUseId);
+      showPermissionRequest(toolName, patterns, toolUseId);
     },
-    [showPermissionDialog],
+    [showPermissionRequest],
   );
 
   const sendMessage = useCallback(
@@ -242,56 +242,66 @@ export function ChatPage() {
     abortRequest(currentRequestId, isLoading, resetRequestState);
   }, [abortRequest, currentRequestId, isLoading, resetRequestState]);
 
-  // Permission dialog handlers
+  // Permission request handlers
   const handlePermissionAllow = useCallback(() => {
-    if (!permissionDialog) return;
+    if (!permissionRequest) return;
 
     // Add all patterns temporarily
     let updatedAllowedTools = allowedTools;
-    permissionDialog.patterns.forEach((pattern) => {
+    permissionRequest.patterns.forEach((pattern) => {
       updatedAllowedTools = allowToolTemporary(pattern, updatedAllowedTools);
     });
 
-    closePermissionDialog();
+    closePermissionRequest();
 
     if (currentSessionId) {
       sendMessage("continue", updatedAllowedTools, true);
     }
   }, [
-    permissionDialog,
+    permissionRequest,
     currentSessionId,
     sendMessage,
     allowedTools,
     allowToolTemporary,
-    closePermissionDialog,
+    closePermissionRequest,
   ]);
 
   const handlePermissionAllowPermanent = useCallback(() => {
-    if (!permissionDialog) return;
+    if (!permissionRequest) return;
 
     // Add all patterns permanently
     let updatedAllowedTools = allowedTools;
-    permissionDialog.patterns.forEach((pattern) => {
+    permissionRequest.patterns.forEach((pattern) => {
       updatedAllowedTools = allowToolPermanent(pattern, updatedAllowedTools);
     });
 
-    closePermissionDialog();
+    closePermissionRequest();
 
     if (currentSessionId) {
       sendMessage("continue", updatedAllowedTools, true);
     }
   }, [
-    permissionDialog,
+    permissionRequest,
     currentSessionId,
     sendMessage,
     allowedTools,
     allowToolPermanent,
-    closePermissionDialog,
+    closePermissionRequest,
   ]);
 
   const handlePermissionDeny = useCallback(() => {
-    closePermissionDialog();
-  }, [closePermissionDialog]);
+    closePermissionRequest();
+  }, [closePermissionRequest]);
+
+  // Create permission data for inline permission interface
+  const permissionData = permissionRequest
+    ? {
+        patterns: permissionRequest.patterns,
+        onAllow: handlePermissionAllow,
+        onAllowPermanent: handlePermissionAllowPermanent,
+        onDeny: handlePermissionDeny,
+      }
+    : undefined;
 
   const handleHistoryClick = useCallback(() => {
     const searchParams = new URLSearchParams();
@@ -490,22 +500,14 @@ export function ChatPage() {
               onInputChange={setInput}
               onSubmit={() => sendMessage()}
               onAbort={handleAbort}
+              showPermissions={isPermissionMode}
+              permissionData={permissionData}
             />
           </>
         )}
       </div>
 
-      {/* Permission Dialog */}
-      {permissionDialog && (
-        <PermissionDialog
-          isOpen={permissionDialog.isOpen}
-          patterns={permissionDialog.patterns}
-          onAllow={handlePermissionAllow}
-          onAllowPermanent={handlePermissionAllowPermanent}
-          onDeny={handlePermissionDeny}
-          onClose={closePermissionDialog}
-        />
-      )}
+      {/* Permission interface - Now handled inline by ChatInput component */}
     </div>
   );
 }

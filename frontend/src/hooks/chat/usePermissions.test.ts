@@ -6,17 +6,17 @@ describe("usePermissions", () => {
   it("should initialize with empty allowed tools", () => {
     const { result } = renderHook(() => usePermissions());
     expect(result.current.allowedTools).toEqual([]);
-    expect(result.current.permissionDialog).toBeNull();
+    expect(result.current.permissionRequest).toBeNull();
   });
 
-  it("should show permission dialog", () => {
+  it("should show permission request", () => {
     const { result } = renderHook(() => usePermissions());
 
     act(() => {
-      result.current.showPermissionDialog("Bash", ["Bash(ls:*)"], "tool-123");
+      result.current.showPermissionRequest("Bash", ["Bash(ls:*)"], "tool-123");
     });
 
-    expect(result.current.permissionDialog).toEqual({
+    expect(result.current.permissionRequest).toEqual({
       isOpen: true,
       toolName: "Bash",
       patterns: ["Bash(ls:*)"],
@@ -24,18 +24,18 @@ describe("usePermissions", () => {
     });
   });
 
-  it("should close permission dialog", () => {
+  it("should close permission request", () => {
     const { result } = renderHook(() => usePermissions());
 
     act(() => {
-      result.current.showPermissionDialog("Bash", ["Bash(ls:*)"], "tool-123");
+      result.current.showPermissionRequest("Bash", ["Bash(ls:*)"], "tool-123");
     });
 
     act(() => {
-      result.current.closePermissionDialog();
+      result.current.closePermissionRequest();
     });
 
-    expect(result.current.permissionDialog).toBeNull();
+    expect(result.current.permissionRequest).toBeNull();
   });
 
   it("should allow tool temporarily", () => {
@@ -133,10 +133,10 @@ describe("usePermissions", () => {
     const { result } = renderHook(() => usePermissions());
 
     act(() => {
-      result.current.showPermissionDialog("Bash", [], "tool-123");
+      result.current.showPermissionRequest("Bash", [], "tool-123");
     });
 
-    expect(result.current.permissionDialog).toEqual({
+    expect(result.current.permissionRequest).toEqual({
       isOpen: true,
       toolName: "Bash",
       patterns: [],
@@ -151,10 +151,10 @@ describe("usePermissions", () => {
     const patterns = ["Bash(command:*)"];
 
     act(() => {
-      result.current.showPermissionDialog("Bash", patterns, "tool-123");
+      result.current.showPermissionRequest("Bash", patterns, "tool-123");
     });
 
-    expect(result.current.permissionDialog).toEqual({
+    expect(result.current.permissionRequest).toEqual({
       isOpen: true,
       toolName: "Bash",
       patterns: ["Bash(command:*)"],

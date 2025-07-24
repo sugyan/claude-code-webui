@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 
-interface PermissionDialog {
+interface PermissionRequest {
   isOpen: boolean;
   toolName: string;
   patterns: string[];
@@ -9,23 +9,30 @@ interface PermissionDialog {
 
 export function usePermissions() {
   const [allowedTools, setAllowedTools] = useState<string[]>([]);
-  const [permissionDialog, setPermissionDialog] =
-    useState<PermissionDialog | null>(null);
+  const [permissionRequest, setPermissionRequest] =
+    useState<PermissionRequest | null>(null);
 
-  const showPermissionDialog = useCallback(
+  // New state for inline permission system
+  const [isPermissionMode, setIsPermissionMode] = useState(false);
+
+  const showPermissionRequest = useCallback(
     (toolName: string, patterns: string[], toolUseId: string) => {
-      setPermissionDialog({
+      setPermissionRequest({
         isOpen: true,
         toolName,
         patterns,
         toolUseId,
       });
+      // Enable inline permission mode
+      setIsPermissionMode(true);
     },
     [],
   );
 
-  const closePermissionDialog = useCallback(() => {
-    setPermissionDialog(null);
+  const closePermissionRequest = useCallback(() => {
+    setPermissionRequest(null);
+    // Disable inline permission mode
+    setIsPermissionMode(false);
   }, []);
 
   const allowToolTemporary = useCallback(
@@ -52,11 +59,14 @@ export function usePermissions() {
 
   return {
     allowedTools,
-    permissionDialog,
-    showPermissionDialog,
-    closePermissionDialog,
+    permissionRequest,
+    showPermissionRequest,
+    closePermissionRequest,
     allowToolTemporary,
     allowToolPermanent,
     resetPermissions,
+    // New inline permission system exports
+    isPermissionMode,
+    setIsPermissionMode,
   };
 }

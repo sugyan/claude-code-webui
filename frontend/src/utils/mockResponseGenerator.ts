@@ -130,7 +130,7 @@ export function* generateMockStream(
 ): Generator<MockStreamResponse, void, unknown> {
   for (const step of steps) {
     if (step.type === "permission_error") {
-      // This would trigger permission dialog in real app
+      // This would trigger permission request in real app
       const errorData = step.data as {
         toolName: string;
         pattern: string;

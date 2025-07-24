@@ -35,7 +35,7 @@ interface DemoAutomationOptions {
   startRequest?: () => void;
   resetRequestState?: () => void;
   generateRequestId?: () => string;
-  showPermissionDialog?: (
+  showPermissionRequest?: (
     toolName: string,
     patterns: string[],
     toolUseId: string,
@@ -83,7 +83,7 @@ export function useDemoAutomation(
     startRequest: externalStartRequest,
     resetRequestState: externalResetRequestState,
     generateRequestId: externalGenerateRequestId,
-    showPermissionDialog: externalShowPermissionDialog,
+    showPermissionRequest: externalShowPermissionRequest,
     onButtonFocus,
     onButtonClick,
   } = options;
@@ -125,8 +125,8 @@ export function useDemoAutomation(
 
   // Permissions - use external if provided, otherwise use internal
   const permissionsHook = usePermissions();
-  const finalShowPermissionDialog =
-    externalShowPermissionDialog || permissionsHook.showPermissionDialog;
+  const finalShowPermissionRequest =
+    externalShowPermissionRequest || permissionsHook.showPermissionRequest;
 
   // Get current scenario
   const scenario = scenarioToStream(scenarioKey);
@@ -183,7 +183,7 @@ export function useDemoAutomation(
           pattern: string;
           toolUseId: string;
         };
-        finalShowPermissionDialog(
+        finalShowPermissionRequest(
           errorData.toolName,
           [errorData.pattern],
           errorData.toolUseId,
@@ -293,7 +293,7 @@ export function useDemoAutomation(
       setHasReceivedInit,
       setCurrentAssistantMessage,
       updateLastMessage,
-      finalShowPermissionDialog,
+      finalShowPermissionRequest,
       finalAddMessage,
       onButtonFocus,
       onButtonClick,
@@ -511,7 +511,7 @@ export function useDemoAutomation(
     if (scenarioKey === "fileOperations") {
       // Auto-allow permissions after a short delay for demo purposes
       const timer = setTimeout(() => {
-        // This would be handled by the permission dialog in the component
+        // This would be handled by the permission interface in the component
       }, 2000);
 
       return () => clearTimeout(timer);

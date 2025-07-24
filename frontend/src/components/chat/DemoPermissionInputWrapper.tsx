@@ -1,18 +1,16 @@
-import { PermissionDialog } from "./PermissionDialog";
+import { PermissionInputPanel } from "./PermissionInputPanel";
 
-interface DemoPermissionDialogWrapperProps {
-  isOpen: boolean;
+interface DemoPermissionInputWrapperProps {
   patterns: string[];
   onAllow: () => void;
   onAllowPermanent: () => void;
   onDeny: () => void;
-  onClose: () => void;
   activeButton?: string | null;
   clickedButton?: string | null;
 }
 
 /**
- * Clean wrapper that adds demo functionality to PermissionDialog via extension point.
+ * Clean wrapper that adds demo functionality to PermissionInputPanel via extension point.
  *
  * Benefits:
  * 1. Minimal modification to original component (just one optional prop)
@@ -20,14 +18,14 @@ interface DemoPermissionDialogWrapperProps {
  * 3. Demo logic cleanly separated
  * 4. Visual feedback included (highlight effects)
  */
-export function DemoPermissionDialogWrapper({
+export function DemoPermissionInputWrapper({
   activeButton,
   clickedButton,
   onAllow,
   onAllowPermanent,
   onDeny,
-  ...permissionDialogProps
-}: DemoPermissionDialogWrapperProps) {
+  patterns,
+}: DemoPermissionInputWrapperProps) {
   // Button class enhancement function
   const getButtonClassName = (
     buttonType: "allow" | "allowPermanent" | "deny",
@@ -55,8 +53,8 @@ export function DemoPermissionDialogWrapper({
   };
 
   return (
-    <PermissionDialog
-      {...permissionDialogProps}
+    <PermissionInputPanel
+      patterns={patterns}
       onAllow={onAllow}
       onAllowPermanent={onAllowPermanent}
       onDeny={onDeny}

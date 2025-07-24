@@ -7,7 +7,6 @@ import { useDemoAutomation } from "../hooks/useDemoAutomation";
 import { ThemeToggle } from "./chat/ThemeToggle";
 import { ChatInput } from "./chat/ChatInput";
 import { ChatMessages } from "./chat/ChatMessages";
-import { DemoPermissionDialogWrapper } from "./DemoPermissionDialogWrapper";
 import { DEMO_SCENARIOS } from "../utils/mockResponseGenerator";
 
 export function DemoPage() {
@@ -114,29 +113,64 @@ export function DemoPage() {
   } = useChatState();
 
   const {
-    permissionDialog,
-    closePermissionDialog,
+    permissionRequest,
+    closePermissionRequest,
     allowToolPermanent,
-    showPermissionDialog,
+    showPermissionRequest,
+    isPermissionMode,
   } = usePermissions();
 
-  // Permission dialog handlers (for demo)
+  // Permission request handlers (for demo)
   const handlePermissionAllow = useCallback(() => {
-    if (!permissionDialog) return;
-    closePermissionDialog();
-  }, [permissionDialog, closePermissionDialog]);
+    if (!permissionRequest) return;
+    closePermissionRequest();
+  }, [permissionRequest, closePermissionRequest]);
 
   const handlePermissionAllowPermanent = useCallback(() => {
-    if (!permissionDialog) return;
+    if (!permissionRequest) return;
     // For demo purposes, just take the first pattern
-    const pattern = permissionDialog.patterns[0];
+    const pattern = permissionRequest.patterns[0];
     allowToolPermanent(pattern);
-    closePermissionDialog();
-  }, [permissionDialog, allowToolPermanent, closePermissionDialog]);
+    closePermissionRequest();
+  }, [permissionRequest, allowToolPermanent, closePermissionRequest]);
 
   const handlePermissionDeny = useCallback(() => {
-    closePermissionDialog();
-  }, [closePermissionDialog]);
+    closePermissionRequest();
+  }, [closePermissionRequest]);
+
+  // Create permission data for inline permission interface with demo effects
+  const permissionData = permissionRequest
+    ? {
+        patterns: permissionRequest.patterns,
+        onAllow: handlePermissionAllow,
+        onAllowPermanent: handlePermissionAllowPermanent,
+        onDeny: handlePermissionDeny,
+        getButtonClassName: (
+          buttonType: "allow" | "allowPermanent" | "deny",
+          defaultClassName: string,
+        ) => {
+          const isActive = activeButton === buttonType;
+          const isClicked = clickedButton === buttonType;
+
+          // Pressed state (brief moment before action)
+          if (isClicked) {
+            return `${defaultClassName} ring-2 ring-white/70`;
+          }
+
+          // Demo focus state (subtle addition to normal styles)
+          if (isActive) {
+            if (buttonType === "allowPermanent") {
+              return `${defaultClassName} ring-1 ring-green-300`;
+            } else if (buttonType === "allow") {
+              return `${defaultClassName} ring-1 ring-blue-300`;
+            }
+          }
+
+          // Default state (normal styles)
+          return defaultClassName;
+        },
+      }
+    : undefined;
 
   // Handle button focus from demo automation
   const handleButtonFocus = useCallback((buttonType: string) => {
@@ -197,7 +231,7 @@ export function DemoPage() {
     },
     onDemoComplete: () => {
       console.log("Demo completed");
-      permissionDialogCountRef.current = 0; // Reset dialog count on demo completion
+      permissionRequestCountRef.current = 0; // Reset permission request count on demo completion
     },
     // Pass message handling functions from DemoPage
     addMessage,
@@ -205,7 +239,7 @@ export function DemoPage() {
     startRequest,
     resetRequestState,
     generateRequestId,
-    showPermissionDialog,
+    showPermissionRequest,
     onButtonFocus: handleButtonFocus,
     onButtonClick: handleButtonClick,
   });
@@ -214,20 +248,20 @@ export function DemoPage() {
   const demoWorkingDirectory = "/Users/demo/claude-code-webui";
   const [activeButton, setActiveButton] = useState<string | null>(null);
   const [clickedButton, setClickedButton] = useState<string | null>(null);
-  const permissionDialogCountRef = useRef(0);
+  const permissionRequestCountRef = useRef(0);
 
-  // Reset states when dialog closes
+  // Reset states when permission request closes
   useEffect(() => {
-    if (!permissionDialog || !permissionDialog.isOpen) {
+    if (!permissionRequest || !permissionRequest.isOpen) {
       setActiveButton(null);
       setClickedButton(null);
     }
-  }, [permissionDialog]);
+  }, [permissionRequest]);
 
-  // Reset dialog count when demo starts/resets
+  // Reset permission request count when demo starts/resets
   useEffect(() => {
     if (currentStep === 0 || currentStep === 1) {
-      permissionDialogCountRef.current = 0;
+      permissionRequestCountRef.current = 0;
     }
   }, [currentStep]);
 
@@ -328,22 +362,12 @@ export function DemoPage() {
           onInputChange={() => {}} // No-op in demo - intentionally blocks user input to simulate a controlled environment where input is not required or allowed
           onSubmit={handleSendMessage}
           onAbort={() => {}} // No-op in demo
+          showPermissions={isPermissionMode}
+          permissionData={permissionData}
         />
       </div>
 
-      {/* Permission Dialog */}
-      {permissionDialog && (
-        <DemoPermissionDialogWrapper
-          isOpen={permissionDialog.isOpen}
-          patterns={permissionDialog.patterns}
-          onAllow={handlePermissionAllow}
-          onAllowPermanent={handlePermissionAllowPermanent}
-          onDeny={handlePermissionDeny}
-          onClose={closePermissionDialog}
-          activeButton={activeButton}
-          clickedButton={clickedButton}
-        />
-      )}
+      {/* Permission interface - Now handled inline by ChatInput component */}
     </div>
   );
 }
