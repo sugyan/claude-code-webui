@@ -293,11 +293,11 @@ export function DemoPage() {
       data-demo-completed={isCompleted}
       data-demo-step={currentStep}
     >
-      <div className="max-w-6xl mx-auto p-6 h-screen flex flex-col">
+      <div className="max-w-6xl mx-auto p-3 sm:p-6 h-screen flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8 flex-shrink-0">
+        <div className="flex items-center justify-between mb-4 sm:mb-8 flex-shrink-0">
           <div>
-            <h1 className="text-slate-800 dark:text-slate-100 text-3xl font-bold tracking-tight">
+            <h1 className="text-slate-800 dark:text-slate-100 text-lg sm:text-3xl font-bold tracking-tight">
               Claude Code Web UI
               {isDemo && (
                 <span className="ml-3 text-lg font-normal text-slate-600 dark:text-slate-400">

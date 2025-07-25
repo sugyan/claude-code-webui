@@ -29,7 +29,7 @@ export function EnterModeMenu() {
   };
 
   return (
-    <div ref={menuRef} className="relative">
+    <div ref={menuRef} className="relative hidden sm:block">
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
