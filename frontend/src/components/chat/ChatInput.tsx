@@ -14,6 +14,8 @@ interface PermissionData {
     buttonType: "allow" | "allowPermanent" | "deny",
     defaultClassName: string,
   ) => string;
+  onSelectionChange?: (selection: "allow" | "allowPermanent" | "deny") => void;
+  externalSelectedOption?: "allow" | "allowPermanent" | "deny" | null;
 }
 
 interface ChatInputProps {
@@ -132,6 +134,8 @@ export function ChatInput({
         onAllowPermanent={permissionData.onAllowPermanent}
         onDeny={permissionData.onDeny}
         getButtonClassName={permissionData.getButtonClassName}
+        onSelectionChange={permissionData.onSelectionChange}
+        externalSelectedOption={permissionData.externalSelectedOption}
       />
     );
   }

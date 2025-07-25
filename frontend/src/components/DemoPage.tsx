@@ -138,6 +138,28 @@ export function DemoPage() {
     closePermissionRequest();
   }, [closePermissionRequest]);
 
+  // Demo permission selection state (for external control)
+  const [demoSelectedOption, setDemoSelectedOption] = useState<
+    "allow" | "allowPermanent" | "deny" | null
+  >(null);
+
+  // Handle button focus from demo automation
+  const handleButtonFocus = useCallback((buttonType: string) => {
+    console.log(`Demo button focus: ${buttonType}`);
+
+    // Map button types to internal names and sync with permission panel
+    if (buttonType === "permission_allow") {
+      setActiveButton("allow");
+      setDemoSelectedOption("allow");
+    } else if (buttonType === "permission_allow_permanent") {
+      setActiveButton("allowPermanent");
+      setDemoSelectedOption("allowPermanent");
+    } else if (buttonType === "permission_deny") {
+      setActiveButton("deny");
+      setDemoSelectedOption("deny");
+    }
+  }, []);
+
   // Create permission data for inline permission interface with demo effects
   const permissionData = permissionRequest
     ? {
@@ -169,22 +191,14 @@ export function DemoPage() {
           // Default state (normal styles)
           return defaultClassName;
         },
+        onSelectionChange: (selection: "allow" | "allowPermanent" | "deny") => {
+          // Sync demo state with component selection state
+          setActiveButton(selection);
+          setDemoSelectedOption(selection);
+        },
+        externalSelectedOption: demoSelectedOption,
       }
     : undefined;
-
-  // Handle button focus from demo automation
-  const handleButtonFocus = useCallback((buttonType: string) => {
-    console.log(`Demo button focus: ${buttonType}`);
-
-    // Map button types to internal names
-    if (buttonType === "permission_allow") {
-      setActiveButton("allow");
-    } else if (buttonType === "permission_allow_permanent") {
-      setActiveButton("allowPermanent");
-    } else if (buttonType === "permission_deny") {
-      setActiveButton("deny");
-    }
-  }, []);
 
   // Handle button clicks from demo automation
   const handleButtonClick = useCallback(
@@ -255,6 +269,7 @@ export function DemoPage() {
     if (!permissionRequest || !permissionRequest.isOpen) {
       setActiveButton(null);
       setClickedButton(null);
+      setDemoSelectedOption(null);
     }
   }, [permissionRequest]);
 

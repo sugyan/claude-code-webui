@@ -1,6 +1,6 @@
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import type { JSX } from "react";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 // Helper function to extract command name from pattern like "Bash(ls:*)" -> "ls"
 function extractCommandName(pattern: string): string {
@@ -85,6 +85,10 @@ interface PermissionInputPanelProps {
     buttonType: "allow" | "allowPermanent" | "deny",
     defaultClassName: string,
   ) => string;
+  // Optional callback for demo automation to control selection state
+  onSelectionChange?: (selection: "allow" | "allowPermanent" | "deny") => void;
+  // Optional external control for demo automation (overrides internal state)
+  externalSelectedOption?: "allow" | "allowPermanent" | "deny" | null;
 }
 
 export function PermissionInputPanel({
@@ -93,10 +97,71 @@ export function PermissionInputPanel({
   onAllowPermanent,
   onDeny,
   getButtonClassName = (_, defaultClassName) => defaultClassName, // Default: no modification
+  onSelectionChange, // Optional callback for demo automation
+  externalSelectedOption, // Optional external control for demo automation
 }: PermissionInputPanelProps) {
   const [selectedOption, setSelectedOption] = useState<
-    "allow" | "allowPermanent" | "deny"
+    "allow" | "allowPermanent" | "deny" | null
   >("allow");
+
+  // Use external selection if provided (for demo), otherwise use internal state
+  const effectiveSelectedOption = externalSelectedOption ?? selectedOption;
+
+  // Update selection state based on external changes (for demo automation)
+  const updateSelectedOption = useCallback(
+    (option: "allow" | "allowPermanent" | "deny") => {
+      // Only update internal state if not controlled externally
+      if (externalSelectedOption === undefined) {
+        setSelectedOption(option);
+      }
+      onSelectionChange?.(option);
+    },
+    [onSelectionChange, externalSelectedOption],
+  );
+
+  // Handle keyboard navigation
+  useEffect(() => {
+    // Skip keyboard navigation if controlled externally (demo mode)
+    if (externalSelectedOption !== undefined) return;
+
+    // Define options array inside useEffect to avoid unnecessary re-renders
+    const options = ["allow", "allowPermanent", "deny"] as const;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        const currentIndex = options.indexOf(effectiveSelectedOption!);
+        const nextIndex = (currentIndex + 1) % options.length;
+        updateSelectedOption(options[nextIndex]);
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        const currentIndex = options.indexOf(effectiveSelectedOption!);
+        const prevIndex = (currentIndex - 1 + options.length) % options.length;
+        updateSelectedOption(options[prevIndex]);
+      } else if (e.key === "Enter" && effectiveSelectedOption) {
+        e.preventDefault();
+        // Execute the currently selected option
+        if (effectiveSelectedOption === "allow") {
+          onAllow();
+        } else if (effectiveSelectedOption === "allowPermanent") {
+          onAllowPermanent();
+        } else if (effectiveSelectedOption === "deny") {
+          onDeny();
+        }
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [
+    effectiveSelectedOption,
+    onAllow,
+    onAllowPermanent,
+    onDeny,
+    updateSelectedOption,
+    externalSelectedOption,
+  ]);
+
   return (
     <div className="flex-shrink-0 px-4 py-4 bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl backdrop-blur-sm shadow-sm">
       {/* Header */}
@@ -121,22 +186,25 @@ export function PermissionInputPanel({
       <div className="space-y-2">
         <button
           onClick={() => {
-            setSelectedOption("allow");
+            updateSelectedOption("allow");
             onAllow();
           }}
-          onMouseEnter={() => setSelectedOption("allow")}
+          onFocus={() => updateSelectedOption("allow")}
+          onBlur={() => setSelectedOption(null)}
+          onMouseEnter={() => updateSelectedOption("allow")}
+          onMouseLeave={() => setSelectedOption(null)}
           className={getButtonClassName(
             "allow",
-            `w-full p-3 rounded-lg cursor-pointer transition-all duration-200 text-left ${
-              selectedOption === "allow"
+            `w-full p-3 rounded-lg cursor-pointer transition-all duration-200 text-left focus:outline-none ${
+              effectiveSelectedOption === "allow"
                 ? "bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-500 dark:border-blue-400 shadow-sm"
-                : "border-2 border-transparent hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-500 dark:hover:border-blue-400 hover:shadow-sm"
+                : "border-2 border-transparent"
             }`,
           )}
         >
           <span
             className={`text-sm font-medium ${
-              selectedOption === "allow"
+              effectiveSelectedOption === "allow"
                 ? "text-blue-700 dark:text-blue-300"
                 : "text-slate-700 dark:text-slate-300"
             }`}
@@ -147,22 +215,25 @@ export function PermissionInputPanel({
 
         <button
           onClick={() => {
-            setSelectedOption("allowPermanent");
+            updateSelectedOption("allowPermanent");
             onAllowPermanent();
           }}
-          onMouseEnter={() => setSelectedOption("allowPermanent")}
+          onFocus={() => updateSelectedOption("allowPermanent")}
+          onBlur={() => setSelectedOption(null)}
+          onMouseEnter={() => updateSelectedOption("allowPermanent")}
+          onMouseLeave={() => setSelectedOption(null)}
           className={getButtonClassName(
             "allowPermanent",
-            `w-full p-3 rounded-lg cursor-pointer transition-all duration-200 text-left ${
-              selectedOption === "allowPermanent"
+            `w-full p-3 rounded-lg cursor-pointer transition-all duration-200 text-left focus:outline-none ${
+              effectiveSelectedOption === "allowPermanent"
                 ? "bg-green-50 dark:bg-green-900/20 border-2 border-green-500 dark:border-green-400 shadow-sm"
-                : "border-2 border-transparent hover:bg-green-50 dark:hover:bg-green-900/20 hover:border-green-500 dark:hover:border-green-400 hover:shadow-sm"
+                : "border-2 border-transparent"
             }`,
           )}
         >
           <span
             className={`text-sm font-medium ${
-              selectedOption === "allowPermanent"
+              effectiveSelectedOption === "allowPermanent"
                 ? "text-green-700 dark:text-green-300"
                 : "text-slate-700 dark:text-slate-300"
             }`}
@@ -173,22 +244,25 @@ export function PermissionInputPanel({
 
         <button
           onClick={() => {
-            setSelectedOption("deny");
+            updateSelectedOption("deny");
             onDeny();
           }}
-          onMouseEnter={() => setSelectedOption("deny")}
+          onFocus={() => updateSelectedOption("deny")}
+          onBlur={() => setSelectedOption(null)}
+          onMouseEnter={() => updateSelectedOption("deny")}
+          onMouseLeave={() => setSelectedOption(null)}
           className={getButtonClassName(
             "deny",
-            `w-full p-3 rounded-lg cursor-pointer transition-all duration-200 text-left ${
-              selectedOption === "deny"
+            `w-full p-3 rounded-lg cursor-pointer transition-all duration-200 text-left focus:outline-none ${
+              effectiveSelectedOption === "deny"
                 ? "bg-slate-50 dark:bg-slate-800 border-2 border-slate-400 dark:border-slate-500 shadow-sm"
-                : "border-2 border-transparent hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-400 dark:hover:border-slate-500 hover:shadow-sm"
+                : "border-2 border-transparent"
             }`,
           )}
         >
           <span
             className={`text-sm font-medium ${
-              selectedOption === "deny"
+              effectiveSelectedOption === "deny"
                 ? "text-slate-800 dark:text-slate-200"
                 : "text-slate-700 dark:text-slate-300"
             }`}
