@@ -489,15 +489,20 @@ export function useDemoAutomation(
 
   // Cleanup on unmount
   useEffect(() => {
+    // Capture current refs for cleanup
+    const stepTimeout = stepTimeoutRef.current;
+    const typingTimeout = typingTimeoutRef.current;
+    const typingInterval = typingIntervalRef.current;
+
     return () => {
-      if (stepTimeoutRef.current) {
-        clearTimeout(stepTimeoutRef.current);
+      if (stepTimeout) {
+        clearTimeout(stepTimeout);
       }
-      if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current);
+      if (typingTimeout) {
+        clearTimeout(typingTimeout);
       }
-      if (typingIntervalRef.current) {
-        clearTimeout(typingIntervalRef.current);
+      if (typingInterval) {
+        clearTimeout(typingInterval);
       }
     };
   }, []);
