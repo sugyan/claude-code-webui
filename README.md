@@ -10,6 +10,31 @@
 
 [🎬 **View Demo**](https://github.com/user-attachments/assets/35dd960c-ed1a-43ee-927d-ca9cdb490855)
 
+## 📱 Screenshots
+
+<div align="center">
+
+| Desktop Interface                                                                                      | Mobile Experience                                                                                    |
+| ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| <img src="docs/images/screenshot-desktop-codeGeneration-dark.png" alt="Desktop Interface" width="600"> | <img src="docs/images/screenshot-mobile-fileOperations-dark.png" alt="Mobile Interface" width="250"> |
+| _Professional coding interface with syntax highlighting and tool permissions_                          | _Touch-friendly mobile experience with responsive design_                                            |
+
+</div>
+
+<details>
+<summary><strong>💡 Light Theme Screenshots</strong></summary>
+
+<div align="center">
+
+| Desktop (Light)                                                                                     | Mobile (Light)                                                                                    |
+| --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| <img src="docs/images/screenshot-desktop-fileOperations.png" alt="Desktop Light Theme" width="600"> | <img src="docs/images/screenshot-mobile-fileOperations.png" alt="Mobile Light Theme" width="250"> |
+| _Clean light interface for daytime coding_                                                          | _Mobile-optimized light theme_                                                                    |
+
+</div>
+
+</details>
+
 ---
 
 ## 📑 Table of Contents

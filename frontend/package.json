@@ -17,7 +17,8 @@
     "test": "vitest",
     "test:run": "vitest run",
     "playwright:install": "npx playwright install",
-    "record-demo": "npx tsx scripts/record-demo.ts"
+    "record-demo": "npx tsx scripts/record-demo.ts",
+    "capture-screenshots": "npx tsx scripts/capture-screenshots.ts"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
