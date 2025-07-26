@@ -104,6 +104,9 @@ export function PermissionInputPanel({
     "allow" | "allowPermanent" | "deny" | null
   >("allow");
 
+  // Check if component is externally controlled (for demo mode)
+  const isExternallyControlled = externalSelectedOption !== undefined;
+
   // Use external selection if provided (for demo), otherwise use internal state
   const effectiveSelectedOption = externalSelectedOption ?? selectedOption;
 
@@ -190,9 +193,17 @@ export function PermissionInputPanel({
             onAllow();
           }}
           onFocus={() => updateSelectedOption("allow")}
-          onBlur={() => setSelectedOption(null)}
+          onBlur={() => {
+            if (!isExternallyControlled) {
+              setSelectedOption(null);
+            }
+          }}
           onMouseEnter={() => updateSelectedOption("allow")}
-          onMouseLeave={() => setSelectedOption(null)}
+          onMouseLeave={() => {
+            if (!isExternallyControlled) {
+              setSelectedOption(null);
+            }
+          }}
           className={getButtonClassName(
             "allow",
             `w-full p-3 rounded-lg cursor-pointer transition-all duration-200 text-left focus:outline-none ${
@@ -219,9 +230,17 @@ export function PermissionInputPanel({
             onAllowPermanent();
           }}
           onFocus={() => updateSelectedOption("allowPermanent")}
-          onBlur={() => setSelectedOption(null)}
+          onBlur={() => {
+            if (!isExternallyControlled) {
+              setSelectedOption(null);
+            }
+          }}
           onMouseEnter={() => updateSelectedOption("allowPermanent")}
-          onMouseLeave={() => setSelectedOption(null)}
+          onMouseLeave={() => {
+            if (!isExternallyControlled) {
+              setSelectedOption(null);
+            }
+          }}
           className={getButtonClassName(
             "allowPermanent",
             `w-full p-3 rounded-lg cursor-pointer transition-all duration-200 text-left focus:outline-none ${
@@ -248,9 +267,17 @@ export function PermissionInputPanel({
             onDeny();
           }}
           onFocus={() => updateSelectedOption("deny")}
-          onBlur={() => setSelectedOption(null)}
+          onBlur={() => {
+            if (!isExternallyControlled) {
+              setSelectedOption(null);
+            }
+          }}
           onMouseEnter={() => updateSelectedOption("deny")}
-          onMouseLeave={() => setSelectedOption(null)}
+          onMouseLeave={() => {
+            if (!isExternallyControlled) {
+              setSelectedOption(null);
+            }
+          }}
           className={getButtonClassName(
             "deny",
             `w-full p-3 rounded-lg cursor-pointer transition-all duration-200 text-left focus:outline-none ${
