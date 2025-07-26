@@ -663,7 +663,7 @@ When updating to a new Claude Code version (e.g., 1.0.40):
    ```bash
    # For Deno: Edit backend/deno.json imports - change version number
    # "@anthropic-ai/claude-code": "npm:@anthropic-ai/claude-code@1.0.XX"
-   cd backend && rm deno.lock && deno cache main.ts
+   cd backend && rm deno.lock && deno cache cli/deno.ts
 
    # For Node.js: Edit backend/package.json - change version number
    # "@anthropic-ai/claude-code": "1.0.XX"
