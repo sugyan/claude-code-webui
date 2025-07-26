@@ -24,7 +24,7 @@ interface ViewportSize {
 
 const VIEWPORTS: Record<"desktop" | "mobile", ViewportSize> = {
   desktop: { width: 1400, height: 900 }, // More suitable for README display
-  mobile: { width: 375, height: 812 }, // iPhone 13 size
+  mobile: { width: 375, height: 667 }, // iPhone SE size (more common and less tall)
 };
 
 // Define the specific screenshot moments for each scenario
@@ -32,7 +32,7 @@ const SCREENSHOT_CONFIGS: Record<
   DemoScenario,
   { step: number; description: string }
 > = {
-  basic: { step: 2, description: "Basic chat response" },
+  basic: { step: 3, description: "Chat conversation with input ready" },
   fileOperations: { step: 3, description: "Read permission dialog" },
   codeGeneration: { step: 4, description: "Write permission dialog with code" },
   debugging: { step: 2, description: "Debug analysis" },
@@ -166,7 +166,7 @@ async function captureScreenshot(options: ScreenshotOptions): Promise<void> {
 }
 
 async function captureAllScreenshots(): Promise<void> {
-  const scenarios: DemoScenario[] = ["codeGeneration", "fileOperations"];
+  const scenarios: DemoScenario[] = ["basic", "codeGeneration"];
   const themes: Theme[] = ["light", "dark"];
   const devices: ("desktop" | "mobile")[] = ["desktop", "mobile"];
 
