@@ -14,10 +14,10 @@
 
 <div align="center">
 
-| Desktop Interface                                                                                      | Mobile Experience                                                                                    |
-| ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
-| <img src="docs/images/screenshot-desktop-codeGeneration-dark.png" alt="Desktop Interface" width="600"> | <img src="docs/images/screenshot-mobile-fileOperations-dark.png" alt="Mobile Interface" width="250"> |
-| _Professional coding interface with syntax highlighting and tool permissions_                          | _Touch-friendly mobile experience with responsive design_                                            |
+| Desktop Interface                                                                             | Mobile Experience                                                                           |
+| --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| <img src="docs/images/screenshot-desktop-basic-dark.png" alt="Desktop Interface" width="600"> | <img src="docs/images/screenshot-mobile-basic-dark.png" alt="Mobile Interface" width="250"> |
+| _Chat-based coding interface with instant responses and ready input field_                    | _Mobile-optimized chat experience with touch-friendly design_                               |
 
 </div>
 
@@ -26,10 +26,24 @@
 
 <div align="center">
 
-| Desktop (Light)                                                                                     | Mobile (Light)                                                                                    |
-| --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| <img src="docs/images/screenshot-desktop-fileOperations.png" alt="Desktop Light Theme" width="600"> | <img src="docs/images/screenshot-mobile-fileOperations.png" alt="Mobile Light Theme" width="250"> |
-| _Clean light interface for daytime coding_                                                          | _Mobile-optimized light theme_                                                                    |
+| Desktop (Light)                                                                            | Mobile (Light)                                                                           |
+| ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
+| <img src="docs/images/screenshot-desktop-basic.png" alt="Desktop Light Theme" width="600"> | <img src="docs/images/screenshot-mobile-basic.png" alt="Mobile Light Theme" width="250"> |
+| _Clean light interface for daytime coding sessions_                                        | _iPhone SE optimized light theme interface_                                              |
+
+</div>
+
+</details>
+
+<details>
+<summary><strong>🔧 Advanced Features</strong></summary>
+
+<div align="center">
+
+| Desktop Permission Dialog                                                                              | Mobile Permission Dialog                                                                              |
+| ------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| <img src="docs/images/screenshot-desktop-fileOperations-dark.png" alt="Permission Dialog" width="600"> | <img src="docs/images/screenshot-mobile-fileOperations-dark.png" alt="Mobile Permission" width="250"> |
+| _Secure tool access with granular permission controls and clear approval workflow_                     | _Touch-optimized permission interface for mobile devices_                                             |
 
 </div>
 
