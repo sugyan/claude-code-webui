@@ -259,7 +259,7 @@ This configuration is shared across all project contributors and automatically l
 
 ### Available Tools
 
-The Playwright MCP server provides 25 browser automation tools including:
+The Playwright MCP server provides comprehensive browser automation tools including:
 
 - **Navigation**: `goto()`, `goBack()`, `goForward()`, `reload()`
 - **Interaction**: `click()`, `fill()`, `select()`, `hover()`, `dragAndDrop()`
@@ -631,14 +631,14 @@ cd backend && deno task build
 
 Both frontend and backend use **fixed versions** (without caret `^`) to ensure consistency:
 
-- **Frontend**: `frontend/package.json` - `"@anthropic-ai/claude-code": "1.0.51"`
+- **Frontend**: `frontend/package.json` - `"@anthropic-ai/claude-code": "1.0.61"`
 - **Backend**:
-  - Deno: `backend/deno.json` imports - `"@anthropic-ai/claude-code": "npm:@anthropic-ai/claude-code@1.0.51"`
-  - Node.js: `backend/package.json` - `"@anthropic-ai/claude-code": "1.0.51"`
+  - Deno: `backend/deno.json` imports - `"@anthropic-ai/claude-code": "npm:@anthropic-ai/claude-code@1.0.61"`
+  - Node.js: `backend/package.json` - `"@anthropic-ai/claude-code": "1.0.61"`
 
 ### Version Update Procedure
 
-When updating to a new Claude Code version (e.g., 1.0.40):
+When updating to a new Claude Code version (e.g., 1.0.62):
 
 1. **Check current versions**:
 
@@ -775,7 +775,7 @@ Multiple labels can be applied if the PR covers multiple areas.
 4. **GitHub Actions builds binaries** and creates GitHub Release automatically
 5. Update documentation if needed
 
-**Manual override**: Edit `backend/VERSION` file directly if specific version needed
+**Manual override**: Edit version in `backend/package.json` directly if specific version needed
 
 ### GitHub Sub-Issues API
 
@@ -786,15 +786,15 @@ Multiple labels can be applied if the PR covers multiple areas.
 gh issue create --title "Sub-issue title" --body "..." --label "feature,enhancement"
 
 # 2. Get the sub-issue ID
-SUB_ISSUE_ID=$(gh api repos/owner/repo/issues/ISSUE_NUMBER --jq '.id')
+SUB_ISSUE_ID=$(gh api repos/sugyan/claude-code-webui/issues/ISSUE_NUMBER --jq '.id')
 
 # 3. Add it as sub-issue to parent issue
-gh api repos/owner/repo/issues/PARENT_ISSUE_NUMBER/sub_issues \
+gh api repos/sugyan/claude-code-webui/issues/PARENT_ISSUE_NUMBER/sub_issues \
   --method POST \
   --field sub_issue_id=$SUB_ISSUE_ID
 
 # 4. Verify the relationship
-gh api repos/owner/repo/issues/PARENT_ISSUE_NUMBER/sub_issues
+gh api repos/sugyan/claude-code-webui/issues/PARENT_ISSUE_NUMBER/sub_issues
 ```
 
 **Key points**:
@@ -810,7 +810,7 @@ gh api repos/owner/repo/issues/PARENT_ISSUE_NUMBER/sub_issues
 
 ```bash
 # View all inline review comments from Copilot
-gh api repos/owner/repo/pulls/PR_NUMBER/comments
+gh api repos/sugyan/claude-code-webui/pulls/PR_NUMBER/comments
 
 # Example for this repository
 gh api repos/sugyan/claude-code-webui/pulls/39/comments
