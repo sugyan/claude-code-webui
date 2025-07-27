@@ -35,3 +35,8 @@ cli/version.ts
 
 # Frontend build output (copied for testing)
 static/
+
+# Files copied during prepack for npm distribution
+README.md
+LICENSE
+docs/
