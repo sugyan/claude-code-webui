@@ -39,4 +39,3 @@ static/
 # Files copied during prepack for npm distribution
 README.md
 LICENSE
-docs/
