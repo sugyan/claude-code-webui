@@ -21,7 +21,7 @@ async function parseCmdScript(
   cmdPath: string,
 ): Promise<string | null> {
   try {
-    console.log(`🔍 Parsing Windows .cmd script: ${cmdPath}`);
+    console.debug(`[DEBUG] Parsing Windows .cmd script: ${cmdPath}`);
     const cmdContent = await runtime.readTextFile(cmdPath);
 
     // Extract directory of the .cmd file for resolving relative paths
@@ -36,24 +36,24 @@ async function parseCmdScript(
       const relativePath = match[1];
       const absolutePath = `${cmdDir}\\${relativePath}`;
 
-      console.log(`🔍 Found CLI script reference: ${relativePath}`);
-      console.log(`🔍 Resolved absolute path: ${absolutePath}`);
+      console.debug(`[DEBUG] Found CLI script reference: ${relativePath}`);
+      console.debug(`[DEBUG] Resolved absolute path: ${absolutePath}`);
 
       // Verify the resolved path exists
       if (await runtime.exists(absolutePath)) {
-        console.log(`✅ .cmd parsing successful: ${absolutePath}`);
+        console.debug(`[DEBUG] .cmd parsing successful: ${absolutePath}`);
         return absolutePath;
       } else {
-        console.log(`⚠️  Resolved path does not exist: ${absolutePath}`);
+        console.debug(`[DEBUG] Resolved path does not exist: ${absolutePath}`);
       }
     } else {
-      console.log(`⚠️  No CLI script pattern found in .cmd content`);
+      console.debug(`[DEBUG] No CLI script pattern found in .cmd content`);
     }
 
     return null;
   } catch (error) {
-    console.log(
-      `⚠️  Failed to parse .cmd script: ${error instanceof Error ? error.message : String(error)}`,
+    console.debug(
+      `[DEBUG] Failed to parse .cmd script: ${error instanceof Error ? error.message : String(error)}`,
     );
     return null;
   }
@@ -177,7 +177,9 @@ export async function detectClaudeCliPath(
 
       // No Claude script path found in trace - try Windows .cmd parsing fallback
       if (isWindows && claudePath.endsWith(".cmd")) {
-        console.log("🔍 PATH wrapping failed, trying .cmd parsing fallback...");
+        console.debug(
+          "[DEBUG] PATH wrapping failed, trying .cmd parsing fallback...",
+        );
         const cmdParsedPath = await parseCmdScript(runtime, claudePath);
         if (cmdParsedPath) {
           return { scriptPath: cmdParsedPath, versionOutput };
@@ -194,15 +196,17 @@ export async function detectClaudeCliPath(
 
     // Try Windows .cmd parsing fallback even if main detection throws an error
     if (isWindows && claudePath.endsWith(".cmd")) {
-      console.log("🔍 Main detection failed, trying .cmd parsing fallback...");
+      console.debug(
+        "[DEBUG] Main detection failed, trying .cmd parsing fallback...",
+      );
       try {
         const cmdParsedPath = await parseCmdScript(runtime, claudePath);
         if (cmdParsedPath) {
           return { scriptPath: cmdParsedPath, versionOutput: "" };
         }
       } catch (fallbackError) {
-        console.log(
-          `⚠️  .cmd parsing fallback also failed: ${fallbackError instanceof Error ? fallbackError.message : String(fallbackError)}`,
+        console.debug(
+          `[DEBUG] .cmd parsing fallback also failed: ${fallbackError instanceof Error ? fallbackError.message : String(fallbackError)}`,
         );
       }
     }
@@ -246,8 +250,10 @@ export async function validateClaudeCli(
 
       // Use the first candidate (most likely to be the correct one)
       claudePath = candidates[0];
-      console.log(`🔍 Found Claude CLI candidates: ${candidates.join(", ")}`);
-      console.log(`🔍 Using Claude CLI path: ${claudePath}`);
+      console.debug(
+        `[DEBUG] Found Claude CLI candidates: ${candidates.join(", ")}`,
+      );
+      console.debug(`[DEBUG] Using Claude CLI path: ${claudePath}`);
     }
 
     // Check if this is a Windows .cmd file for enhanced debugging
@@ -256,8 +262,8 @@ export async function validateClaudeCli(
     const isCmdFile = claudePath.endsWith(".cmd");
 
     if (isWindows && isCmdFile) {
-      console.log(
-        "🔍 Detected Windows .cmd file - fallback parsing available if needed",
+      console.debug(
+        "[DEBUG] Detected Windows .cmd file - fallback parsing available if needed",
       );
     }
 
