@@ -21,7 +21,7 @@ function App() {
         <Routes>
           <Route path="/" element={<ProjectSelector />} />
           <Route path="/projects/*" element={<ChatPage />} />
-          {isDevelopment() && DemoPage && (
+          {DemoPage && (
             <Route
               path="/demo"
               element={
