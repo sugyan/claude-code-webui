@@ -93,15 +93,19 @@ export async function detectClaudeCliPath(
   const platform = runtime.getPlatform();
   const isWindows = platform === "windows";
 
+  // First try PATH wrapping method
+  let pathWrappingResult: { scriptPath: string; versionOutput: string } | null =
+    null;
+
   try {
-    return await runtime.withTempDir(async (tempDir) => {
+    pathWrappingResult = await runtime.withTempDir(async (tempDir) => {
       const traceFile = `${tempDir}/trace.log`;
 
       // Find the original node executable
       const nodeExecutables = await runtime.findExecutable("node");
       if (nodeExecutables.length === 0) {
-        // Silently return empty strings - this is not a critical error
-        return { scriptPath: "", versionOutput: "" };
+        // Silently return null - this is not a critical error
+        return null;
       }
 
       const originalNodePath = nodeExecutables[0];
@@ -134,7 +138,7 @@ export async function detectClaudeCliPath(
 
       // Verify command executed successfully
       if (!executionResult.success) {
-        return { scriptPath: "", versionOutput: "" };
+        return null;
       }
 
       const versionOutput = executionResult.stdout.trim();
@@ -175,44 +179,58 @@ export async function detectClaudeCliPath(
         }
       }
 
-      // No Claude script path found in trace - try Windows .cmd parsing fallback
-      if (isWindows && claudePath.endsWith(".cmd")) {
-        console.debug(
-          "[DEBUG] PATH wrapping failed, trying .cmd parsing fallback...",
-        );
-        const cmdParsedPath = await parseCmdScript(runtime, claudePath);
-        if (cmdParsedPath) {
-          return { scriptPath: cmdParsedPath, versionOutput };
-        }
-      }
-
+      // No Claude script path found in trace
       return { scriptPath: "", versionOutput };
     });
   } catch (error) {
     // Log error for debugging but don't crash the application
-    console.error(
-      `Failed to detect Claude CLI path: ${error instanceof Error ? error.message : String(error)}`,
+    console.debug(
+      `[DEBUG] PATH wrapping detection failed: ${error instanceof Error ? error.message : String(error)}`,
     );
-
-    // Try Windows .cmd parsing fallback even if main detection throws an error
-    if (isWindows && claudePath.endsWith(".cmd")) {
-      console.debug(
-        "[DEBUG] Main detection failed, trying .cmd parsing fallback...",
-      );
-      try {
-        const cmdParsedPath = await parseCmdScript(runtime, claudePath);
-        if (cmdParsedPath) {
-          return { scriptPath: cmdParsedPath, versionOutput: "" };
-        }
-      } catch (fallbackError) {
-        console.debug(
-          `[DEBUG] .cmd parsing fallback also failed: ${fallbackError instanceof Error ? fallbackError.message : String(fallbackError)}`,
-        );
-      }
-    }
-
-    return { scriptPath: "", versionOutput: "" };
+    pathWrappingResult = null;
   }
+
+  // If PATH wrapping succeeded, return the result
+  if (pathWrappingResult && pathWrappingResult.scriptPath) {
+    return pathWrappingResult;
+  }
+
+  // Try Windows .cmd parsing fallback if PATH wrapping didn't work
+  if (isWindows && claudePath.endsWith(".cmd")) {
+    console.debug(
+      "[DEBUG] PATH wrapping method failed, trying .cmd parsing fallback...",
+    );
+    try {
+      const cmdParsedPath = await parseCmdScript(runtime, claudePath);
+      if (cmdParsedPath) {
+        // Get version output, use from PATH wrapping if available
+        let versionOutput = pathWrappingResult?.versionOutput || "";
+        if (!versionOutput) {
+          try {
+            const versionResult = await runtime.runCommand(claudePath, [
+              "--version",
+            ]);
+            if (versionResult.success) {
+              versionOutput = versionResult.stdout.trim();
+            }
+          } catch {
+            // Ignore version detection errors
+          }
+        }
+        return { scriptPath: cmdParsedPath, versionOutput };
+      }
+    } catch (fallbackError) {
+      console.debug(
+        `[DEBUG] .cmd parsing fallback failed: ${fallbackError instanceof Error ? fallbackError.message : String(fallbackError)}`,
+      );
+    }
+  }
+
+  // Both methods failed, return empty result but preserve version output if available
+  return {
+    scriptPath: "",
+    versionOutput: pathWrappingResult?.versionOutput || "",
+  };
 }
 
 /**
