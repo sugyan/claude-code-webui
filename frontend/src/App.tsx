@@ -1,8 +1,18 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Suspense, lazy } from "react";
 import { ProjectSelector } from "./components/ProjectSelector";
 import { ChatPage } from "./components/ChatPage";
-import { DemoPage } from "./components/DemoPage";
 import { EnterBehaviorProvider } from "./contexts/EnterBehaviorContext";
+import { isDevelopment } from "./utils/environment";
+
+// Lazy load DemoPage only in development
+const DemoPage = isDevelopment()
+  ? lazy(() =>
+      import("./components/DemoPage").then((module) => ({
+        default: module.DemoPage,
+      })),
+    )
+  : null;
 
 function App() {
   return (
@@ -11,7 +21,16 @@ function App() {
         <Routes>
           <Route path="/" element={<ProjectSelector />} />
           <Route path="/projects/*" element={<ChatPage />} />
-          <Route path="/demo" element={<DemoPage />} />
+          {isDevelopment() && DemoPage && (
+            <Route
+              path="/demo"
+              element={
+                <Suspense fallback={<div>Loading demo...</div>}>
+                  <DemoPage />
+                </Suspense>
+              }
+            />
+          )}
         </Routes>
       </Router>
     </EnterBehaviorProvider>
