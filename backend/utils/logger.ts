@@ -45,7 +45,7 @@ export async function setupLogger(debugMode: boolean): Promise<void> {
     },
     loggers: [
       {
-        category: "claude-webui",
+        category: [],
         lowestLevel,
         sinks: ["console"],
       },
@@ -66,22 +66,22 @@ export async function setupLogger(debugMode: boolean): Promise<void> {
  */
 export const logger = {
   // CLI and startup logging
-  cli: getLogger(["claude-webui", "cli"]),
+  cli: getLogger(["cli"]),
 
   // Claude CLI validation and detection
-  validation: getLogger(["claude-webui", "validation"]),
+  validation: getLogger(["validation"]),
 
   // Chat handling and streaming
-  chat: getLogger(["claude-webui", "chat"]),
+  chat: getLogger(["chat"]),
 
   // History and conversation management
-  history: getLogger(["claude-webui", "history"]),
+  history: getLogger(["history"]),
 
   // API handlers
-  api: getLogger(["claude-webui", "api"]),
+  api: getLogger(["api"]),
 
   // General application logging
-  app: getLogger(["claude-webui", "app"]),
+  app: getLogger(["app"]),
 };
 
 /**
