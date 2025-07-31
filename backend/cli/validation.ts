@@ -4,6 +4,7 @@
  * Common validation functions used across different runtime CLI entry points.
  */
 
+import { dirname, join } from "node:path";
 import type { Runtime } from "../runtime/types.ts";
 
 // Regex to fix double backslashes that might occur during Windows path string processing
@@ -25,16 +26,13 @@ async function parseCmdScript(
     const cmdContent = await runtime.readTextFile(cmdPath);
 
     // Extract directory of the .cmd file for resolving relative paths
-    const cmdDir = cmdPath.substring(
-      0,
-      cmdPath.lastIndexOf("\\") || cmdPath.lastIndexOf("/"),
-    );
+    const cmdDir = dirname(cmdPath);
 
     // Match NPM standard template pattern: "%~dp0\cli.js" or "%~dp0\path\to\file.js"
     const match = cmdContent.match(/"%~dp0\\([^"]+\.js)"/);
     if (match) {
       const relativePath = match[1];
-      const absolutePath = `${cmdDir}\\${relativePath}`;
+      const absolutePath = join(cmdDir, relativePath);
 
       console.debug(`[DEBUG] Found CLI script reference: ${relativePath}`);
       console.debug(`[DEBUG] Resolved absolute path: ${absolutePath}`);
