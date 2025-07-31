@@ -28,8 +28,8 @@ async function parseCmdScript(
     // Extract directory of the .cmd file for resolving relative paths
     const cmdDir = dirname(cmdPath);
 
-    // Match NPM standard template pattern: "%~dp0\cli.js" or "%~dp0\path\to\file.js"
-    const match = cmdContent.match(/"%~dp0\\([^"]+\.js)"/);
+    // Match NPM standard template pattern: "%dp0%\cli.js" or "%dp0%\path\to\file.js"
+    const match = cmdContent.match(/"%dp0%\\([^"]+)"/);
     if (match) {
       const relativePath = match[1];
       const absolutePath = join(cmdDir, relativePath);
@@ -264,12 +264,27 @@ export async function validateClaudeCli(
         runtime.exit(1);
       }
 
-      // Use the first candidate (most likely to be the correct one)
-      claudePath = candidates[0];
-      console.debug(
-        `[DEBUG] Found Claude CLI candidates: ${candidates.join(", ")}`,
-      );
-      console.debug(`[DEBUG] Using Claude CLI path: ${claudePath}`);
+      // On Windows, prefer .cmd files when multiple candidates exist
+      const platform = runtime.getPlatform();
+      const isWindows = platform === "windows";
+
+      if (isWindows && candidates.length > 1) {
+        const cmdCandidate = candidates.find((path) => path.endsWith(".cmd"));
+        claudePath = cmdCandidate || candidates[0];
+        console.debug(
+          `[DEBUG] Found Claude CLI candidates: ${candidates.join(", ")}`,
+        );
+        console.debug(
+          `[DEBUG] Using Claude CLI path: ${claudePath} (Windows .cmd preferred)`,
+        );
+      } else {
+        // Use the first candidate (most likely to be the correct one)
+        claudePath = candidates[0];
+        console.debug(
+          `[DEBUG] Found Claude CLI candidates: ${candidates.join(", ")}`,
+        );
+        console.debug(`[DEBUG] Using Claude CLI path: ${claudePath}`);
+      }
     }
 
     // Check if this is a Windows .cmd file for enhanced debugging
