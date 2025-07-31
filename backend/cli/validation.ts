@@ -28,24 +28,38 @@ async function parseCmdScript(
     // Extract directory of the .cmd file for resolving relative paths
     const cmdDir = dirname(cmdPath);
 
-    // Match NPM standard template pattern: "%dp0%\cli.js" or "%dp0%\path\to\file.js"
-    const match = cmdContent.match(/"%dp0%\\([^"]+)"/);
-    if (match) {
-      const relativePath = match[1];
-      const absolutePath = join(cmdDir, relativePath);
+    // Match NPM cmd-shim execution line pattern: "%_prog%" args "%dp0%\script.js" %*
+    // Skip IF EXIST conditions and target the actual execution line
+    const execLineMatch = cmdContent.match(/"%_prog%"[^"]*"(%dp0%\\[^"]+)"/);
+    if (execLineMatch) {
+      const fullPath = execLineMatch[1]; // "%dp0%\path\to\script.js"
+      // Extract the relative path part after %dp0%\
+      const pathMatch = fullPath.match(/%dp0%\\(.+)/);
+      if (pathMatch) {
+        const relativePath = pathMatch[1];
+        const absolutePath = join(cmdDir, relativePath);
 
-      console.debug(`[DEBUG] Found CLI script reference: ${relativePath}`);
-      console.debug(`[DEBUG] Resolved absolute path: ${absolutePath}`);
+        console.debug(`[DEBUG] Found CLI script reference: ${relativePath}`);
+        console.debug(`[DEBUG] Resolved absolute path: ${absolutePath}`);
 
-      // Verify the resolved path exists
-      if (await runtime.exists(absolutePath)) {
-        console.debug(`[DEBUG] .cmd parsing successful: ${absolutePath}`);
-        return absolutePath;
+        // Verify the resolved path exists
+        if (await runtime.exists(absolutePath)) {
+          console.debug(`[DEBUG] .cmd parsing successful: ${absolutePath}`);
+          return absolutePath;
+        } else {
+          console.debug(
+            `[DEBUG] Resolved path does not exist: ${absolutePath}`,
+          );
+        }
       } else {
-        console.debug(`[DEBUG] Resolved path does not exist: ${absolutePath}`);
+        console.debug(
+          `[DEBUG] Could not extract relative path from: ${fullPath}`,
+        );
       }
     } else {
-      console.debug(`[DEBUG] No CLI script pattern found in .cmd content`);
+      console.debug(
+        `[DEBUG] No CLI script execution pattern found in .cmd content`,
+      );
     }
 
     return null;
