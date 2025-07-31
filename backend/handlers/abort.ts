@@ -1,4 +1,5 @@
 import { Context } from "hono";
+import { logger } from "../utils/logger.ts";
 
 /**
  * Handles POST /api/abort/:requestId requests
@@ -11,28 +12,23 @@ export function handleAbortRequest(
   c: Context,
   requestAbortControllers: Map<string, AbortController>,
 ) {
-  const { debugMode } = c.var.config;
   const requestId = c.req.param("requestId");
 
   if (!requestId) {
     return c.json({ error: "Request ID is required" }, 400);
   }
 
-  if (debugMode) {
-    console.debug(`[DEBUG] Abort attempt for request: ${requestId}`);
-    console.debug(
-      `[DEBUG] Active requests: ${Array.from(requestAbortControllers.keys())}`,
-    );
-  }
+  logger.api.debug(`Abort attempt for request: ${requestId}`);
+  logger.api.debug(
+    `Active requests: ${Array.from(requestAbortControllers.keys())}`,
+  );
 
   const abortController = requestAbortControllers.get(requestId);
   if (abortController) {
     abortController.abort();
     requestAbortControllers.delete(requestId);
 
-    if (debugMode) {
-      console.debug(`[DEBUG] Aborted request: ${requestId}`);
-    }
+    logger.api.debug(`Aborted request: ${requestId}`);
 
     return c.json({ success: true, message: "Request aborted" });
   } else {

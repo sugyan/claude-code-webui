@@ -2,12 +2,16 @@
   "version": "5",
   "specifiers": {
     "jsr:@hono/hono@^4.8.5": "4.8.5",
+    "jsr:@logtape/logtape@1": "1.0.4",
     "jsr:@std/internal@^1.0.9": "1.0.9",
     "jsr:@std/path@1": "1.1.1"
   },
   "jsr": {
     "@hono/hono@4.8.5": {
       "integrity": "78f72e532f378e379915a7e1ae7bd8a171b02324bd37b70877fd35375e8c2d6b"
+    },
+    "@logtape/logtape@1.0.4": {
+      "integrity": "6ada87764d995b1033c352a17fd9e20b217f3672083bc2d8debe356eac03fe10"
     },
     "@std/internal@1.0.9": {
       "integrity": "bdfb97f83e4db7a13e8faab26fb1958d1b80cc64366501af78a0aee151696eb8"
@@ -22,6 +26,7 @@
   "workspace": {
     "dependencies": [
       "jsr:@hono/hono@^4.8.5",
+      "jsr:@logtape/logtape@1",
       "jsr:@std/assert@1",
       "jsr:@std/path@1",
       "npm:@anthropic-ai/claude-code@1.0.61",
@@ -31,6 +36,7 @@
       "dependencies": [
         "npm:@anthropic-ai/claude-code@1.0.61",
         "npm:@hono/node-server@1",
+        "npm:@logtape/logtape@1",
         "npm:@types/node@20",
         "npm:@typescript-eslint/eslint-plugin@8",
         "npm:@typescript-eslint/parser@8",

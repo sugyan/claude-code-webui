@@ -3,6 +3,7 @@ import type { HistoryListResponse } from "../../shared/types.ts";
 import { validateEncodedProjectName } from "../history/pathUtils.ts";
 import { parseAllHistoryFiles } from "../history/parser.ts";
 import { groupConversations } from "../history/grouping.ts";
+import { logger } from "../utils/logger.ts";
 
 /**
  * Handles GET /api/projects/:encodedProjectName/histories requests
@@ -12,7 +13,7 @@ import { groupConversations } from "../history/grouping.ts";
  */
 export async function handleHistoriesRequest(c: Context) {
   try {
-    const { debugMode, runtime } = c.var.config;
+    const { runtime } = c.var.config;
     const encodedProjectName = c.req.param("encodedProjectName");
 
     if (!encodedProjectName) {
@@ -23,11 +24,9 @@ export async function handleHistoriesRequest(c: Context) {
       return c.json({ error: "Invalid encoded project name" }, 400);
     }
 
-    if (debugMode) {
-      console.debug(
-        `[DEBUG] Fetching histories for encoded project: ${encodedProjectName}`,
-      );
-    }
+    logger.history.debug(
+      `Fetching histories for encoded project: ${encodedProjectName}`,
+    );
 
     // Get home directory
     const homeDir = runtime.getHomeDir();
@@ -38,9 +37,7 @@ export async function handleHistoriesRequest(c: Context) {
     // Build history directory path directly from encoded name
     const historyDir = `${homeDir}/.claude/projects/${encodedProjectName}`;
 
-    if (debugMode) {
-      console.debug(`[DEBUG] History directory: ${historyDir}`);
-    }
+    logger.history.debug(`History directory: ${historyDir}`);
 
     // Check if the directory exists
     try {
@@ -58,20 +55,16 @@ export async function handleHistoriesRequest(c: Context) {
 
     const conversationFiles = await parseAllHistoryFiles(historyDir, runtime);
 
-    if (debugMode) {
-      console.debug(
-        `[DEBUG] Found ${conversationFiles.length} conversation files`,
-      );
-    }
+    logger.history.debug(
+      `Found ${conversationFiles.length} conversation files`,
+    );
 
     // Group conversations and remove duplicates
     const conversations = groupConversations(conversationFiles);
 
-    if (debugMode) {
-      console.debug(
-        `[DEBUG] After grouping: ${conversations.length} unique conversations`,
-      );
-    }
+    logger.history.debug(
+      `After grouping: ${conversations.length} unique conversations`,
+    );
 
     const response: HistoryListResponse = {
       conversations,
@@ -79,7 +72,9 @@ export async function handleHistoriesRequest(c: Context) {
 
     return c.json(response);
   } catch (error) {
-    console.error("Error fetching conversation histories:", error);
+    logger.history.error("Error fetching conversation histories: {error}", {
+      error,
+    });
 
     return c.json(
       {

@@ -1,6 +1,7 @@
 import { Context } from "hono";
 import { validateEncodedProjectName } from "../history/pathUtils.ts";
 import { loadConversation } from "../history/conversationLoader.ts";
+import { logger } from "../utils/logger.ts";
 
 /**
  * Handles GET /api/projects/:encodedProjectName/histories/:sessionId requests
@@ -10,7 +11,7 @@ import { loadConversation } from "../history/conversationLoader.ts";
  */
 export async function handleConversationRequest(c: Context) {
   try {
-    const { debugMode, runtime } = c.var.config;
+    const { runtime } = c.var.config;
     const encodedProjectName = c.req.param("encodedProjectName");
     const sessionId = c.req.param("sessionId");
 
@@ -26,11 +27,9 @@ export async function handleConversationRequest(c: Context) {
       return c.json({ error: "Invalid encoded project name" }, 400);
     }
 
-    if (debugMode) {
-      console.debug(
-        `[DEBUG] Fetching conversation details for project: ${encodedProjectName}, session: ${sessionId}`,
-      );
-    }
+    logger.history.debug(
+      `Fetching conversation details for project: ${encodedProjectName}, session: ${sessionId}`,
+    );
 
     // Load the specific conversation (already returns processed ConversationHistory)
     const conversationHistory = await loadConversation(
@@ -49,15 +48,15 @@ export async function handleConversationRequest(c: Context) {
       );
     }
 
-    if (debugMode) {
-      console.debug(
-        `[DEBUG] Loaded conversation with ${conversationHistory.messages.length} messages`,
-      );
-    }
+    logger.history.debug(
+      `Loaded conversation with ${conversationHistory.messages.length} messages`,
+    );
 
     return c.json(conversationHistory);
   } catch (error) {
-    console.error("Error fetching conversation details:", error);
+    logger.history.error("Error fetching conversation details: {error}", {
+      error,
+    });
 
     // Handle specific error types
     if (error instanceof Error) {

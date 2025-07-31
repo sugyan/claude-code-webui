@@ -8,6 +8,7 @@ import type {
   SDKUserMessage,
 } from "@anthropic-ai/claude-code";
 import type { Runtime } from "../runtime/types.ts";
+import { logger } from "../utils/logger.ts";
 
 // Raw JSONL line structure from Claude history files
 export interface RawHistoryLine {
@@ -96,7 +97,9 @@ async function parseHistoryFile(
           }
         }
       } catch (parseError) {
-        console.error(`Failed to parse line in ${filePath}:`, parseError);
+        logger.history.error(`Failed to parse line in ${filePath}: {error}`, {
+          error: parseError,
+        });
         // Continue processing other lines
       }
     }
@@ -116,7 +119,9 @@ async function parseHistoryFile(
       lastMessagePreview: lastMessagePreview || "No preview available",
     };
   } catch (error) {
-    console.error(`Failed to read history file ${filePath}:`, error);
+    logger.history.error(`Failed to read history file ${filePath}: {error}`, {
+      error,
+    });
     return null;
   }
 }

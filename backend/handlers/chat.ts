@@ -1,6 +1,7 @@
 import { Context } from "hono";
 import { AbortError, query } from "@anthropic-ai/claude-code";
 import type { ChatRequest, StreamResponse } from "../../shared/types.ts";
+import { logger } from "../utils/logger.ts";
 
 /**
  * Executes a Claude command and yields streaming responses
@@ -11,7 +12,6 @@ import type { ChatRequest, StreamResponse } from "../../shared/types.ts";
  * @param sessionId - Optional session ID for conversation continuity
  * @param allowedTools - Optional array of allowed tool names
  * @param workingDirectory - Optional working directory for Claude execution
- * @param debugMode - Enable debug logging
  * @returns AsyncGenerator yielding StreamResponse objects
  */
 async function* executeClaudeCommand(
@@ -22,7 +22,6 @@ async function* executeClaudeCommand(
   sessionId?: string,
   allowedTools?: string[],
   workingDirectory?: string,
-  debugMode?: boolean,
 ): AsyncGenerator<StreamResponse> {
   let abortController: AbortController;
 
@@ -51,11 +50,10 @@ async function* executeClaudeCommand(
       },
     })) {
       // Debug logging of raw SDK messages
-      if (debugMode) {
-        console.debug("[DEBUG] Claude SDK Message:");
-        console.debug(JSON.stringify(sdkMessage, null, 2));
-        console.debug("---");
-      }
+      logger.chat.debug(
+        "Claude SDK Message {*}",
+        sdkMessage as unknown as Record<string, unknown>,
+      );
 
       yield {
         type: "claude_json",
@@ -69,9 +67,7 @@ async function* executeClaudeCommand(
     if (error instanceof AbortError) {
       yield { type: "aborted" };
     } else {
-      if (debugMode) {
-        console.error("Claude Code execution failed:", error);
-      }
+      logger.chat.error("Claude Code execution failed: {error}", { error });
       yield {
         type: "error",
         error: error instanceof Error ? error.message : String(error),
@@ -96,14 +92,12 @@ export async function handleChatRequest(
   requestAbortControllers: Map<string, AbortController>,
 ) {
   const chatRequest: ChatRequest = await c.req.json();
-  const { debugMode, cliPath } = c.var.config;
+  const { cliPath } = c.var.config;
 
-  if (debugMode) {
-    console.debug(
-      "[DEBUG] Received chat request:",
-      JSON.stringify(chatRequest, null, 2),
-    );
-  }
+  logger.chat.debug(
+    "Received chat request {*}",
+    chatRequest as unknown as Record<string, unknown>,
+  );
 
   const stream = new ReadableStream({
     async start(controller) {
@@ -116,7 +110,6 @@ export async function handleChatRequest(
           chatRequest.sessionId,
           chatRequest.allowedTools,
           chatRequest.workingDirectory,
-          debugMode,
         )) {
           const data = JSON.stringify(chunk) + "\n";
           controller.enqueue(new TextEncoder().encode(data));

@@ -6,6 +6,7 @@
 import type { RawHistoryLine } from "./parser.ts";
 import type { ConversationHistory } from "../../shared/types.ts";
 import type { Runtime } from "../runtime/types.ts";
+import { logger } from "../utils/logger.ts";
 import { processConversationMessages } from "./timestampRestore.ts";
 import { validateEncodedProjectName } from "./pathUtils.ts";
 
@@ -79,7 +80,9 @@ async function parseConversationFile(
       const parsed = JSON.parse(line) as RawHistoryLine;
       rawLines.push(parsed);
     } catch (parseError) {
-      console.error(`Failed to parse line in ${filePath}:`, parseError);
+      logger.history.error(`Failed to parse line in ${filePath}: {error}`, {
+        error: parseError,
+      });
       // Continue processing other lines
     }
   }

@@ -1,6 +1,7 @@
 import { Context } from "hono";
 import type { ProjectInfo, ProjectsResponse } from "../../shared/types.ts";
 import { getEncodedProjectName } from "../history/pathUtils.ts";
+import { logger } from "../utils/logger.ts";
 
 /**
  * Handles GET /api/projects requests
@@ -54,7 +55,7 @@ export async function handleProjectsRequest(c: Context) {
       throw error;
     }
   } catch (error) {
-    console.error("Error reading projects:", error);
+    logger.api.error("Error reading projects: {error}", { error });
     return c.json({ error: "Failed to read projects" }, 500);
   }
 }

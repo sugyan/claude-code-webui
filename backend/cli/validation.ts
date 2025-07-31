@@ -6,6 +6,7 @@
 
 import { dirname, join } from "node:path";
 import type { Runtime } from "../runtime/types.ts";
+import { logger } from "../utils/logger.ts";
 
 // Regex to fix double backslashes that might occur during Windows path string processing
 const DOUBLE_BACKSLASH_REGEX = /\\\\/g;
@@ -23,7 +24,7 @@ async function parseCmdScript(
   cmdPath: string,
 ): Promise<string | null> {
   try {
-    console.debug(`[DEBUG] Parsing Windows .cmd script: ${cmdPath}`);
+    logger.validation.debug(`Parsing Windows .cmd script: ${cmdPath}`);
     const cmdContent = await runtime.readTextFile(cmdPath);
 
     // Extract directory of the .cmd file for resolving relative paths
@@ -40,33 +41,33 @@ async function parseCmdScript(
         const relativePath = pathMatch[1];
         const absolutePath = join(cmdDir, relativePath);
 
-        console.debug(`[DEBUG] Found CLI script reference: ${relativePath}`);
-        console.debug(`[DEBUG] Resolved absolute path: ${absolutePath}`);
+        logger.validation.debug(`Found CLI script reference: ${relativePath}`);
+        logger.validation.debug(`Resolved absolute path: ${absolutePath}`);
 
         // Verify the resolved path exists
         if (await runtime.exists(absolutePath)) {
-          console.debug(`[DEBUG] .cmd parsing successful: ${absolutePath}`);
+          logger.validation.debug(`.cmd parsing successful: ${absolutePath}`);
           return absolutePath;
         } else {
-          console.debug(
-            `[DEBUG] Resolved path does not exist: ${absolutePath}`,
+          logger.validation.debug(
+            `Resolved path does not exist: ${absolutePath}`,
           );
         }
       } else {
-        console.debug(
-          `[DEBUG] Could not extract relative path from: ${fullPath}`,
+        logger.validation.debug(
+          `Could not extract relative path from: ${fullPath}`,
         );
       }
     } else {
-      console.debug(
-        `[DEBUG] No CLI script execution pattern found in .cmd content`,
+      logger.validation.debug(
+        `No CLI script execution pattern found in .cmd content`,
       );
     }
 
     return null;
   } catch (error) {
-    console.debug(
-      `[DEBUG] Failed to parse .cmd script: ${error instanceof Error ? error.message : String(error)}`,
+    logger.validation.debug(
+      `Failed to parse .cmd script: ${error instanceof Error ? error.message : String(error)}`,
     );
     return null;
   }
@@ -197,8 +198,8 @@ export async function detectClaudeCliPath(
     });
   } catch (error) {
     // Log error for debugging but don't crash the application
-    console.debug(
-      `[DEBUG] PATH wrapping detection failed: ${error instanceof Error ? error.message : String(error)}`,
+    logger.validation.debug(
+      `PATH wrapping detection failed: ${error instanceof Error ? error.message : String(error)}`,
     );
     pathWrappingResult = null;
   }
@@ -210,8 +211,8 @@ export async function detectClaudeCliPath(
 
   // Try Windows .cmd parsing fallback if PATH wrapping didn't work
   if (isWindows && claudePath.endsWith(".cmd")) {
-    console.debug(
-      "[DEBUG] PATH wrapping method failed, trying .cmd parsing fallback...",
+    logger.validation.debug(
+      "PATH wrapping method failed, trying .cmd parsing fallback...",
     );
     try {
       const cmdParsedPath = await parseCmdScript(runtime, claudePath);
@@ -233,8 +234,8 @@ export async function detectClaudeCliPath(
         return { scriptPath: cmdParsedPath, versionOutput };
       }
     } catch (fallbackError) {
-      console.debug(
-        `[DEBUG] .cmd parsing fallback failed: ${fallbackError instanceof Error ? fallbackError.message : String(fallbackError)}`,
+      logger.validation.debug(
+        `.cmd parsing fallback failed: ${fallbackError instanceof Error ? fallbackError.message : String(fallbackError)}`,
       );
     }
   }
@@ -268,10 +269,10 @@ export async function validateClaudeCli(
     if (customPath) {
       // Use custom path if provided
       claudePath = customPath;
-      console.log(`🔍 Validating custom Claude path: ${customPath}`);
+      logger.cli.info(`🔍 Validating custom Claude path: ${customPath}`);
     } else {
       // Auto-detect using runtime's findExecutable method
-      console.log("🔍 Searching for Claude CLI in PATH...");
+      logger.cli.info("🔍 Searching for Claude CLI in PATH...");
       const candidates = await runtime.findExecutable("claude");
 
       if (candidates.length === 0) {
@@ -287,19 +288,19 @@ export async function validateClaudeCli(
       if (isWindows && candidates.length > 1) {
         const cmdCandidate = candidates.find((path) => path.endsWith(".cmd"));
         claudePath = cmdCandidate || candidates[0];
-        console.debug(
-          `[DEBUG] Found Claude CLI candidates: ${candidates.join(", ")}`,
+        logger.validation.debug(
+          `Found Claude CLI candidates: ${candidates.join(", ")}`,
         );
-        console.debug(
-          `[DEBUG] Using Claude CLI path: ${claudePath} (Windows .cmd preferred)`,
+        logger.validation.debug(
+          `Using Claude CLI path: ${claudePath} (Windows .cmd preferred)`,
         );
       } else {
         // Use the first candidate (most likely to be the correct one)
         claudePath = candidates[0];
-        console.debug(
-          `[DEBUG] Found Claude CLI candidates: ${candidates.join(", ")}`,
+        logger.validation.debug(
+          `Found Claude CLI candidates: ${candidates.join(", ")}`,
         );
-        console.debug(`[DEBUG] Using Claude CLI path: ${claudePath}`);
+        logger.validation.debug(`Using Claude CLI path: ${claudePath}`);
       }
     }
 
@@ -307,28 +308,28 @@ export async function validateClaudeCli(
     const isCmdFile = claudePath.endsWith(".cmd");
 
     if (isWindows && isCmdFile) {
-      console.debug(
-        "[DEBUG] Detected Windows .cmd file - fallback parsing available if needed",
+      logger.validation.debug(
+        "Detected Windows .cmd file - fallback parsing available if needed",
       );
     }
 
     // Detect the actual CLI script path using tracing approach
-    console.log("🔍 Detecting actual Claude CLI script path...");
+    logger.cli.info("🔍 Detecting actual Claude CLI script path...");
     const detection = await detectClaudeCliPath(runtime, claudePath);
 
     if (detection.scriptPath) {
-      console.log(`✅ Claude CLI script detected: ${detection.scriptPath}`);
+      logger.cli.info(`✅ Claude CLI script detected: ${detection.scriptPath}`);
       if (detection.versionOutput) {
-        console.log(`✅ Claude CLI found: ${detection.versionOutput}`);
+        logger.cli.info(`✅ Claude CLI found: ${detection.versionOutput}`);
       }
       return detection.scriptPath;
     } else {
       // Fallback to the original path if detection fails
-      console.log(
+      logger.cli.info(
         `⚠️  CLI script detection failed, using original path: ${claudePath}`,
       );
       if (detection.versionOutput) {
-        console.log(`✅ Claude CLI found: ${detection.versionOutput}`);
+        logger.cli.info(`✅ Claude CLI found: ${detection.versionOutput}`);
       }
       return claudePath;
     }
