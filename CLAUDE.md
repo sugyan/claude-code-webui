@@ -51,7 +51,8 @@ This project consists of three main components:
 
 - **Runtime Abstraction**: Clean separation between business logic and platform-specific code
 - **Modular Architecture**: CLI, application core, and runtime layers clearly separated
-- Command line interface with `--port`, `--help`, `--version` options
+- **Structured Logging**: LogTape-based logging system with debug mode control via `--debug` flag
+- Command line interface with `--port`, `--help`, `--version`, `--debug` options
 - Universal Claude CLI path detection with tracing-based approach
 - Startup validation to check Claude CLI availability
 - Executes `claude --output-format stream-json --verbose -p <message>`
@@ -349,6 +350,10 @@ cd frontend && npm run dev      # Configures proxy to localhost:9000
    # Or Node.js
    cd backend
    npm run dev
+
+   # With debug logging enabled
+   deno task dev --debug
+   npm run dev -- --debug
    ```
 
 2. **Start Frontend**:
@@ -395,6 +400,8 @@ cd frontend && npm run dev      # Configures proxy to localhost:9000
 │   │   └── timestampRestore.ts     # Restore message timestamps
 │   ├── middleware/   # Middleware modules
 │   │   └── config.ts        # Configuration middleware with runtime injection
+│   ├── utils/        # Utility modules
+│   │   └── logger.ts        # LogTape-based logging system with debug mode support
 │   ├── scripts/      # Build and packaging scripts
 │   │   ├── build-bundle.js      # Bundle creation for distribution
 │   │   ├── copy-frontend.js     # Frontend static file copying
@@ -481,39 +488,41 @@ cd frontend && npm run dev      # Configures proxy to localhost:9000
 
 3. **Universal CLI Path Detection**: Tracing-based approach using temporary node wrappers to detect actual Claude script paths regardless of installation method (npm, pnpm, asdf, yarn). This eliminates complex installation-specific logic and works universally across all package managers and platforms.
 
-4. **Raw JSON Streaming**: Backend passes Claude JSON responses without modification to allow frontend flexibility in handling different message types.
+4. **Structured Logging System**: LogTape-based logging with cross-runtime compatibility (Deno/Node.js), debug mode control via `--debug` flag, ANSI color formatting, and shortened category names for improved terminal readability.
 
-5. **Configurable Ports**: Backend port configurable via PORT environment variable or CLI argument, frontend port via CLI argument to allow independent development and deployment.
+5. **Raw JSON Streaming**: Backend passes Claude JSON responses without modification to allow frontend flexibility in handling different message types.
 
-6. **TypeScript Throughout**: Consistent TypeScript usage across all components with shared type definitions.
+6. **Configurable Ports**: Backend port configurable via PORT environment variable or CLI argument, frontend port via CLI argument to allow independent development and deployment.
 
-7. **TailwindCSS Styling**: Uses @tailwindcss/vite plugin for utility-first CSS without separate CSS files.
+7. **TypeScript Throughout**: Consistent TypeScript usage across all components with shared type definitions.
 
-8. **Theme System**: Light/dark theme toggle with automatic system preference detection and localStorage persistence.
+8. **TailwindCSS Styling**: Uses @tailwindcss/vite plugin for utility-first CSS without separate CSS files.
 
-9. **Project Directory Selection**: Users choose working directory before starting chat sessions, with support for both configured projects and custom directory selection.
+9. **Theme System**: Light/dark theme toggle with automatic system preference detection and localStorage persistence.
 
-10. **Routing Architecture**: React Router separates project selection and chat interfaces for better user experience.
+10. **Project Directory Selection**: Users choose working directory before starting chat sessions, with support for both configured projects and custom directory selection.
 
-11. **Dynamic Working Directory**: Claude commands execute in user-selected project directories for contextual file access.
+11. **Routing Architecture**: React Router separates project selection and chat interfaces for better user experience.
 
-12. **Request Management**: Unique request IDs enable request tracking and abort functionality for better user control.
+12. **Dynamic Working Directory**: Claude commands execute in user-selected project directories for contextual file access.
 
-13. **Tool Permission Handling**: Frontend permission dialog allows users to grant/deny tool access with proper state management.
+13. **Request Management**: Unique request IDs enable request tracking and abort functionality for better user control.
 
-14. **Comprehensive Error Handling**: Enhanced error states and user feedback for better debugging and user experience.
+14. **Tool Permission Handling**: Frontend permission dialog allows users to grant/deny tool access with proper state management.
 
-15. **Modular Architecture**: Frontend code is organized into specialized hooks and components for better maintainability and testability.
+15. **Comprehensive Error Handling**: Enhanced error states and user feedback for better debugging and user experience.
 
-16. **Separation of Concerns**: Business logic, UI components, and utilities are clearly separated into different modules.
+16. **Modular Architecture**: Frontend code is organized into specialized hooks and components for better maintainability and testability.
 
-17. **Configuration Management**: Centralized configuration for API endpoints and application constants.
+17. **Separation of Concerns**: Business logic, UI components, and utilities are clearly separated into different modules.
 
-18. **Reusable Components**: Common UI patterns are extracted into reusable components to reduce duplication.
+18. **Configuration Management**: Centralized configuration for API endpoints and application constants.
 
-19. **Hook Composition**: Complex functionality is built by composing smaller, focused hooks that each handle a specific concern.
+19. **Reusable Components**: Common UI patterns are extracted into reusable components to reduce duplication.
 
-20. **Enter Key Behavior**: Configurable Enter key behavior with persistent user preferences, supporting both traditional (Enter=Send) and modern (Enter=Newline) interaction patterns.
+20. **Hook Composition**: Complex functionality is built by composing smaller, focused hooks that each handle a specific concern.
+
+21. **Enter Key Behavior**: Configurable Enter key behavior with persistent user preferences, supporting both traditional (Enter=Send) and modern (Enter=Newline) interaction patterns.
 
 ## Claude Code SDK Types Reference
 
