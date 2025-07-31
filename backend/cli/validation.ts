@@ -12,7 +12,8 @@ const DOUBLE_BACKSLASH_REGEX = /\\\\/g;
 
 /**
  * Parses Windows .cmd script to extract the actual CLI script path
- * Handles NPM standard template that uses "%~dp0\cli.js" pattern
+ * Handles NPM cmd-shim execution line pattern: "%_prog%" args "%dp0%\script.js" %*
+ * Skips IF EXIST conditions and targets the actual execution line
  * @param runtime - Runtime abstraction for system operations
  * @param cmdPath - Path to the .cmd file to parse
  * @returns Promise<string | null> - The extracted CLI script path or null if parsing fails
@@ -258,6 +259,10 @@ export async function validateClaudeCli(
   customPath?: string,
 ): Promise<string> {
   try {
+    // Get platform information once at the beginning
+    const platform = runtime.getPlatform();
+    const isWindows = platform === "windows";
+
     let claudePath = "";
 
     if (customPath) {
@@ -279,9 +284,6 @@ export async function validateClaudeCli(
       }
 
       // On Windows, prefer .cmd files when multiple candidates exist
-      const platform = runtime.getPlatform();
-      const isWindows = platform === "windows";
-
       if (isWindows && candidates.length > 1) {
         const cmdCandidate = candidates.find((path) => path.endsWith(".cmd"));
         claudePath = cmdCandidate || candidates[0];
@@ -302,8 +304,6 @@ export async function validateClaudeCli(
     }
 
     // Check if this is a Windows .cmd file for enhanced debugging
-    const platform = runtime.getPlatform();
-    const isWindows = platform === "windows";
     const isCmdFile = claudePath.endsWith(".cmd");
 
     if (isWindows && isCmdFile) {
