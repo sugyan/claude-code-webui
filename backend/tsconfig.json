@@ -26,6 +26,7 @@
     "history/**/*.ts",
     "middleware/**/*.ts",
     "runtime/types.ts",
+    "tests/**/*.ts",
     "types.ts"
   ],
   "exclude": [
