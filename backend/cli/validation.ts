@@ -7,6 +7,13 @@
 import { dirname, join } from "node:path";
 import type { Runtime } from "../runtime/types.ts";
 import { logger } from "../utils/logger.ts";
+import {
+  readTextFile,
+  writeTextFile,
+  exists,
+  withTempDir,
+} from "../utils/fs.ts";
+import { getPlatform, getEnv, exit } from "../utils/os.ts";
 
 // Regex to fix double backslashes that might occur during Windows path string processing
 const DOUBLE_BACKSLASH_REGEX = /\\\\/g;
@@ -19,13 +26,10 @@ const DOUBLE_BACKSLASH_REGEX = /\\\\/g;
  * @param cmdPath - Path to the .cmd file to parse
  * @returns Promise<string | null> - The extracted CLI script path or null if parsing fails
  */
-async function parseCmdScript(
-  runtime: Runtime,
-  cmdPath: string,
-): Promise<string | null> {
+async function parseCmdScript(cmdPath: string): Promise<string | null> {
   try {
     logger.validation.debug(`Parsing Windows .cmd script: ${cmdPath}`);
-    const cmdContent = await runtime.readTextFile(cmdPath);
+    const cmdContent = await readTextFile(cmdPath);
 
     // Extract directory of the .cmd file for resolving relative paths
     const cmdDir = dirname(cmdPath);
@@ -45,7 +49,7 @@ async function parseCmdScript(
         logger.validation.debug(`Resolved absolute path: ${absolutePath}`);
 
         // Verify the resolved path exists
-        if (await runtime.exists(absolutePath)) {
+        if (await exists(absolutePath)) {
           logger.validation.debug(`.cmd parsing successful: ${absolutePath}`);
           return absolutePath;
         } else {
@@ -104,7 +108,7 @@ export async function detectClaudeCliPath(
   runtime: Runtime,
   claudePath: string,
 ): Promise<{ scriptPath: string; versionOutput: string }> {
-  const platform = runtime.getPlatform();
+  const platform = getPlatform();
   const isWindows = platform === "windows";
 
   // First try PATH wrapping method
@@ -112,7 +116,7 @@ export async function detectClaudeCliPath(
     null;
 
   try {
-    pathWrappingResult = await runtime.withTempDir(async (tempDir) => {
+    pathWrappingResult = await withTempDir(async (tempDir: string) => {
       const traceFile = `${tempDir}/trace.log`;
 
       // Find the original node executable
@@ -130,14 +134,14 @@ export async function detectClaudeCliPath(
         ? getWindowsWrapperScript(traceFile, originalNodePath)
         : getUnixWrapperScript(traceFile, originalNodePath);
 
-      await runtime.writeTextFile(
+      await writeTextFile(
         `${tempDir}/${wrapperFileName}`,
         wrapperScript,
         isWindows ? undefined : { mode: 0o755 },
       );
 
       // Execute claude with modified PATH to intercept node calls
-      const currentPath = runtime.getEnv("PATH") || "";
+      const currentPath = getEnv("PATH") || "";
       const modifiedPath = isWindows
         ? `${tempDir};${currentPath}`
         : `${tempDir}:${currentPath}`;
@@ -160,7 +164,7 @@ export async function detectClaudeCliPath(
       // Parse trace file to extract script path
       let traceContent: string;
       try {
-        traceContent = await runtime.readTextFile(traceFile);
+        traceContent = await readTextFile(traceFile);
       } catch {
         // Trace file might not exist or be readable
         return { scriptPath: "", versionOutput };
@@ -215,7 +219,7 @@ export async function detectClaudeCliPath(
       "PATH wrapping method failed, trying .cmd parsing fallback...",
     );
     try {
-      const cmdParsedPath = await parseCmdScript(runtime, claudePath);
+      const cmdParsedPath = await parseCmdScript(claudePath);
       if (cmdParsedPath) {
         // Get version output, use from PATH wrapping if available
         let versionOutput = pathWrappingResult?.versionOutput || "";
@@ -261,7 +265,7 @@ export async function validateClaudeCli(
 ): Promise<string> {
   try {
     // Get platform information once at the beginning
-    const platform = runtime.getPlatform();
+    const platform = getPlatform();
     const isWindows = platform === "windows";
 
     let claudePath = "";
@@ -281,7 +285,7 @@ export async function validateClaudeCli(
         console.error(
           "   Visit: https://claude.ai/code for installation instructions",
         );
-        runtime.exit(1);
+        exit(1);
       }
 
       // On Windows, prefer .cmd files when multiple candidates exist
@@ -338,6 +342,6 @@ export async function validateClaudeCli(
     console.error(
       `   Error: ${error instanceof Error ? error.message : String(error)}`,
     );
-    runtime.exit(1);
+    exit(1);
   }
 }

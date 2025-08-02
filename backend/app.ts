@@ -18,6 +18,7 @@ import { handleConversationRequest } from "./handlers/conversations.ts";
 import { handleChatRequest } from "./handlers/chat.ts";
 import { handleAbortRequest } from "./handlers/abort.ts";
 import { logger } from "./utils/logger.ts";
+import { readBinaryFile } from "./utils/fs.ts";
 
 export interface AppConfig {
   debugMode: boolean;
@@ -89,7 +90,7 @@ export function createApp(
 
     try {
       const indexPath = `${config.staticPath}/index.html`;
-      const indexFile = await runtime.readBinaryFile(indexPath);
+      const indexFile = await readBinaryFile(indexPath);
       return c.html(new TextDecoder().decode(indexFile));
     } catch (error) {
       logger.app.error("Error serving index.html: {error}", { error });

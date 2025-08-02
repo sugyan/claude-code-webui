@@ -3,7 +3,8 @@
  * Handles conversion between project paths and Claude history directory names
  */
 
-import type { Runtime } from "../runtime/types.ts";
+import { readDir } from "../utils/fs.ts";
+import { getHomeDir } from "../utils/os.ts";
 
 /**
  * Get the encoded directory name for a project path by checking what actually exists
@@ -11,9 +12,8 @@ import type { Runtime } from "../runtime/types.ts";
  */
 export async function getEncodedProjectName(
   projectPath: string,
-  runtime: Runtime,
 ): Promise<string | null> {
-  const homeDir = runtime.getHomeDir();
+  const homeDir = getHomeDir();
   if (!homeDir) {
     return null;
   }
@@ -23,7 +23,7 @@ export async function getEncodedProjectName(
   try {
     // Read all directories in .claude/projects
     const entries = [];
-    for await (const entry of runtime.readDir(projectsDir)) {
+    for await (const entry of readDir(projectsDir)) {
       if (entry.isDirectory) {
         entries.push(entry.name);
       }

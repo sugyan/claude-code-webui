@@ -7,8 +7,8 @@ import type {
   SDKAssistantMessage,
   SDKUserMessage,
 } from "@anthropic-ai/claude-code";
-import type { Runtime } from "../runtime/types.ts";
 import { logger } from "../utils/logger.ts";
+import { readTextFile, readDir } from "../utils/fs.ts";
 
 // Raw JSONL line structure from Claude history files
 export interface RawHistoryLine {
@@ -44,10 +44,9 @@ export interface ConversationFile {
  */
 async function parseHistoryFile(
   filePath: string,
-  runtime: Runtime,
 ): Promise<ConversationFile | null> {
   try {
-    const content = await runtime.readTextFile(filePath);
+    const content = await readTextFile(filePath);
     const lines = content
       .trim()
       .split("\n")
@@ -130,14 +129,11 @@ async function parseHistoryFile(
  * Get all JSONL files in a history directory
  * @private - Internal function used by parseAllHistoryFiles
  */
-async function getHistoryFiles(
-  historyDir: string,
-  runtime: Runtime,
-): Promise<string[]> {
+async function getHistoryFiles(historyDir: string): Promise<string[]> {
   try {
     const files: string[] = [];
 
-    for await (const entry of runtime.readDir(historyDir)) {
+    for await (const entry of readDir(historyDir)) {
       if (entry.isFile && entry.name.endsWith(".jsonl")) {
         files.push(`${historyDir}/${entry.name}`);
       }
@@ -156,13 +152,12 @@ async function getHistoryFiles(
  */
 export async function parseAllHistoryFiles(
   historyDir: string,
-  runtime: Runtime,
 ): Promise<ConversationFile[]> {
-  const filePaths = await getHistoryFiles(historyDir, runtime);
+  const filePaths = await getHistoryFiles(historyDir);
   const results: ConversationFile[] = [];
 
   for (const filePath of filePaths) {
-    const parsed = await parseHistoryFile(filePath, runtime);
+    const parsed = await parseHistoryFile(filePath);
     if (parsed) {
       results.push(parsed);
     }

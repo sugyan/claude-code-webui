@@ -5,8 +5,8 @@
  */
 
 import { program } from "commander";
-import type { Runtime } from "../runtime/types.ts";
 import { VERSION } from "./version.ts";
+import { getEnv, getArgs } from "../utils/os.ts";
 
 export interface ParsedArgs {
   debug: boolean;
@@ -15,12 +15,12 @@ export interface ParsedArgs {
   claudePath?: string;
 }
 
-export function parseCliArgs(runtime: Runtime): ParsedArgs {
+export function parseCliArgs(): ParsedArgs {
   // Use version from auto-generated version.ts file
   const version = VERSION;
 
   // Get default port from environment
-  const defaultPort = parseInt(runtime.getEnv("PORT") || "8080", 10);
+  const defaultPort = parseInt(getEnv("PORT") || "8080", 10);
 
   // Configure program
   program
@@ -51,11 +51,11 @@ export function parseCliArgs(runtime: Runtime): ParsedArgs {
     .option("-d, --debug", "Enable debug mode", false);
 
   // Parse arguments - Commander.js v14 handles this automatically
-  program.parse(runtime.getArgs(), { from: "user" });
+  program.parse(getArgs(), { from: "user" });
   const options = program.opts();
 
   // Handle DEBUG environment variable manually
-  const debugEnv = runtime.getEnv("DEBUG");
+  const debugEnv = getEnv("DEBUG");
   const debugFromEnv = debugEnv?.toLowerCase() === "true" || debugEnv === "1";
 
   return {

@@ -5,10 +5,11 @@
 
 import type { RawHistoryLine } from "./parser.ts";
 import type { ConversationHistory } from "../../shared/types.ts";
-import type { Runtime } from "../runtime/types.ts";
 import { logger } from "../utils/logger.ts";
 import { processConversationMessages } from "./timestampRestore.ts";
 import { validateEncodedProjectName } from "./pathUtils.ts";
+import { readTextFile, exists } from "../utils/fs.ts";
+import { getHomeDir } from "../utils/os.ts";
 
 /**
  * Load a specific conversation by session ID
@@ -16,7 +17,6 @@ import { validateEncodedProjectName } from "./pathUtils.ts";
 export async function loadConversation(
   encodedProjectName: string,
   sessionId: string,
-  runtime: Runtime,
 ): Promise<ConversationHistory | null> {
   // Validate inputs
   if (!validateEncodedProjectName(encodedProjectName)) {
@@ -28,7 +28,7 @@ export async function loadConversation(
   }
 
   // Get home directory
-  const homeDir = runtime.getHomeDir();
+  const homeDir = getHomeDir();
   if (!homeDir) {
     throw new Error("Home directory not found");
   }
@@ -38,7 +38,7 @@ export async function loadConversation(
   const filePath = `${historyDir}/${sessionId}.jsonl`;
 
   // Check if file exists before trying to read it
-  if (!(await runtime.exists(filePath))) {
+  if (!(await exists(filePath))) {
     return null; // Session not found
   }
 
@@ -46,7 +46,6 @@ export async function loadConversation(
     const conversationHistory = await parseConversationFile(
       filePath,
       sessionId,
-      runtime,
     );
     return conversationHistory;
   } catch (error) {
@@ -61,9 +60,8 @@ export async function loadConversation(
 async function parseConversationFile(
   filePath: string,
   sessionId: string,
-  runtime: Runtime,
 ): Promise<ConversationHistory> {
-  const content = await runtime.readTextFile(filePath);
+  const content = await readTextFile(filePath);
   const lines = content
     .trim()
     .split("\n")
@@ -136,14 +134,9 @@ function validateSessionId(sessionId: string): boolean {
 export async function conversationExists(
   encodedProjectName: string,
   sessionId: string,
-  runtime: Runtime,
 ): Promise<boolean> {
   try {
-    const conversation = await loadConversation(
-      encodedProjectName,
-      sessionId,
-      runtime,
-    );
+    const conversation = await loadConversation(encodedProjectName, sessionId);
     return conversation !== null;
   } catch {
     return false;

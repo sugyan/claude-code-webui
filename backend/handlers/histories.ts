@@ -4,6 +4,8 @@ import { validateEncodedProjectName } from "../history/pathUtils.ts";
 import { parseAllHistoryFiles } from "../history/parser.ts";
 import { groupConversations } from "../history/grouping.ts";
 import { logger } from "../utils/logger.ts";
+import { stat } from "../utils/fs.ts";
+import { getHomeDir } from "../utils/os.ts";
 
 /**
  * Handles GET /api/projects/:encodedProjectName/histories requests
@@ -13,7 +15,6 @@ import { logger } from "../utils/logger.ts";
  */
 export async function handleHistoriesRequest(c: Context) {
   try {
-    const { runtime } = c.var.config;
     const encodedProjectName = c.req.param("encodedProjectName");
 
     if (!encodedProjectName) {
@@ -29,7 +30,7 @@ export async function handleHistoriesRequest(c: Context) {
     );
 
     // Get home directory
-    const homeDir = runtime.getHomeDir();
+    const homeDir = getHomeDir();
     if (!homeDir) {
       return c.json({ error: "Home directory not found" }, 500);
     }
@@ -41,7 +42,7 @@ export async function handleHistoriesRequest(c: Context) {
 
     // Check if the directory exists
     try {
-      const dirInfo = await runtime.stat(historyDir);
+      const dirInfo = await stat(historyDir);
       if (!dirInfo.isDirectory) {
         return c.json({ error: "Project not found" }, 404);
       }
@@ -53,7 +54,7 @@ export async function handleHistoriesRequest(c: Context) {
       throw error;
     }
 
-    const conversationFiles = await parseAllHistoryFiles(historyDir, runtime);
+    const conversationFiles = await parseAllHistoryFiles(historyDir);
 
     logger.history.debug(
       `Found ${conversationFiles.length} conversation files`,

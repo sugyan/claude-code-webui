@@ -7,8 +7,8 @@
   "tasks": {
     "generate-version": "node scripts/generate-version.js",
     "copy-frontend": "node scripts/copy-frontend.js",
-    "dev": "deno task generate-version && deno run --allow-net --allow-run --allow-read --allow-write --allow-env --watch cli/deno.ts --debug",
-    "build": "deno task generate-version && deno task copy-frontend && deno compile --allow-net --allow-run --allow-read --allow-write --allow-env --include ./dist/static --output ../dist/claude-code-webui cli/deno.ts",
+    "dev": "deno task generate-version && deno run --allow-net --allow-run --allow-read --allow-write --allow-env --allow-sys --watch cli/deno.ts --debug",
+    "build": "deno task generate-version && deno task copy-frontend && deno compile --allow-net --allow-run --allow-read --allow-write --allow-env --allow-sys --include ./dist/static --output ../dist/claude-code-webui cli/deno.ts",
     "format": "deno fmt cli/deno.ts runtime/deno.ts",
     "format:check": "deno fmt --check cli/deno.ts runtime/deno.ts",
     "lint": "deno lint cli/deno.ts runtime/deno.ts",
@@ -17,6 +17,11 @@
   "imports": {
     "@std/assert": "jsr:@std/assert@1",
     "@std/path": "jsr:@std/path@1",
+    "node:fs": "node:fs",
+    "node:fs/promises": "node:fs/promises",
+    "node:os": "node:os",
+    "node:path": "node:path",
+    "node:process": "node:process",
     "commander": "npm:commander@^14.0.0",
     "hono": "jsr:@hono/hono@^4.8.5",
     "@anthropic-ai/claude-code": "npm:@anthropic-ai/claude-code@1.0.61",

@@ -13,10 +13,11 @@ import { validateClaudeCli } from "./validation.ts";
 import { setupLogger, logger } from "../utils/logger.ts";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
+import { exit } from "../utils/os.ts";
 
 async function main(runtime: NodeRuntime) {
   // Parse CLI arguments
-  const args = parseCliArgs(runtime);
+  const args = parseCliArgs();
 
   // Initialize logging system
   await setupLogger(args.debug);
@@ -51,5 +52,5 @@ const runtime = new NodeRuntime();
 main(runtime).catch((error) => {
   // Logger may not be initialized yet, so use console.error
   console.error("Failed to start server:", error);
-  runtime.exit(1);
+  exit(1);
 });

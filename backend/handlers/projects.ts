@@ -2,6 +2,8 @@ import { Context } from "hono";
 import type { ProjectInfo, ProjectsResponse } from "../../shared/types.ts";
 import { getEncodedProjectName } from "../history/pathUtils.ts";
 import { logger } from "../utils/logger.ts";
+import { readTextFile } from "../utils/fs.ts";
+import { getHomeDir } from "../utils/os.ts";
 
 /**
  * Handles GET /api/projects requests
@@ -11,9 +13,7 @@ import { logger } from "../utils/logger.ts";
  */
 export async function handleProjectsRequest(c: Context) {
   try {
-    const { runtime } = c.var.config;
-
-    const homeDir = runtime.getHomeDir();
+    const homeDir = getHomeDir();
     if (!homeDir) {
       return c.json({ error: "Home directory not found" }, 500);
     }
@@ -21,7 +21,7 @@ export async function handleProjectsRequest(c: Context) {
     const claudeConfigPath = `${homeDir}/.claude.json`;
 
     try {
-      const configContent = await runtime.readTextFile(claudeConfigPath);
+      const configContent = await readTextFile(claudeConfigPath);
       const config = JSON.parse(configContent);
 
       if (config.projects && typeof config.projects === "object") {
@@ -30,7 +30,7 @@ export async function handleProjectsRequest(c: Context) {
         // Get encoded names for each project, only include projects with history
         const projects: ProjectInfo[] = [];
         for (const path of projectPaths) {
-          const encodedName = await getEncodedProjectName(path, runtime);
+          const encodedName = await getEncodedProjectName(path);
           // Only include projects that have history directories
           if (encodedName) {
             projects.push({

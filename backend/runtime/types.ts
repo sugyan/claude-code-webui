@@ -15,48 +15,9 @@ export interface CommandResult {
   code: number;
 }
 
-// File system information
-export interface FileStats {
-  isFile: boolean;
-  isDirectory: boolean;
-  isSymlink: boolean;
-  size: number;
-  mtime: Date | null;
-}
-
-// Directory entry information
-export interface DirectoryEntry {
-  name: string;
-  isFile: boolean;
-  isDirectory: boolean;
-  isSymlink: boolean;
-}
-
-// Main runtime interface - minimal and focused
+// Simplified runtime interface - only truly platform-specific operations
 export interface Runtime {
-  // File operations
-  readTextFile(path: string): Promise<string>;
-  readBinaryFile(path: string): Promise<Uint8Array>;
-  writeTextFile(
-    path: string,
-    content: string,
-    options?: { mode?: number },
-  ): Promise<void>;
-  exists(path: string): Promise<boolean>;
-  stat(path: string): Promise<FileStats>;
-  readDir(path: string): AsyncIterable<DirectoryEntry>;
-
-  // Temporary directory operations
-  withTempDir<T>(callback: (tempDir: string) => Promise<T>): Promise<T>;
-
-  // Environment access
-  getEnv(key: string): string | undefined;
-  getArgs(): string[];
-  getPlatform(): "windows" | "darwin" | "linux";
-  getHomeDir(): string | undefined;
-  exit(code: number): never;
-
-  // Process execution
+  // Process execution (different APIs between Deno and Node.js)
   runCommand(
     command: string,
     args: string[],
@@ -64,13 +25,13 @@ export interface Runtime {
   ): Promise<CommandResult>;
   findExecutable(name: string): Promise<string[]>;
 
-  // HTTP server
+  // HTTP server (different implementations)
   serve(
     port: number,
     hostname: string,
     handler: (req: Request) => Response | Promise<Response>,
   ): void;
 
-  // Static file serving
+  // Static file serving (different middleware)
   createStaticFileMiddleware(options: { root: string }): MiddlewareHandler;
 }

@@ -11,10 +11,11 @@ import { parseCliArgs } from "./args.ts";
 import { validateClaudeCli } from "./validation.ts";
 import { logger, setupLogger } from "../utils/logger.ts";
 import { dirname, fromFileUrl, join } from "@std/path";
+import { exit } from "../utils/os.ts";
 
 async function main(runtime: DenoRuntime) {
   // Parse CLI arguments
-  const args = parseCliArgs(runtime);
+  const args = parseCliArgs();
 
   // Initialize logging system
   await setupLogger(args.debug);
@@ -47,6 +48,6 @@ if (import.meta.main) {
   main(runtime).catch((error) => {
     // Logger may not be initialized yet, so use console.error
     console.error("Failed to start server:", error);
-    runtime.exit(1);
+    exit(1);
   });
 }
