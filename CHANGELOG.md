@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.46](https://github.com/sugyan/claude-code-webui/compare/0.1.45...0.1.46) - 2025-08-02
+- feat: implement LogTape logging system for debug log control by @sugyan in https://github.com/sugyan/claude-code-webui/pull/220
+- feat: simplify runtime abstraction using Node.js standard modules by @sugyan in https://github.com/sugyan/claude-code-webui/pull/223
+
 ## [0.1.45](https://github.com/sugyan/claude-code-webui/compare/0.1.44...0.1.45) - 2025-07-31
 - feat: make demo page available only in development mode by @sugyan in https://github.com/sugyan/claude-code-webui/pull/217
 - fix: add Windows .cmd parsing fallback for node.exe colocated environments by @sugyan in https://github.com/sugyan/claude-code-webui/pull/219
