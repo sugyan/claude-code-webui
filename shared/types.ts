@@ -10,6 +10,7 @@ export interface ChatRequest {
   requestId: string;
   allowedTools?: string[];
   workingDirectory?: string;
+  permissionMode?: "default" | "plan" | "acceptEdits";
 }
 
 export interface AbortRequest {
@@ -50,4 +51,3 @@ export interface ConversationHistory {
     messageCount: number;
   };
 }
-

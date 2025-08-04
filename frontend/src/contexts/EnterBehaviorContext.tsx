@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import type { EnterBehavior } from "../types/enterBehavior";
 import { EnterBehaviorContext } from "./EnterBehaviorContextDefinition";
+import { STORAGE_KEYS } from "../utils/storage";
 
 export function EnterBehaviorProvider({
   children,
@@ -12,7 +13,9 @@ export function EnterBehaviorProvider({
 
   useEffect(() => {
     // Initialize enter behavior on client side
-    const saved = localStorage.getItem("enterBehavior") as EnterBehavior;
+    const saved = localStorage.getItem(
+      STORAGE_KEYS.ENTER_BEHAVIOR,
+    ) as EnterBehavior;
 
     if (saved && (saved === "send" || saved === "newline")) {
       setEnterBehavior(saved);
@@ -26,7 +29,7 @@ export function EnterBehaviorProvider({
   useEffect(() => {
     if (!isInitialized) return;
 
-    localStorage.setItem("enterBehavior", enterBehavior);
+    localStorage.setItem(STORAGE_KEYS.ENTER_BEHAVIOR, enterBehavior);
   }, [enterBehavior, isInitialized]);
 
   const toggleEnterBehavior = useCallback(() => {

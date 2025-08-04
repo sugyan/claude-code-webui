@@ -16,6 +16,7 @@ import {
   type Theme,
   type RecordingOptions,
 } from "./demo-constants";
+import { STORAGE_KEYS } from "../src/utils/storage";
 
 /**
  * Demo recording script using Playwright's native video recording
@@ -67,7 +68,7 @@ async function recordDemoVideo(options: RecordingOptions): Promise<void> {
     // Pre-configure theme to avoid flashing
     if (theme === "dark") {
       await page.addInitScript(() => {
-        localStorage.setItem("theme", "dark");
+        localStorage.setItem(STORAGE_KEYS.THEME, "dark");
         document.documentElement.classList.add("dark");
       });
     }
@@ -128,7 +129,7 @@ async function recordDemoVideo(options: RecordingOptions): Promise<void> {
     // Re-setup in recording context
     if (theme === "dark") {
       await page.addInitScript(() => {
-        localStorage.setItem("theme", "dark");
+        localStorage.setItem(STORAGE_KEYS.THEME, "dark");
         document.documentElement.classList.add("dark");
       });
     }

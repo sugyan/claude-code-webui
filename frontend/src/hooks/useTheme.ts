@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { STORAGE_KEYS } from "../utils/storage";
 
 export type Theme = "light" | "dark";
 
@@ -8,7 +9,7 @@ export function useTheme() {
 
   useEffect(() => {
     // Initialize theme on client side
-    const saved = localStorage.getItem("theme") as Theme;
+    const saved = localStorage.getItem(STORAGE_KEYS.THEME) as Theme;
 
     if (saved && (saved === "light" || saved === "dark")) {
       setTheme(saved);
@@ -32,7 +33,7 @@ export function useTheme() {
       root.classList.remove("dark");
     }
 
-    localStorage.setItem("theme", theme);
+    localStorage.setItem(STORAGE_KEYS.THEME, theme);
   }, [theme, isInitialized]);
 
   const toggleTheme = () => {

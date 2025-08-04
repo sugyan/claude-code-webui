@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import { type Theme } from "../hooks/useTheme";
+import { STORAGE_KEYS } from "../utils/storage";
 import { useChatState } from "../hooks/chat/useChatState";
 import { usePermissions } from "../hooks/chat/usePermissions";
 import { useDemoAutomation } from "../hooks/useDemoAutomation";
@@ -33,7 +34,7 @@ export function DemoPage() {
       return themeParam;
     }
     // Get system theme without using useTheme hook
-    const saved = localStorage.getItem("theme");
+    const saved = localStorage.getItem(STORAGE_KEYS.THEME);
     if (saved === "dark" || saved === "light") {
       return saved;
     }
@@ -83,7 +84,7 @@ export function DemoPage() {
 
     // Save to localStorage (unless overridden by URL)
     if (!themeParam) {
-      localStorage.setItem("theme", theme);
+      localStorage.setItem(STORAGE_KEYS.THEME, theme);
     }
 
     console.log(`Demo theme applied: ${theme}`, {

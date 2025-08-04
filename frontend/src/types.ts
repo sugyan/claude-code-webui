@@ -3,6 +3,7 @@ import type {
   SDKAssistantMessage,
   SDKSystemMessage,
   SDKResultMessage,
+  PermissionMode as SDKPermissionMode,
 } from "@anthropic-ai/claude-code";
 
 // Chat message for user/assistant interactions (not part of SDKMessage)
@@ -55,6 +56,21 @@ export type ToolResultMessage = {
   timestamp: number;
 };
 
+// Plan approval dialog state
+export interface PlanApprovalDialog {
+  isOpen: boolean;
+  plan: string;
+  toolUseId: string;
+}
+
+// Plan message type for UI display
+export interface PlanMessage {
+  type: "plan";
+  plan: string;
+  toolUseId: string;
+  timestamp: number;
+}
+
 // TimestampedSDKMessage types for conversation history API
 // These extend Claude SDK types with timestamp information
 type WithTimestamp<T> = T & { timestamp: string };
@@ -74,7 +90,8 @@ export type AllMessage =
   | ChatMessage
   | SystemMessage
   | ToolMessage
-  | ToolResultMessage;
+  | ToolResultMessage
+  | PlanMessage;
 
 // Type guard functions
 export function isChatMessage(message: AllMessage): message is ChatMessage {
@@ -98,6 +115,53 @@ export function isToolResultMessage(
 ): message is ToolResultMessage {
   return message.type === "tool_result";
 }
+
+export function isPlanMessage(message: AllMessage): message is PlanMessage {
+  return message.type === "plan";
+}
+
+// Permission mode types (UI-focused subset of SDK PermissionMode)
+export type PermissionMode = "default" | "plan" | "acceptEdits";
+
+// SDK type integration utilities
+export function toSDKPermissionMode(uiMode: PermissionMode): SDKPermissionMode {
+  return uiMode as SDKPermissionMode;
+}
+
+export function fromSDKPermissionMode(
+  sdkMode: SDKPermissionMode,
+): PermissionMode {
+  // Filter out bypassPermissions for UI
+  return sdkMode === "bypassPermissions" ? "default" : sdkMode;
+}
+
+// Chat state extensions for permission mode
+export interface ChatStatePermissions {
+  permissionMode: PermissionMode;
+  planApprovalDialog: PlanApprovalDialog | null;
+  setPermissionMode: (mode: PermissionMode) => void;
+  showPlanApprovalDialog: (plan: string, toolUseId: string) => void;
+  closePlanApprovalDialog: () => void;
+  approvePlan: () => void;
+  rejectPlan: () => void;
+}
+
+// Permission mode preference type
+export interface PermissionModePreference {
+  mode: PermissionMode;
+  timestamp: number;
+}
+
+// Plan approval error types (simplified, realistic)
+export interface PlanApprovalError {
+  type: "user_rejected" | "network_error";
+  message: string;
+  canRetry: boolean;
+}
+
+export type PlanApprovalResult =
+  | { success: true; sessionId: string }
+  | { success: false; error: PlanApprovalError };
 
 // Re-export shared types
 export type {
