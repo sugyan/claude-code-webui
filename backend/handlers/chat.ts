@@ -1,5 +1,9 @@
 import { Context } from "hono";
-import { AbortError, query } from "@anthropic-ai/claude-code";
+import {
+  AbortError,
+  query,
+  type PermissionMode,
+} from "@anthropic-ai/claude-code";
 import type { ChatRequest, StreamResponse } from "../../shared/types.ts";
 import { logger } from "../utils/logger.ts";
 
@@ -12,6 +16,7 @@ import { logger } from "../utils/logger.ts";
  * @param sessionId - Optional session ID for conversation continuity
  * @param allowedTools - Optional array of allowed tool names
  * @param workingDirectory - Optional working directory for Claude execution
+ * @param permissionMode - Optional permission mode for Claude execution
  * @returns AsyncGenerator yielding StreamResponse objects
  */
 async function* executeClaudeCommand(
@@ -22,6 +27,7 @@ async function* executeClaudeCommand(
   sessionId?: string,
   allowedTools?: string[],
   workingDirectory?: string,
+  permissionMode?: PermissionMode,
 ): AsyncGenerator<StreamResponse> {
   let abortController: AbortController;
 
@@ -47,6 +53,7 @@ async function* executeClaudeCommand(
         ...(sessionId ? { resume: sessionId } : {}),
         ...(allowedTools ? { allowedTools } : {}),
         ...(workingDirectory ? { cwd: workingDirectory } : {}),
+        ...(permissionMode ? { permissionMode } : {}),
       },
     })) {
       // Debug logging of raw SDK messages
@@ -110,6 +117,7 @@ export async function handleChatRequest(
           chatRequest.sessionId,
           chatRequest.allowedTools,
           chatRequest.workingDirectory,
+          chatRequest.permissionMode,
         )) {
           const data = JSON.stringify(chunk) + "\n";
           controller.enqueue(new TextEncoder().encode(data));
