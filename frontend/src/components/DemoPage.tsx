@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import { type Theme } from "../hooks/useTheme";
-import { STORAGE_KEYS } from "../utils/storage";
+import { STORAGE_KEYS, getStorageItem, setStorageItem } from "../utils/storage";
 import { useChatState } from "../hooks/chat/useChatState";
 import { usePermissions } from "../hooks/chat/usePermissions";
 import { useDemoAutomation } from "../hooks/useDemoAutomation";
@@ -34,13 +34,11 @@ export function DemoPage() {
       return themeParam;
     }
     // Get system theme without using useTheme hook
-    const saved = localStorage.getItem(STORAGE_KEYS.THEME);
-    if (saved === "dark" || saved === "light") {
-      return saved;
-    }
-    return window.matchMedia("(prefers-color-scheme: dark)").matches
+    const systemDefault = window.matchMedia("(prefers-color-scheme: dark)")
+      .matches
       ? "dark"
       : "light";
+    return getStorageItem(STORAGE_KEYS.THEME, systemDefault);
   });
 
   const toggleTheme = () => {
@@ -84,7 +82,7 @@ export function DemoPage() {
 
     // Save to localStorage (unless overridden by URL)
     if (!themeParam) {
-      localStorage.setItem(STORAGE_KEYS.THEME, theme);
+      setStorageItem(STORAGE_KEYS.THEME, theme);
     }
 
     console.log(`Demo theme applied: ${theme}`, {
