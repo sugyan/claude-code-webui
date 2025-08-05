@@ -4,7 +4,7 @@ import { chromium } from "playwright";
 import { existsSync, mkdirSync } from "fs";
 import { join } from "path";
 import { type DemoScenario, type Theme } from "./demo-constants";
-import { STORAGE_KEYS } from "../src/utils/storage";
+import { STORAGE_KEYS, setStorageItem } from "../src/utils/storage";
 
 /**
  * Screenshot capture script using Playwright
@@ -88,7 +88,7 @@ async function captureScreenshot(options: ScreenshotOptions): Promise<void> {
     // Pre-configure theme to avoid flashing
     if (theme === "dark") {
       await page.addInitScript(() => {
-        localStorage.setItem(STORAGE_KEYS.THEME, "dark");
+        setStorageItem(STORAGE_KEYS.THEME, "dark");
         document.documentElement.classList.add("dark");
       });
     }
