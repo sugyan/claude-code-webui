@@ -56,11 +56,8 @@ async function* executeClaudeCommand(
         ...(permissionMode ? { permissionMode } : {}),
       },
     })) {
-      // Debug logging of raw SDK messages
-      logger.chat.debug(
-        "Claude SDK Message {*}",
-        sdkMessage as unknown as Record<string, unknown>,
-      );
+      // Debug logging of raw SDK messages with detailed content
+      logger.chat.debug("Claude SDK Message: {sdkMessage}", { sdkMessage });
 
       yield {
         type: "claude_json",
