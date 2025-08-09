@@ -86,6 +86,9 @@ export function PlanPermissionInputPanel({
         } else if (effectiveSelectedOption === "keepPlanning") {
           onKeepPlanning();
         }
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        onKeepPlanning(); // "Keep planning" option when ESC is pressed
       }
     };
 

@@ -151,6 +151,9 @@ export function PermissionInputPanel({
         } else if (effectiveSelectedOption === "deny") {
           onDeny();
         }
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        onDeny(); // "Deny" option when ESC is pressed
       }
     };
 

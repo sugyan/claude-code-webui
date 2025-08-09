@@ -73,21 +73,6 @@ export function ChatInput({
     }
   }, [isLoading, showPermissions]);
 
-  // Handle ESC key for permission denial
-  useEffect(() => {
-    if (!showPermissions || !permissionData) return;
-
-    const handleEscKey = (e: KeyboardEvent) => {
-      if (e.key === KEYBOARD_SHORTCUTS.ABORT) {
-        e.preventDefault();
-        permissionData.onDeny();
-      }
-    };
-
-    document.addEventListener("keydown", handleEscKey);
-    return () => document.removeEventListener("keydown", handleEscKey);
-  }, [showPermissions, permissionData]);
-
   // Auto-resize textarea
   useEffect(() => {
     const textarea = inputRef.current;
