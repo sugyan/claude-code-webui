@@ -1,4 +1,3 @@
-import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { useState, useEffect, useCallback } from "react";
 
 interface PlanPermissionInputPanelProps {
@@ -34,7 +33,7 @@ export function PlanPermissionInputPanel({
 }: PlanPermissionInputPanelProps) {
   const [selectedOption, setSelectedOption] = useState<
     "acceptWithEdits" | "acceptDefault" | "keepPlanning" | null
-  >("acceptDefault");
+  >("acceptWithEdits");
 
   // Check if component is externally controlled (for demo mode)
   const isExternallyControlled = externalSelectedOption !== undefined;
@@ -61,8 +60,8 @@ export function PlanPermissionInputPanel({
 
     // Define options array inside useEffect to avoid unnecessary re-renders
     const options = [
-      "acceptDefault",
       "acceptWithEdits",
+      "acceptDefault",
       "keepPlanning",
     ] as const;
 
@@ -80,10 +79,10 @@ export function PlanPermissionInputPanel({
       } else if (e.key === "Enter" && effectiveSelectedOption) {
         e.preventDefault();
         // Execute the currently selected option
-        if (effectiveSelectedOption === "acceptDefault") {
-          onAcceptDefault();
-        } else if (effectiveSelectedOption === "acceptWithEdits") {
+        if (effectiveSelectedOption === "acceptWithEdits") {
           onAcceptWithEdits();
+        } else if (effectiveSelectedOption === "acceptDefault") {
+          onAcceptDefault();
         } else if (effectiveSelectedOption === "keepPlanning") {
           onKeepPlanning();
         }
@@ -103,16 +102,6 @@ export function PlanPermissionInputPanel({
 
   return (
     <div className="flex-shrink-0 px-4 py-4 bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl backdrop-blur-sm shadow-sm">
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-4">
-        <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
-          <ExclamationTriangleIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-        </div>
-        <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100">
-          Ready to code?
-        </h3>
-      </div>
-
       {/* Content */}
       <div className="mb-4">
         <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -122,43 +111,6 @@ export function PlanPermissionInputPanel({
 
       {/* Permission options with selection state */}
       <div className="space-y-2">
-        <button
-          onClick={() => {
-            updateSelectedOption("acceptDefault");
-            onAcceptDefault();
-          }}
-          onFocus={() => updateSelectedOption("acceptDefault")}
-          onBlur={() => {
-            if (!isExternallyControlled) {
-              setSelectedOption(null);
-            }
-          }}
-          onMouseEnter={() => updateSelectedOption("acceptDefault")}
-          onMouseLeave={() => {
-            if (!isExternallyControlled) {
-              setSelectedOption(null);
-            }
-          }}
-          className={getButtonClassName(
-            "acceptDefault",
-            `w-full p-3 rounded-lg cursor-pointer transition-all duration-200 text-left focus:outline-none ${
-              effectiveSelectedOption === "acceptDefault"
-                ? "bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-500 dark:border-blue-400 shadow-sm"
-                : "border-2 border-transparent"
-            }`,
-          )}
-        >
-          <span
-            className={`text-sm font-medium ${
-              effectiveSelectedOption === "acceptDefault"
-                ? "text-blue-700 dark:text-blue-300"
-                : "text-slate-700 dark:text-slate-300"
-            }`}
-          >
-            Yes, and manually approve edits
-          </span>
-        </button>
-
         <button
           onClick={() => {
             updateSelectedOption("acceptWithEdits");
@@ -193,6 +145,43 @@ export function PlanPermissionInputPanel({
             }`}
           >
             Yes, and auto-accept edits
+          </span>
+        </button>
+
+        <button
+          onClick={() => {
+            updateSelectedOption("acceptDefault");
+            onAcceptDefault();
+          }}
+          onFocus={() => updateSelectedOption("acceptDefault")}
+          onBlur={() => {
+            if (!isExternallyControlled) {
+              setSelectedOption(null);
+            }
+          }}
+          onMouseEnter={() => updateSelectedOption("acceptDefault")}
+          onMouseLeave={() => {
+            if (!isExternallyControlled) {
+              setSelectedOption(null);
+            }
+          }}
+          className={getButtonClassName(
+            "acceptDefault",
+            `w-full p-3 rounded-lg cursor-pointer transition-all duration-200 text-left focus:outline-none ${
+              effectiveSelectedOption === "acceptDefault"
+                ? "bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-500 dark:border-blue-400 shadow-sm"
+                : "border-2 border-transparent"
+            }`,
+          )}
+        >
+          <span
+            className={`text-sm font-medium ${
+              effectiveSelectedOption === "acceptDefault"
+                ? "text-blue-700 dark:text-blue-300"
+                : "text-slate-700 dark:text-slate-300"
+            }`}
+          >
+            Yes, and manually approve edits
           </span>
         </button>
 

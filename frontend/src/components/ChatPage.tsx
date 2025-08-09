@@ -308,23 +308,20 @@ export function ChatPage() {
   const handlePlanAcceptWithEdits = useCallback(() => {
     closePlanModeRequest();
     if (currentSessionId) {
-      sendMessage("continue", allowedTools, true, "acceptEdits");
+      sendMessage("accept", allowedTools, true, "acceptEdits");
     }
   }, [closePlanModeRequest, currentSessionId, sendMessage, allowedTools]);
 
   const handlePlanAcceptDefault = useCallback(() => {
     closePlanModeRequest();
     if (currentSessionId) {
-      sendMessage("continue", allowedTools, true, "default");
+      sendMessage("accept", allowedTools, true, "default");
     }
   }, [closePlanModeRequest, currentSessionId, sendMessage, allowedTools]);
 
   const handlePlanKeepPlanning = useCallback(() => {
     closePlanModeRequest();
-    if (currentSessionId) {
-      sendMessage("continue", allowedTools, true, "plan");
-    }
-  }, [closePlanModeRequest, currentSessionId, sendMessage, allowedTools]);
+  }, [closePlanModeRequest]);
 
   // Create permission data for inline permission interface
   const permissionData = permissionRequest

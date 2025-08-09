@@ -8,6 +8,11 @@ interface ToolCache {
   input: Record<string, unknown>;
 }
 
+// Helper function to detect tool use errors that should be displayed as regular results
+function isToolUseError(content: string): boolean {
+  return content.includes("tool_use_error");
+}
+
 export function useToolHandling() {
   // Store tool_use information for later matching with tool_result
   const toolUseCache = useCallback(() => {
@@ -69,8 +74,8 @@ export function useToolHandling() {
           ? contentItem.content
           : JSON.stringify(contentItem.content);
 
-      // Check for permission errors - any is_error from Claude SDK indicates permission issues
-      if (contentItem.is_error) {
+      // Check for permission errors - but skip tool use errors which should be displayed as regular results
+      if (contentItem.is_error && !isToolUseError(content)) {
         handlePermissionError(contentItem, context);
         return;
       }
