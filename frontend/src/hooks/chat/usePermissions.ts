@@ -7,10 +7,17 @@ interface PermissionRequest {
   toolUseId: string;
 }
 
+interface PlanModeRequest {
+  isOpen: boolean;
+  planContent: string;
+}
+
 export function usePermissions() {
   const [allowedTools, setAllowedTools] = useState<string[]>([]);
   const [permissionRequest, setPermissionRequest] =
     useState<PermissionRequest | null>(null);
+  const [planModeRequest, setPlanModeRequest] =
+    useState<PlanModeRequest | null>(null);
 
   // New state for inline permission system
   const [isPermissionMode, setIsPermissionMode] = useState(false);
@@ -32,6 +39,19 @@ export function usePermissions() {
   const closePermissionRequest = useCallback(() => {
     setPermissionRequest(null);
     // Disable inline permission mode
+    setIsPermissionMode(false);
+  }, []);
+
+  const showPlanModeRequest = useCallback((planContent: string) => {
+    setPlanModeRequest({
+      isOpen: true,
+      planContent,
+    });
+    setIsPermissionMode(true);
+  }, []);
+
+  const closePlanModeRequest = useCallback(() => {
+    setPlanModeRequest(null);
     setIsPermissionMode(false);
   }, []);
 
@@ -65,8 +85,10 @@ export function usePermissions() {
     allowToolTemporary,
     allowToolPermanent,
     resetPermissions,
-    // New inline permission system exports
     isPermissionMode,
     setIsPermissionMode,
+    planModeRequest,
+    showPlanModeRequest,
+    closePlanModeRequest,
   };
 }

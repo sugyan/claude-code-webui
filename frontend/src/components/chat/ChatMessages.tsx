@@ -5,12 +5,14 @@ import {
   isSystemMessage,
   isToolMessage,
   isToolResultMessage,
+  isPlanMessage,
 } from "../../types";
 import {
   ChatMessageComponent,
   SystemMessageComponent,
   ToolMessageComponent,
   ToolResultMessageComponent,
+  PlanMessageComponent,
   LoadingComponent,
 } from "../MessageComponents";
 // import { UI_CONSTANTS } from "../../utils/constants"; // Unused for now
@@ -58,6 +60,8 @@ export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
       return <ToolMessageComponent key={key} message={message} />;
     } else if (isToolResultMessage(message)) {
       return <ToolResultMessageComponent key={key} message={message} />;
+    } else if (isPlanMessage(message)) {
+      return <PlanMessageComponent key={key} message={message} />;
     } else if (isChatMessage(message)) {
       return <ChatMessageComponent key={key} message={message} />;
     }

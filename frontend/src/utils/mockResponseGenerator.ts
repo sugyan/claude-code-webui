@@ -19,6 +19,7 @@ export interface MockScenarioStep {
   type:
     | "system"
     | "assistant"
+    | "user"
     | "result"
     | "permission_error"
     | "button_focus"
@@ -69,6 +70,41 @@ export function createAssistantMessage(
   };
 }
 
+// Generate combined assistant message with both text and tool_use (like real SDK)
+export function createCombinedAssistantMessage(
+  textContent: string,
+  toolUse: {
+    id: string;
+    name: string;
+    input: Record<string, unknown>;
+  },
+  sessionId: string,
+): Extract<SDKMessage, { type: "assistant" }> {
+  return {
+    type: "assistant",
+    message: {
+      id: "msg_" + generateId(),
+      type: "message",
+      role: "assistant",
+      content: [
+        { type: "text", text: textContent },
+        {
+          type: "tool_use",
+          id: toolUse.id,
+          name: toolUse.name,
+          input: toolUse.input,
+        },
+      ],
+      model: "claude-3-5-sonnet-20241022",
+      stop_reason: "tool_use",
+      stop_sequence: null,
+      usage: { input_tokens: 25, output_tokens: 65 },
+    },
+    parent_tool_use_id: null,
+    session_id: sessionId,
+  };
+}
+
 // Generate realistic Claude result messages
 export function createResultMessage(
   sessionId: string,
@@ -90,6 +126,92 @@ export function createResultMessage(
       output_tokens: outputTokens,
       total_tokens: inputTokens + outputTokens,
     },
+  };
+}
+
+// Generate ExitPlanMode tool use message
+export function createExitPlanModeToolUse(
+  sessionId: string,
+  planContent: string,
+): Extract<SDKMessage, { type: "assistant" }> {
+  const toolUseId = generateId();
+  return {
+    type: "assistant",
+    message: {
+      id: "msg_" + generateId(),
+      type: "message",
+      role: "assistant",
+      content: [
+        {
+          type: "tool_use",
+          id: toolUseId,
+          name: "ExitPlanMode",
+          input: {
+            plan: planContent,
+          },
+        },
+      ],
+      model: "claude-3-5-sonnet-20241022",
+      stop_reason: "tool_use",
+      stop_sequence: null,
+      usage: { input_tokens: 25, output_tokens: 28 },
+    },
+    parent_tool_use_id: null,
+    session_id: sessionId,
+  };
+}
+
+// Generate ExitPlanMode tool use message with specific ID
+export function createExitPlanModeToolUseWithId(
+  sessionId: string,
+  toolUseId: string,
+  planContent: string,
+): Extract<SDKMessage, { type: "assistant" }> {
+  return {
+    type: "assistant",
+    message: {
+      id: "msg_" + generateId(),
+      type: "message",
+      role: "assistant",
+      content: [
+        {
+          type: "tool_use",
+          id: toolUseId,
+          name: "ExitPlanMode",
+          input: {
+            plan: planContent,
+          },
+        },
+      ],
+      model: "claude-3-5-sonnet-20241022",
+      stop_reason: "tool_use",
+      stop_sequence: null,
+      usage: { input_tokens: 25, output_tokens: 28 },
+    },
+    parent_tool_use_id: null,
+    session_id: sessionId,
+  };
+}
+
+// Generate ExitPlanMode tool result message
+export function createExitPlanModeToolResult(
+  sessionId: string,
+  toolUseId: string,
+): Extract<SDKMessage, { type: "user" }> {
+  return {
+    type: "user",
+    message: {
+      role: "user",
+      content: [
+        {
+          type: "tool_result",
+          tool_use_id: toolUseId,
+          content: "Exit plan mode?",
+        },
+      ],
+    },
+    parent_tool_use_id: null,
+    session_id: sessionId,
   };
 }
 
@@ -161,6 +283,8 @@ export const DEMO_INPUTS = {
     "Please analyze the frontend code structure and suggest improvements",
   codeGeneration:
     "Write a simple Python script that calculates fibonacci numbers and run it",
+  planMode:
+    "Help me implement a new feature to add dark theme support to the project",
 } as const;
 
 // Predefined demo scenarios
@@ -453,6 +577,74 @@ if __name__ == "__main__":
       },
     ],
   },
+  planMode: (() => {
+    // Generate a consistent tool use ID that will be shared between tool_use and tool_result
+    const planToolUseId = "demo-plan-tool-" + Date.now();
+    const planContent = `# Dark Theme Implementation Plan
+
+## 1. Analysis of Current Structure
+- Review existing theme implementation in frontend/src/hooks/useTheme.ts
+- Check TailwindCSS configuration for dark mode support
+- Examine current light/dark theme toggle mechanism
+
+## 2. Theme Enhancement Tasks
+- **Extend Color Palette**: Add more comprehensive dark theme colors
+- **Component Updates**: Update all components to use consistent dark theme classes
+- **Storage Integration**: Ensure theme preference persistence works correctly
+- **System Theme Detection**: Improve automatic system theme detection
+
+## 3. Implementation Steps
+1. Update TailwindCSS configuration for extended dark mode colors
+2. Create comprehensive theme color tokens
+3. Update all components to use new dark theme classes
+4. Test theme switching across all UI components
+5. Add smooth theme transition animations
+6. Verify localStorage persistence works correctly
+
+## 4. Testing Plan
+- Test theme switching in all major UI components
+- Verify system theme detection works on different OS
+- Check theme persistence across browser sessions
+- Test accessibility with both themes`;
+
+    return {
+      sessionId: "demo-session-plan",
+      inputText: DEMO_INPUTS.planMode,
+      steps: [
+        {
+          type: "system" as const,
+          delay: 600,
+          data: createSystemMessage("demo-session-plan"),
+        },
+        {
+          type: "assistant" as const,
+          delay: 1200,
+          data: createCombinedAssistantMessage(
+            "I'll help you implement dark theme support! Let me first analyze the current project structure to understand how theming should be implemented.",
+            {
+              id: planToolUseId,
+              name: "ExitPlanMode",
+              input: { plan: planContent },
+            },
+            "demo-session-plan",
+          ),
+        },
+        {
+          type: "user" as const,
+          delay: 1500,
+          data: createExitPlanModeToolResult(
+            "demo-session-plan",
+            planToolUseId,
+          ),
+        },
+        {
+          type: "result" as const,
+          delay: 800,
+          data: createResultMessage("demo-session-plan", 75, 250),
+        },
+      ],
+    };
+  })(),
 } as const;
 
 // Helper to convert scenario to stream responses

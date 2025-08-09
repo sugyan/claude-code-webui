@@ -24,12 +24,3 @@ export function isUserMessage(
 ): data is Extract<SDKMessage, { type: "user" }> {
   return data.type === "user";
 }
-
-// Helper function to check if tool_result contains permission error
-export function isPermissionError(content: string): boolean {
-  return (
-    content.includes("requested permissions") ||
-    content.includes("haven't granted it yet") ||
-    content.includes("permission denied")
-  );
-}

@@ -18,8 +18,9 @@ export function extractToolInfo(
     typeof input.command === "string"
   ) {
     commands = extractBashCommands(input.command);
+  } else if (extractedToolName === "ExitPlanMode") {
+    commands = ["ExitPlanMode"];
   } else {
-    // For all non-Bash tools (Write, Edit, Read, etc.), use wildcard
     commands = [TOOL_CONSTANTS.WILDCARD_COMMAND];
   }
 

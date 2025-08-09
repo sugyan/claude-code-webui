@@ -1,12 +1,16 @@
 import { useCallback } from "react";
 import { extractToolInfo, generateToolPatterns } from "../../utils/toolUtils";
-import { isPermissionError } from "../../utils/messageTypes";
 import type { StreamingContext } from "./useMessageProcessor";
 import type { ToolResultMessage } from "../../types";
 
 interface ToolCache {
   name: string;
   input: Record<string, unknown>;
+}
+
+// Helper function to detect tool use errors that should be displayed as regular results
+function isToolUseError(content: string): boolean {
+  return content.includes("tool_use_error");
 }
 
 export function useToolHandling() {
@@ -70,8 +74,8 @@ export function useToolHandling() {
           ? contentItem.content
           : JSON.stringify(contentItem.content);
 
-      // Check for permission errors
-      if (contentItem.is_error && isPermissionError(content)) {
+      // Check for permission errors - but skip tool use errors which should be displayed as regular results
+      if (contentItem.is_error && !isToolUseError(content)) {
         handlePermissionError(contentItem, context);
         return;
       }

@@ -1,108 +1,39 @@
-import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
-import type { JSX } from "react";
 import { useState, useEffect, useCallback } from "react";
 
-// Helper function to extract command name from pattern like "Bash(ls:*)" -> "ls"
-function extractCommandName(pattern: string): string {
-  if (!pattern) return "Unknown";
-  const match = pattern.match(/Bash\(([^:]+):/);
-  return match ? match[1] : pattern;
-}
-
-// Helper function to render permission content based on patterns
-function renderPermissionContent(patterns: string[]): JSX.Element {
-  // Handle empty patterns array
-  if (patterns.length === 0) {
-    return (
-      <p className="text-slate-600 dark:text-slate-300 mb-3">
-        Claude wants to use bash commands, but the specific commands could not
-        be determined.
-      </p>
-    );
-  }
-
-  const isMultipleCommands = patterns.length > 1;
-
-  if (isMultipleCommands) {
-    // Extract command names from patterns like "Bash(ls:*)" -> "ls"
-    const commandNames = patterns.map(extractCommandName);
-
-    return (
-      <>
-        <p className="text-slate-600 dark:text-slate-300 mb-2">
-          Claude wants to use the following commands:
-        </p>
-        <div className="flex flex-wrap gap-2 mb-3">
-          {commandNames.map((cmd, index) => (
-            <span
-              key={index}
-              className="font-mono bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded text-sm"
-            >
-              {cmd}
-            </span>
-          ))}
-        </div>
-      </>
-    );
-  } else {
-    const commandName = extractCommandName(patterns[0]);
-    return (
-      <p className="text-slate-600 dark:text-slate-300 mb-3">
-        Claude wants to use the{" "}
-        <span className="font-mono bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded text-sm">
-          {commandName}
-        </span>{" "}
-        command.
-      </p>
-    );
-  }
-}
-
-// Helper function to render button text for permanent permission
-function renderPermanentButtonText(patterns: string[]): string {
-  // Handle empty patterns array
-  if (patterns.length === 0) {
-    return "Yes, and don't ask again for bash commands";
-  }
-
-  const isMultipleCommands = patterns.length > 1;
-  const commandNames = patterns.map(extractCommandName);
-
-  if (isMultipleCommands) {
-    return `Yes, and don't ask again for ${commandNames.join(" and ")} commands`;
-  } else {
-    return `Yes, and don't ask again for ${commandNames[0]} command`;
-  }
-}
-
-interface PermissionInputPanelProps {
-  patterns: string[];
-  onAllow: () => void;
-  onAllowPermanent: () => void;
-  onDeny: () => void;
+interface PlanPermissionInputPanelProps {
+  planContent?: string; // Keep for compatibility but not used in UI anymore
+  onAcceptWithEdits: () => void;
+  onAcceptDefault: () => void;
+  onKeepPlanning: () => void;
   // Optional extension point for custom button styling (e.g., demo effects)
   getButtonClassName?: (
-    buttonType: "allow" | "allowPermanent" | "deny",
+    buttonType: "acceptWithEdits" | "acceptDefault" | "keepPlanning",
     defaultClassName: string,
   ) => string;
   // Optional callback for demo automation to control selection state
-  onSelectionChange?: (selection: "allow" | "allowPermanent" | "deny") => void;
+  onSelectionChange?: (
+    selection: "acceptWithEdits" | "acceptDefault" | "keepPlanning",
+  ) => void;
   // Optional external control for demo automation (overrides internal state)
-  externalSelectedOption?: "allow" | "allowPermanent" | "deny" | null;
+  externalSelectedOption?:
+    | "acceptWithEdits"
+    | "acceptDefault"
+    | "keepPlanning"
+    | null;
 }
 
-export function PermissionInputPanel({
-  patterns,
-  onAllow,
-  onAllowPermanent,
-  onDeny,
+export function PlanPermissionInputPanel({
+  planContent: _, // eslint-disable-line @typescript-eslint/no-unused-vars
+  onAcceptWithEdits,
+  onAcceptDefault,
+  onKeepPlanning,
   getButtonClassName = (_, defaultClassName) => defaultClassName, // Default: no modification
   onSelectionChange, // Optional callback for demo automation
   externalSelectedOption, // Optional external control for demo automation
-}: PermissionInputPanelProps) {
+}: PlanPermissionInputPanelProps) {
   const [selectedOption, setSelectedOption] = useState<
-    "allow" | "allowPermanent" | "deny" | null
-  >("allow");
+    "acceptWithEdits" | "acceptDefault" | "keepPlanning" | null
+  >("acceptWithEdits");
 
   // Check if component is externally controlled (for demo mode)
   const isExternallyControlled = externalSelectedOption !== undefined;
@@ -112,7 +43,7 @@ export function PermissionInputPanel({
 
   // Update selection state based on external changes (for demo automation)
   const updateSelectedOption = useCallback(
-    (option: "allow" | "allowPermanent" | "deny") => {
+    (option: "acceptWithEdits" | "acceptDefault" | "keepPlanning") => {
       // Only update internal state if not controlled externally
       if (externalSelectedOption === undefined) {
         setSelectedOption(option);
@@ -128,7 +59,11 @@ export function PermissionInputPanel({
     if (externalSelectedOption !== undefined) return;
 
     // Define options array inside useEffect to avoid unnecessary re-renders
-    const options = ["allow", "allowPermanent", "deny"] as const;
+    const options = [
+      "acceptWithEdits",
+      "acceptDefault",
+      "keepPlanning",
+    ] as const;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "ArrowDown") {
@@ -144,16 +79,16 @@ export function PermissionInputPanel({
       } else if (e.key === "Enter" && effectiveSelectedOption) {
         e.preventDefault();
         // Execute the currently selected option
-        if (effectiveSelectedOption === "allow") {
-          onAllow();
-        } else if (effectiveSelectedOption === "allowPermanent") {
-          onAllowPermanent();
-        } else if (effectiveSelectedOption === "deny") {
-          onDeny();
+        if (effectiveSelectedOption === "acceptWithEdits") {
+          onAcceptWithEdits();
+        } else if (effectiveSelectedOption === "acceptDefault") {
+          onAcceptDefault();
+        } else if (effectiveSelectedOption === "keepPlanning") {
+          onKeepPlanning();
         }
       } else if (e.key === "Escape") {
         e.preventDefault();
-        onDeny(); // "Deny" option when ESC is pressed
+        onKeepPlanning(); // "Keep planning" option when ESC is pressed
       }
     };
 
@@ -161,93 +96,45 @@ export function PermissionInputPanel({
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [
     effectiveSelectedOption,
-    onAllow,
-    onAllowPermanent,
-    onDeny,
+    onAcceptDefault,
+    onAcceptWithEdits,
+    onKeepPlanning,
     updateSelectedOption,
     externalSelectedOption,
   ]);
 
   return (
     <div className="flex-shrink-0 px-4 py-4 bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl backdrop-blur-sm shadow-sm">
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-4">
-        <div className="p-2 bg-amber-100 dark:bg-amber-900/20 rounded-lg">
-          <ExclamationTriangleIcon className="w-5 h-5 text-amber-600 dark:text-amber-400" />
-        </div>
-        <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100">
-          Permission Required
-        </h3>
-      </div>
-
       {/* Content */}
       <div className="mb-4">
-        {renderPermissionContent(patterns)}
         <p className="text-sm text-slate-500 dark:text-slate-400">
-          Do you want to proceed? (Press ESC to deny)
+          Choose how to proceed (Press ESC to keep planning)
         </p>
       </div>
 
-      {/* Direct-click permission options with selection state */}
+      {/* Permission options with selection state */}
       <div className="space-y-2">
         <button
           onClick={() => {
-            updateSelectedOption("allow");
-            onAllow();
+            updateSelectedOption("acceptWithEdits");
+            onAcceptWithEdits();
           }}
-          onFocus={() => updateSelectedOption("allow")}
+          onFocus={() => updateSelectedOption("acceptWithEdits")}
           onBlur={() => {
             if (!isExternallyControlled) {
               setSelectedOption(null);
             }
           }}
-          onMouseEnter={() => updateSelectedOption("allow")}
+          onMouseEnter={() => updateSelectedOption("acceptWithEdits")}
           onMouseLeave={() => {
             if (!isExternallyControlled) {
               setSelectedOption(null);
             }
           }}
           className={getButtonClassName(
-            "allow",
+            "acceptWithEdits",
             `w-full p-3 rounded-lg cursor-pointer transition-all duration-200 text-left focus:outline-none ${
-              effectiveSelectedOption === "allow"
-                ? "bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-500 dark:border-blue-400 shadow-sm"
-                : "border-2 border-transparent"
-            }`,
-          )}
-        >
-          <span
-            className={`text-sm font-medium ${
-              effectiveSelectedOption === "allow"
-                ? "text-blue-700 dark:text-blue-300"
-                : "text-slate-700 dark:text-slate-300"
-            }`}
-          >
-            Yes
-          </span>
-        </button>
-
-        <button
-          onClick={() => {
-            updateSelectedOption("allowPermanent");
-            onAllowPermanent();
-          }}
-          onFocus={() => updateSelectedOption("allowPermanent")}
-          onBlur={() => {
-            if (!isExternallyControlled) {
-              setSelectedOption(null);
-            }
-          }}
-          onMouseEnter={() => updateSelectedOption("allowPermanent")}
-          onMouseLeave={() => {
-            if (!isExternallyControlled) {
-              setSelectedOption(null);
-            }
-          }}
-          className={getButtonClassName(
-            "allowPermanent",
-            `w-full p-3 rounded-lg cursor-pointer transition-all duration-200 text-left focus:outline-none ${
-              effectiveSelectedOption === "allowPermanent"
+              effectiveSelectedOption === "acceptWithEdits"
                 ? "bg-green-50 dark:bg-green-900/20 border-2 border-green-500 dark:border-green-400 shadow-sm"
                 : "border-2 border-transparent"
             }`,
@@ -255,36 +142,73 @@ export function PermissionInputPanel({
         >
           <span
             className={`text-sm font-medium ${
-              effectiveSelectedOption === "allowPermanent"
+              effectiveSelectedOption === "acceptWithEdits"
                 ? "text-green-700 dark:text-green-300"
                 : "text-slate-700 dark:text-slate-300"
             }`}
           >
-            {renderPermanentButtonText(patterns)}
+            Yes, and auto-accept edits
           </span>
         </button>
 
         <button
           onClick={() => {
-            updateSelectedOption("deny");
-            onDeny();
+            updateSelectedOption("acceptDefault");
+            onAcceptDefault();
           }}
-          onFocus={() => updateSelectedOption("deny")}
+          onFocus={() => updateSelectedOption("acceptDefault")}
           onBlur={() => {
             if (!isExternallyControlled) {
               setSelectedOption(null);
             }
           }}
-          onMouseEnter={() => updateSelectedOption("deny")}
+          onMouseEnter={() => updateSelectedOption("acceptDefault")}
           onMouseLeave={() => {
             if (!isExternallyControlled) {
               setSelectedOption(null);
             }
           }}
           className={getButtonClassName(
-            "deny",
+            "acceptDefault",
             `w-full p-3 rounded-lg cursor-pointer transition-all duration-200 text-left focus:outline-none ${
-              effectiveSelectedOption === "deny"
+              effectiveSelectedOption === "acceptDefault"
+                ? "bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-500 dark:border-blue-400 shadow-sm"
+                : "border-2 border-transparent"
+            }`,
+          )}
+        >
+          <span
+            className={`text-sm font-medium ${
+              effectiveSelectedOption === "acceptDefault"
+                ? "text-blue-700 dark:text-blue-300"
+                : "text-slate-700 dark:text-slate-300"
+            }`}
+          >
+            Yes, and manually approve edits
+          </span>
+        </button>
+
+        <button
+          onClick={() => {
+            updateSelectedOption("keepPlanning");
+            onKeepPlanning();
+          }}
+          onFocus={() => updateSelectedOption("keepPlanning")}
+          onBlur={() => {
+            if (!isExternallyControlled) {
+              setSelectedOption(null);
+            }
+          }}
+          onMouseEnter={() => updateSelectedOption("keepPlanning")}
+          onMouseLeave={() => {
+            if (!isExternallyControlled) {
+              setSelectedOption(null);
+            }
+          }}
+          className={getButtonClassName(
+            "keepPlanning",
+            `w-full p-3 rounded-lg cursor-pointer transition-all duration-200 text-left focus:outline-none ${
+              effectiveSelectedOption === "keepPlanning"
                 ? "bg-slate-50 dark:bg-slate-800 border-2 border-slate-400 dark:border-slate-500 shadow-sm"
                 : "border-2 border-transparent"
             }`,
@@ -292,12 +216,12 @@ export function PermissionInputPanel({
         >
           <span
             className={`text-sm font-medium ${
-              effectiveSelectedOption === "deny"
+              effectiveSelectedOption === "keepPlanning"
                 ? "text-slate-800 dark:text-slate-200"
                 : "text-slate-700 dark:text-slate-300"
             }`}
           >
-            No
+            No, keep planning
           </span>
         </button>
       </div>
