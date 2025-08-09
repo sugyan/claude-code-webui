@@ -1,6 +1,5 @@
 import { useCallback } from "react";
 import { extractToolInfo, generateToolPatterns } from "../../utils/toolUtils";
-import { isPermissionError } from "../../utils/messageTypes";
 import type { StreamingContext } from "./useMessageProcessor";
 import type { ToolResultMessage } from "../../types";
 
@@ -70,8 +69,8 @@ export function useToolHandling() {
           ? contentItem.content
           : JSON.stringify(contentItem.content);
 
-      // Check for permission errors
-      if (contentItem.is_error && isPermissionError(content)) {
+      // Check for permission errors - any is_error from Claude SDK indicates permission issues
+      if (contentItem.is_error) {
         handlePermissionError(contentItem, context);
         return;
       }

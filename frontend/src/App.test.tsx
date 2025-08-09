@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, act } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { ProjectSelector } from "./components/ProjectSelector";
@@ -32,19 +32,23 @@ describe("App Routing", () => {
     });
   });
 
-  it("renders chat page when navigating to projects path", () => {
-    render(
-      <EnterBehaviorProvider>
-        <MemoryRouter initialEntries={["/projects/test-path"]}>
-          <Routes>
-            <Route path="/projects/*" element={<ChatPage />} />
-          </Routes>
-        </MemoryRouter>
-      </EnterBehaviorProvider>,
-    );
+  it("renders chat page when navigating to projects path", async () => {
+    await act(async () => {
+      render(
+        <EnterBehaviorProvider>
+          <MemoryRouter initialEntries={["/projects/test-path"]}>
+            <Routes>
+              <Route path="/projects/*" element={<ChatPage />} />
+            </Routes>
+          </MemoryRouter>
+        </EnterBehaviorProvider>,
+      );
+    });
 
-    expect(screen.getByText("Claude Code Web UI")).toBeInTheDocument();
-    expect(screen.getByText("/test-path")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("Claude Code Web UI")).toBeInTheDocument();
+      expect(screen.getByText("/test-path")).toBeInTheDocument();
+    });
   });
 
   it("shows new directory selection button", async () => {

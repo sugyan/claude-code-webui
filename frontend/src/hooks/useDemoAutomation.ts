@@ -10,6 +10,7 @@ import {
 } from "../utils/mockResponseGenerator";
 import type { SDKMessage } from "../types";
 import { formatToolArguments } from "../utils/toolUtils";
+import { createToolResultMessage } from "../utils/messageConversion";
 
 export interface DemoAutomationHook {
   currentStep: number;
@@ -234,6 +235,7 @@ export function useDemoAutomation(
           >;
 
           // Process the assistant message content
+
           for (const contentItem of assistantMsg.message.content) {
             if (contentItem.type === "text") {
               const textContent = (contentItem as { text: string }).text;
@@ -269,6 +271,31 @@ export function useDemoAutomation(
           }
 
           setCurrentAssistantMessage(null);
+          break;
+        }
+
+        case "user": {
+          // Handle user messages containing tool results (like ExitPlanMode)
+          const userMsg = sdkMessage as Extract<SDKMessage, { type: "user" }>;
+          const messageContent = userMsg.message.content;
+
+          if (Array.isArray(messageContent)) {
+            for (const contentItem of messageContent) {
+              if (contentItem.type === "tool_result") {
+                const toolResult = contentItem as {
+                  type: "tool_result";
+                  tool_use_id: string;
+                  content: string;
+                };
+
+                const toolResultMessage = createToolResultMessage(
+                  "Tool result",
+                  toolResult.content,
+                );
+                finalAddMessage(toolResultMessage);
+              }
+            }
+          }
           break;
         }
 

@@ -110,13 +110,22 @@ export function ChatPage() {
     allowToolTemporary,
     allowToolPermanent,
     isPermissionMode,
+    planModeRequest,
+    showPlanModeRequest,
+    closePlanModeRequest,
   } = usePermissions();
 
   const handlePermissionError = useCallback(
     (toolName: string, patterns: string[], toolUseId: string) => {
-      showPermissionRequest(toolName, patterns, toolUseId);
+      // Check if this is an ExitPlanMode permission error
+      if (patterns.includes("ExitPlanMode")) {
+        // For ExitPlanMode, show plan permission interface instead of regular permission
+        showPlanModeRequest(""); // Empty plan content since it was already displayed
+      } else {
+        showPermissionRequest(toolName, patterns, toolUseId);
+      }
     },
-    [showPermissionRequest],
+    [showPermissionRequest, showPlanModeRequest],
   );
 
   const sendMessage = useCallback(
@@ -124,6 +133,7 @@ export function ChatPage() {
       messageContent?: string,
       tools?: string[],
       hideUserMessage = false,
+      permissionMode?: "default" | "plan" | "acceptEdits",
     ) => {
       const content = messageContent || input.trim();
       if (!content || isLoading) return;
@@ -154,6 +164,7 @@ export function ChatPage() {
             ...(currentSessionId ? { sessionId: currentSessionId } : {}),
             allowedTools: tools || allowedTools,
             ...(workingDirectory ? { workingDirectory } : {}),
+            ...(permissionMode ? { permissionMode } : {}),
           } as ChatRequest),
         });
 
@@ -293,6 +304,28 @@ export function ChatPage() {
     closePermissionRequest();
   }, [closePermissionRequest]);
 
+  // Plan mode request handlers
+  const handlePlanAcceptWithEdits = useCallback(() => {
+    closePlanModeRequest();
+    if (currentSessionId) {
+      sendMessage("continue", allowedTools, true, "acceptEdits");
+    }
+  }, [closePlanModeRequest, currentSessionId, sendMessage, allowedTools]);
+
+  const handlePlanAcceptDefault = useCallback(() => {
+    closePlanModeRequest();
+    if (currentSessionId) {
+      sendMessage("continue", allowedTools, true, "default");
+    }
+  }, [closePlanModeRequest, currentSessionId, sendMessage, allowedTools]);
+
+  const handlePlanKeepPlanning = useCallback(() => {
+    closePlanModeRequest();
+    if (currentSessionId) {
+      sendMessage("continue", allowedTools, true, "plan");
+    }
+  }, [closePlanModeRequest, currentSessionId, sendMessage, allowedTools]);
+
   // Create permission data for inline permission interface
   const permissionData = permissionRequest
     ? {
@@ -300,6 +333,16 @@ export function ChatPage() {
         onAllow: handlePermissionAllow,
         onAllowPermanent: handlePermissionAllowPermanent,
         onDeny: handlePermissionDeny,
+      }
+    : undefined;
+
+  // Create plan permission data for plan mode interface
+  const planPermissionData = planModeRequest
+    ? {
+        planContent: planModeRequest.planContent,
+        onAcceptWithEdits: handlePlanAcceptWithEdits,
+        onAcceptDefault: handlePlanAcceptDefault,
+        onKeepPlanning: handlePlanKeepPlanning,
       }
     : undefined;
 
@@ -502,6 +545,7 @@ export function ChatPage() {
               onAbort={handleAbort}
               showPermissions={isPermissionMode}
               permissionData={permissionData}
+              planPermissionData={planPermissionData}
             />
           </>
         )}

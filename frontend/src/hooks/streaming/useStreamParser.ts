@@ -97,8 +97,20 @@ export function useStreamParser() {
         );
       }
 
-      const toolMessage = createToolMessage(contentItem);
-      context.addMessage(toolMessage);
+      // Special handling for ExitPlanMode - create plan message instead of tool message
+      if (contentItem.name === "ExitPlanMode") {
+        const planContent = (contentItem.input?.plan as string) || "";
+        const planMessage = {
+          type: "plan" as const,
+          plan: planContent,
+          toolUseId: contentItem.id || "",
+          timestamp: Date.now(),
+        };
+        context.addMessage(planMessage);
+      } else {
+        const toolMessage = createToolMessage(contentItem);
+        context.addMessage(toolMessage);
+      }
     },
     [createToolMessage, toolUseCache],
   );

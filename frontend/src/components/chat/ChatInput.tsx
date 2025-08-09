@@ -4,6 +4,7 @@ import { UI_CONSTANTS, KEYBOARD_SHORTCUTS } from "../../utils/constants";
 import { useEnterBehavior } from "../../hooks/useEnterBehavior";
 import { EnterModeMenu } from "./EnterModeMenu";
 import { PermissionInputPanel } from "./PermissionInputPanel";
+import { PlanPermissionInputPanel } from "./PlanPermissionInputPanel";
 
 interface PermissionData {
   patterns: string[];
@@ -18,6 +19,25 @@ interface PermissionData {
   externalSelectedOption?: "allow" | "allowPermanent" | "deny" | null;
 }
 
+interface PlanPermissionData {
+  planContent: string;
+  onAcceptWithEdits: () => void;
+  onAcceptDefault: () => void;
+  onKeepPlanning: () => void;
+  getButtonClassName?: (
+    buttonType: "acceptWithEdits" | "acceptDefault" | "keepPlanning",
+    defaultClassName: string,
+  ) => string;
+  onSelectionChange?: (
+    selection: "acceptWithEdits" | "acceptDefault" | "keepPlanning",
+  ) => void;
+  externalSelectedOption?:
+    | "acceptWithEdits"
+    | "acceptDefault"
+    | "keepPlanning"
+    | null;
+}
+
 interface ChatInputProps {
   input: string;
   isLoading: boolean;
@@ -28,6 +48,7 @@ interface ChatInputProps {
   // Permission mode props
   showPermissions?: boolean;
   permissionData?: PermissionData;
+  planPermissionData?: PlanPermissionData;
 }
 
 export function ChatInput({
@@ -39,6 +60,7 @@ export function ChatInput({
   onAbort,
   showPermissions = false,
   permissionData,
+  planPermissionData,
 }: ChatInputProps) {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [isComposing, setIsComposing] = useState(false);
@@ -125,7 +147,22 @@ export function ChatInput({
     setTimeout(() => setIsComposing(false), 0);
   };
 
-  // If we're in permission mode, show the permission panel instead
+  // If we're in plan permission mode, show the plan permission panel instead
+  if (showPermissions && planPermissionData) {
+    return (
+      <PlanPermissionInputPanel
+        planContent={planPermissionData.planContent}
+        onAcceptWithEdits={planPermissionData.onAcceptWithEdits}
+        onAcceptDefault={planPermissionData.onAcceptDefault}
+        onKeepPlanning={planPermissionData.onKeepPlanning}
+        getButtonClassName={planPermissionData.getButtonClassName}
+        onSelectionChange={planPermissionData.onSelectionChange}
+        externalSelectedOption={planPermissionData.externalSelectedOption}
+      />
+    );
+  }
+
+  // If we're in regular permission mode, show the permission panel instead
   if (showPermissions && permissionData) {
     return (
       <PermissionInputPanel
