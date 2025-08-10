@@ -117,7 +117,23 @@ export function DemoPage() {
     allowToolPermanent,
     showPermissionRequest,
     isPermissionMode,
+    planModeRequest,
+    showPlanModeRequest,
+    closePlanModeRequest,
   } = usePermissions();
+
+  const handlePermissionError = useCallback(
+    (toolName: string, patterns: string[], toolUseId: string) => {
+      // Check if this is an ExitPlanMode permission error
+      if (patterns.includes("ExitPlanMode")) {
+        // For ExitPlanMode, show plan permission interface instead of regular permission
+        showPlanModeRequest(""); // Empty plan content since it was already displayed
+      } else {
+        showPermissionRequest(toolName, patterns, toolUseId);
+      }
+    },
+    [showPermissionRequest, showPlanModeRequest],
+  );
 
   // Permission request handlers (for demo)
   const handlePermissionAllow = useCallback(() => {
@@ -136,6 +152,19 @@ export function DemoPage() {
   const handlePermissionDeny = useCallback(() => {
     closePermissionRequest();
   }, [closePermissionRequest]);
+
+  // Plan mode request handlers (for demo)
+  const handlePlanAcceptWithEdits = useCallback(() => {
+    closePlanModeRequest();
+  }, [closePlanModeRequest]);
+
+  const handlePlanAcceptDefault = useCallback(() => {
+    closePlanModeRequest();
+  }, [closePlanModeRequest]);
+
+  const handlePlanKeepPlanning = useCallback(() => {
+    closePlanModeRequest();
+  }, [closePlanModeRequest]);
 
   // Demo permission selection state (for external control)
   const [demoSelectedOption, setDemoSelectedOption] = useState<
@@ -156,6 +185,13 @@ export function DemoPage() {
     } else if (buttonType === "permission_deny") {
       setActiveButton("deny");
       setDemoSelectedOption("deny");
+    } else if (buttonType === "plan_accept_with_edits") {
+      // For plan permission focus, we can add visual feedback later if needed
+      console.log("Plan button focused: Accept with Edits");
+    } else if (buttonType === "plan_accept_default") {
+      console.log("Plan button focused: Accept Default");
+    } else if (buttonType === "plan_keep_planning") {
+      console.log("Plan button focused: Keep Planning");
     }
   }, []);
 
@@ -199,6 +235,16 @@ export function DemoPage() {
       }
     : undefined;
 
+  // Create plan permission data for plan mode interface
+  const planPermissionData = planModeRequest
+    ? {
+        planContent: planModeRequest.planContent,
+        onAcceptWithEdits: handlePlanAcceptWithEdits,
+        onAcceptDefault: handlePlanAcceptDefault,
+        onKeepPlanning: handlePlanKeepPlanning,
+      }
+    : undefined;
+
   // Handle button clicks from demo automation
   const handleButtonClick = useCallback(
     (buttonType: string) => {
@@ -214,12 +260,21 @@ export function DemoPage() {
       } else if (buttonType === "permission_deny") {
         setClickedButton("deny");
         setTimeout(() => handlePermissionDeny(), 200);
+      } else if (buttonType === "plan_accept_with_edits") {
+        setTimeout(() => handlePlanAcceptWithEdits(), 200);
+      } else if (buttonType === "plan_accept_default") {
+        setTimeout(() => handlePlanAcceptDefault(), 200);
+      } else if (buttonType === "plan_keep_planning") {
+        setTimeout(() => handlePlanKeepPlanning(), 200);
       }
     },
     [
       handlePermissionAllow,
       handlePermissionAllowPermanent,
       handlePermissionDeny,
+      handlePlanAcceptWithEdits,
+      handlePlanAcceptDefault,
+      handlePlanKeepPlanning,
     ],
   );
 
@@ -252,7 +307,7 @@ export function DemoPage() {
     startRequest,
     resetRequestState,
     generateRequestId,
-    showPermissionRequest,
+    showPermissionRequest: handlePermissionError,
     onButtonFocus: handleButtonFocus,
     onButtonClick: handleButtonClick,
   });
@@ -378,6 +433,7 @@ export function DemoPage() {
           onAbort={() => {}} // No-op in demo
           showPermissions={isPermissionMode}
           permissionData={permissionData}
+          planPermissionData={planPermissionData}
         />
       </div>
 

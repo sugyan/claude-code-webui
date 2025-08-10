@@ -12,24 +12,28 @@ export interface ButtonActionData {
   buttonType:
     | "permission_allow"
     | "permission_deny"
-    | "permission_allow_permanent";
+    | "permission_allow_permanent"
+    | "plan_accept_with_edits"
+    | "plan_accept_default"
+    | "plan_keep_planning";
 }
 
-export interface MockScenarioStep {
-  type:
-    | "system"
-    | "assistant"
-    | "user"
-    | "result"
-    | "permission_error"
-    | "button_focus"
-    | "button_click";
-  delay: number; // delay in milliseconds before this step
-  data:
-    | SDKMessage
-    | { toolName: string; pattern: string; toolUseId: string }
-    | ButtonActionData;
-}
+export type MockScenarioStep =
+  | {
+      type: "system" | "assistant" | "user" | "result";
+      delay: number; // delay in milliseconds before this step
+      data: SDKMessage;
+    }
+  | {
+      type: "permission_error";
+      delay: number;
+      data: { toolName: string; pattern: string; toolUseId: string };
+    }
+  | {
+      type: "button_focus" | "button_click";
+      delay: number;
+      data: ButtonActionData;
+    };
 
 // Generate realistic Claude system messages
 export function createSystemMessage(
@@ -207,6 +211,7 @@ export function createExitPlanModeToolResult(
           type: "tool_result",
           tool_use_id: toolUseId,
           content: "Exit plan mode?",
+          is_error: true, // Mark as error to trigger permission dialog
         },
       ],
     },
@@ -284,7 +289,7 @@ export const DEMO_INPUTS = {
   codeGeneration:
     "Write a simple Python script that calculates fibonacci numbers and run it",
   planMode:
-    "Help me implement a new feature to add dark theme support to the project",
+    "Create a simple README.md file for this project with basic documentation",
 } as const;
 
 // Predefined demo scenarios
@@ -580,32 +585,22 @@ if __name__ == "__main__":
   planMode: (() => {
     // Generate a consistent tool use ID that will be shared between tool_use and tool_result
     const planToolUseId = "demo-plan-tool-" + Date.now();
-    const planContent = `# Dark Theme Implementation Plan
+    const planContent = `# README Creation Plan
 
-## 1. Analysis of Current Structure
-- Review existing theme implementation in frontend/src/hooks/useTheme.ts
-- Check TailwindCSS configuration for dark mode support
-- Examine current light/dark theme toggle mechanism
+## Overview
+I'll create a comprehensive README.md file for the Claude Code Web UI project with essential documentation.
 
-## 2. Theme Enhancement Tasks
-- **Extend Color Palette**: Add more comprehensive dark theme colors
-- **Component Updates**: Update all components to use consistent dark theme classes
-- **Storage Integration**: Ensure theme preference persistence works correctly
-- **System Theme Detection**: Improve automatic system theme detection
+## Implementation Steps
+1. **Project Analysis**: Review the project structure to understand key features
+2. **README Structure**: Create sections for description, installation, usage, and features
+3. **Content Creation**: Write clear, concise documentation with examples
+4. **Final Review**: Ensure all important aspects are covered
 
-## 3. Implementation Steps
-1. Update TailwindCSS configuration for extended dark mode colors
-2. Create comprehensive theme color tokens
-3. Update all components to use new dark theme classes
-4. Test theme switching across all UI components
-5. Add smooth theme transition animations
-6. Verify localStorage persistence works correctly
-
-## 4. Testing Plan
-- Test theme switching in all major UI components
-- Verify system theme detection works on different OS
-- Check theme persistence across browser sessions
-- Test accessibility with both themes`;
+## Deliverables
+- Professional README.md file with project overview
+- Installation and usage instructions
+- Feature descriptions and screenshots references
+- Development and contribution guidelines`;
 
     return {
       sessionId: "demo-session-plan",
@@ -620,7 +615,7 @@ if __name__ == "__main__":
           type: "assistant" as const,
           delay: 1200,
           data: createCombinedAssistantMessage(
-            "I'll help you implement dark theme support! Let me first analyze the current project structure to understand how theming should be implemented.",
+            "I'll help you create a comprehensive README.md file! Let me first analyze the project structure and create a documentation plan.",
             {
               id: planToolUseId,
               name: "ExitPlanMode",
@@ -638,9 +633,113 @@ if __name__ == "__main__":
           ),
         },
         {
-          type: "result" as const,
+          type: "button_focus",
           delay: 800,
-          data: createResultMessage("demo-session-plan", 75, 250),
+          data: {
+            buttonType: "plan_accept_with_edits",
+          },
+        },
+        {
+          type: "button_click",
+          delay: 1000,
+          data: {
+            buttonType: "plan_accept_with_edits",
+          },
+        },
+        // Post-approval implementation steps (after user accepts plan with edits)
+        {
+          type: "assistant" as const,
+          delay: 1500,
+          data: createAssistantMessage(
+            "Excellent! Now I'll implement the README creation plan. Let me start by examining the project structure to understand the key features.",
+            "demo-session-plan",
+          ),
+        },
+        {
+          type: "assistant" as const,
+          delay: 1800,
+          data: createToolUseMessage(
+            "Read",
+            { file_path: "/Users/demo/claude-code-webui/package.json" },
+            "demo-session-plan",
+            "read-package-json",
+          ),
+        },
+        {
+          type: "assistant" as const,
+          delay: 1200,
+          data: createAssistantMessage(
+            "Great! I can see this is the Claude Code Web UI project. Now I'll create a comprehensive README.md file with all the essential information.",
+            "demo-session-plan",
+          ),
+        },
+        {
+          type: "assistant" as const,
+          delay: 1600,
+          data: createToolUseMessage(
+            "Write",
+            {
+              file_path: "/Users/demo/claude-code-webui/README.md",
+              content: `# Claude Code Web UI
+
+A modern, web-based interface for the Claude Code CLI tool that provides streaming responses in an intuitive chat interface.
+
+## ✨ Features
+
+- **🌐 Web Interface**: Access Claude Code through your browser
+- **💬 Real-time Chat**: Streaming responses with live updates
+- **📁 Project Management**: Select and switch between project directories
+- **🎨 Theme Support**: Light/dark theme with system preference detection
+- **📝 Conversation History**: Browse and restore previous chat sessions
+
+## 🚀 Quick Start
+
+1. **Install Dependencies**
+   \`\`\`bash
+   # Backend
+   cd backend && npm install
+   
+   # Frontend  
+   cd frontend && npm install
+   \`\`\`
+
+2. **Start the Application**
+   \`\`\`bash
+   # Start backend (port 8080)
+   cd backend && npm run dev
+   
+   # Start frontend (port 3000)
+   cd frontend && npm run dev
+   \`\`\`
+
+3. **Open your browser** and navigate to \`http://localhost:3000\`
+
+## 🏗️ Architecture
+
+- **Backend**: TypeScript + Hono framework (Deno/Node.js)
+- **Frontend**: React + Vite + TailwindCSS + TypeScript
+- **Streaming**: Real-time JSON streaming from Claude CLI
+
+## 📄 License
+
+MIT License - see LICENSE file for details.`,
+            },
+            "demo-session-plan",
+            "write-readme",
+          ),
+        },
+        {
+          type: "assistant" as const,
+          delay: 1200,
+          data: createAssistantMessage(
+            "Perfect! I've successfully created a comprehensive README.md file with:\n\n✅ Clear project description and features\n✅ Quick start installation guide\n✅ Architecture overview\n✅ Professional formatting with emojis\n\nThe README provides all essential information for users and contributors. Notice how I was able to read the project structure and create the file seamlessly without additional permission requests - that's the power of plan mode approval!",
+            "demo-session-plan",
+          ),
+        },
+        {
+          type: "result" as const,
+          delay: 1000,
+          data: createResultMessage("demo-session-plan", 85, 280),
         },
       ],
     };
@@ -651,5 +750,5 @@ if __name__ == "__main__":
 export function scenarioToStream(
   scenarioKey: keyof typeof DEMO_SCENARIOS,
 ): MockScenarioStep[] {
-  return [...DEMO_SCENARIOS[scenarioKey].steps];
+  return [...DEMO_SCENARIOS[scenarioKey].steps] as MockScenarioStep[];
 }

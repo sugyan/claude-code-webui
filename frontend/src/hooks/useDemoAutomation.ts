@@ -260,13 +260,25 @@ export function useDemoAutomation(
                 input: Record<string, unknown>;
               };
 
-              const argsDisplay = formatToolArguments(toolUse.input);
-              const toolMessage: AllMessage = {
-                type: "tool",
-                content: `${toolUse.name}${argsDisplay}`,
-                timestamp: Date.now(),
-              };
-              finalAddMessage(toolMessage);
+              // Special handling for ExitPlanMode - create plan message instead of tool message
+              if (toolUse.name === "ExitPlanMode") {
+                const planContent = (toolUse.input?.plan as string) || "";
+                const planMessage = {
+                  type: "plan" as const,
+                  plan: planContent,
+                  toolUseId: toolUse.id || "",
+                  timestamp: Date.now(),
+                };
+                finalAddMessage(planMessage);
+              } else {
+                const argsDisplay = formatToolArguments(toolUse.input);
+                const toolMessage: AllMessage = {
+                  type: "tool",
+                  content: `${toolUse.name}${argsDisplay}`,
+                  timestamp: Date.now(),
+                };
+                finalAddMessage(toolMessage);
+              }
             }
           }
 
@@ -286,13 +298,41 @@ export function useDemoAutomation(
                   type: "tool_result";
                   tool_use_id: string;
                   content: string;
+                  is_error?: boolean;
                 };
 
-                const toolResultMessage = createToolResultMessage(
-                  "Tool result",
-                  toolResult.content,
-                );
-                finalAddMessage(toolResultMessage);
+                // Check for permission errors (similar to useToolHandling.ts)
+                if (
+                  toolResult.is_error &&
+                  !toolResult.content.includes("tool_use_error")
+                ) {
+                  // For demo, we need to trigger permission dialog
+                  // Since this is ExitPlanMode, show plan permission request
+                  if (toolResult.content === "Exit plan mode?") {
+                    // This indicates an ExitPlanMode permission error
+                    // Check if showPlanModeRequest is available (it should be from usePermissions)
+                    // For now, trigger regular permission request with ExitPlanMode pattern
+                    // The ChatPage.tsx logic will convert this to plan mode request
+                    finalShowPermissionRequest(
+                      "ExitPlanMode",
+                      ["ExitPlanMode"],
+                      toolResult.tool_use_id,
+                    );
+                  } else {
+                    // For other tool permission errors, show regular permission dialog
+                    finalShowPermissionRequest(
+                      "Unknown",
+                      ["*"],
+                      toolResult.tool_use_id,
+                    );
+                  }
+                } else {
+                  const toolResultMessage = createToolResultMessage(
+                    "Tool result",
+                    toolResult.content,
+                  );
+                  finalAddMessage(toolResultMessage);
+                }
               }
             }
           }
