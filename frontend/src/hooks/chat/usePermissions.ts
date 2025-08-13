@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import type { PermissionMode } from "../../types";
 
 interface PermissionRequest {
   isOpen: boolean;
@@ -12,7 +13,12 @@ interface PlanModeRequest {
   planContent: string;
 }
 
-export function usePermissions() {
+interface UsePermissionsOptions {
+  onPermissionModeChange?: (mode: PermissionMode) => void;
+}
+
+export function usePermissions(options: UsePermissionsOptions = {}) {
+  const { onPermissionModeChange } = options;
   const [allowedTools, setAllowedTools] = useState<string[]>([]);
   const [permissionRequest, setPermissionRequest] =
     useState<PermissionRequest | null>(null);
@@ -77,6 +83,14 @@ export function usePermissions() {
     setAllowedTools([]);
   }, []);
 
+  // Helper function to update permission mode based on user action
+  const updatePermissionMode = useCallback(
+    (mode: PermissionMode) => {
+      onPermissionModeChange?.(mode);
+    },
+    [onPermissionModeChange],
+  );
+
   return {
     allowedTools,
     permissionRequest,
@@ -90,5 +104,6 @@ export function usePermissions() {
     planModeRequest,
     showPlanModeRequest,
     closePlanModeRequest,
+    updatePermissionMode,
   };
 }

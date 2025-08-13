@@ -6,6 +6,7 @@ import { useTheme } from "../hooks/useTheme";
 import { useClaudeStreaming } from "../hooks/useClaudeStreaming";
 import { useChatState } from "../hooks/chat/useChatState";
 import { usePermissions } from "../hooks/chat/usePermissions";
+import { usePermissionMode } from "../hooks/chat/usePermissionMode";
 import { useAbortController } from "../hooks/chat/useAbortController";
 import { useAutoHistoryLoader } from "../hooks/useHistoryLoader";
 import { ThemeToggle } from "./chat/ThemeToggle";
@@ -45,6 +46,9 @@ export function ChatPage() {
   const { theme, toggleTheme } = useTheme();
   const { processStreamLine } = useClaudeStreaming();
   const { abortRequest, createAbortHandler } = useAbortController();
+
+  // Permission mode state management
+  const { permissionMode, setPermissionMode } = usePermissionMode();
 
   // Get encoded name for current working directory
   const getEncodedName = useCallback(() => {
@@ -113,7 +117,10 @@ export function ChatPage() {
     planModeRequest,
     showPlanModeRequest,
     closePlanModeRequest,
-  } = usePermissions();
+    updatePermissionMode,
+  } = usePermissions({
+    onPermissionModeChange: setPermissionMode,
+  });
 
   const handlePermissionError = useCallback(
     (toolName: string, patterns: string[], toolUseId: string) => {
@@ -133,7 +140,6 @@ export function ChatPage() {
       messageContent?: string,
       tools?: string[],
       hideUserMessage = false,
-      permissionMode?: "default" | "plan" | "acceptEdits",
     ) => {
       const content = messageContent || input.trim();
       if (!content || isLoading) return;
@@ -164,7 +170,7 @@ export function ChatPage() {
             ...(currentSessionId ? { sessionId: currentSessionId } : {}),
             allowedTools: tools || allowedTools,
             ...(workingDirectory ? { workingDirectory } : {}),
-            ...(permissionMode ? { permissionMode } : {}),
+            permissionMode,
           } as ChatRequest),
         });
 
@@ -233,6 +239,7 @@ export function ChatPage() {
       hasShownInitMessage,
       currentAssistantMessage,
       workingDirectory,
+      permissionMode,
       generateRequestId,
       clearInput,
       startRequest,
@@ -306,22 +313,37 @@ export function ChatPage() {
 
   // Plan mode request handlers
   const handlePlanAcceptWithEdits = useCallback(() => {
+    updatePermissionMode("acceptEdits");
     closePlanModeRequest();
     if (currentSessionId) {
-      sendMessage("accept", allowedTools, true, "acceptEdits");
+      sendMessage("accept", allowedTools, true);
     }
-  }, [closePlanModeRequest, currentSessionId, sendMessage, allowedTools]);
+  }, [
+    updatePermissionMode,
+    closePlanModeRequest,
+    currentSessionId,
+    sendMessage,
+    allowedTools,
+  ]);
 
   const handlePlanAcceptDefault = useCallback(() => {
+    updatePermissionMode("default");
     closePlanModeRequest();
     if (currentSessionId) {
-      sendMessage("accept", allowedTools, true, "default");
+      sendMessage("accept", allowedTools, true);
     }
-  }, [closePlanModeRequest, currentSessionId, sendMessage, allowedTools]);
+  }, [
+    updatePermissionMode,
+    closePlanModeRequest,
+    currentSessionId,
+    sendMessage,
+    allowedTools,
+  ]);
 
   const handlePlanKeepPlanning = useCallback(() => {
+    updatePermissionMode("plan");
     closePlanModeRequest();
-  }, [closePlanModeRequest]);
+  }, [updatePermissionMode, closePlanModeRequest]);
 
   // Create permission data for inline permission interface
   const permissionData = permissionRequest
