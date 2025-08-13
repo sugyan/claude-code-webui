@@ -28,6 +28,7 @@ describe("useClaudeStreaming", () => {
       mcp_servers: [],
       model: "claude-3-sonnet",
       permissionMode: "default" as const,
+      slash_commands: [],
     };
 
     const streamLine = JSON.stringify({
@@ -153,6 +154,7 @@ describe("useClaudeStreaming", () => {
       session_id: "test-session-789",
       total_cost_usd: 0.001,
       usage: { input_tokens: 10, output_tokens: 5 },
+      permission_denials: [],
     };
 
     const streamLine = JSON.stringify({
@@ -189,6 +191,7 @@ describe("useClaudeStreaming", () => {
       mcp_servers: [],
       model: "claude-3-sonnet",
       permissionMode: "default" as const,
+      slash_commands: [],
     };
 
     const streamLine = JSON.stringify({

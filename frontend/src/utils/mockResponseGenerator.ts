@@ -49,6 +49,7 @@ export function createSystemMessage(
     mcp_servers: [],
     model: "claude-3-5-sonnet-20241022",
     permissionMode: "default",
+    slash_commands: [],
   };
 }
 
@@ -130,6 +131,7 @@ export function createResultMessage(
       output_tokens: outputTokens,
       total_tokens: inputTokens + outputTokens,
     },
+    permission_denials: [],
   };
 }
 
