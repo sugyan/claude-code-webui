@@ -8,7 +8,15 @@
     <script>
       // Prevent flash of unstyled content by setting theme class early
       (function () {
-        const theme = localStorage.getItem("claude-code-webui-theme");
+        const storedTheme = localStorage.getItem("claude-code-webui-theme");
+        let theme = null;
+        try {
+          theme = storedTheme ? JSON.parse(storedTheme) : null;
+        } catch {
+          // If parsing fails, fall back to null
+          theme = null;
+        }
+        
         if (
           theme === "dark" ||
           (!theme && window.matchMedia("(prefers-color-scheme: dark)").matches)
