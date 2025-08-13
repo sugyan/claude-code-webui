@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 
 interface PlanPermissionInputPanelProps {
-  planContent?: string; // Keep for compatibility but not used in UI anymore
   onAcceptWithEdits: () => void;
   onAcceptDefault: () => void;
   onKeepPlanning: () => void;
@@ -23,7 +22,6 @@ interface PlanPermissionInputPanelProps {
 }
 
 export function PlanPermissionInputPanel({
-  planContent: _, // eslint-disable-line @typescript-eslint/no-unused-vars
   onAcceptWithEdits,
   onAcceptDefault,
   onKeepPlanning,

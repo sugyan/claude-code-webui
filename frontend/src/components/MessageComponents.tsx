@@ -109,12 +109,6 @@ interface ToolMessageComponentProps {
 }
 
 export function ToolMessageComponent({ message }: ToolMessageComponentProps) {
-  // Special handling for ExitPlanMode tool - don't render anything
-  // The plan mode UI will be handled by the plan permission panel
-  if (message.content.includes("ExitPlanMode")) {
-    return null;
-  }
-
   return (
     <MessageContainer
       alignment="left"
@@ -137,16 +131,6 @@ interface ToolResultMessageComponentProps {
 export function ToolResultMessageComponent({
   message,
 }: ToolResultMessageComponentProps) {
-  // Special handling for ExitPlanMode tool result - don't render anything
-  if (
-    message.content.includes("ExitPlanMode") ||
-    message.content.includes("Exit plan mode") ||
-    message.toolName === "ExitPlanMode" ||
-    message.content.includes("plan mode")
-  ) {
-    return null;
-  }
-
   return (
     <CollapsibleDetails
       label={message.toolName}

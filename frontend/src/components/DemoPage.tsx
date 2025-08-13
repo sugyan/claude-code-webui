@@ -238,7 +238,6 @@ export function DemoPage() {
   // Create plan permission data for plan mode interface
   const planPermissionData = planModeRequest
     ? {
-        planContent: planModeRequest.planContent,
         onAcceptWithEdits: handlePlanAcceptWithEdits,
         onAcceptDefault: handlePlanAcceptDefault,
         onKeepPlanning: handlePlanKeepPlanning,

@@ -20,7 +20,6 @@ interface PermissionData {
 }
 
 interface PlanPermissionData {
-  planContent: string;
   onAcceptWithEdits: () => void;
   onAcceptDefault: () => void;
   onKeepPlanning: () => void;
@@ -136,7 +135,6 @@ export function ChatInput({
   if (showPermissions && planPermissionData) {
     return (
       <PlanPermissionInputPanel
-        planContent={planPermissionData.planContent}
         onAcceptWithEdits={planPermissionData.onAcceptWithEdits}
         onAcceptDefault={planPermissionData.onAcceptDefault}
         onKeepPlanning={planPermissionData.onKeepPlanning}

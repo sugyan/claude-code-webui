@@ -234,8 +234,6 @@ export function useDemoAutomation(
             { type: "assistant" }
           >;
 
-          // Process the assistant message content
-
           for (const contentItem of assistantMsg.message.content) {
             if (contentItem.type === "text") {
               const textContent = (contentItem as { text: string }).text;
