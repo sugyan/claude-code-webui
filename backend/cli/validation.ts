@@ -334,19 +334,11 @@ export async function validateClaudeCli(
         "   This can happen when the Claude CLI installation is incompatible with this application.",
       );
       console.error("");
-      console.error("   Solutions:");
       console.error(
-        "   1. Specify a custom Claude path using: --claude-path /path/to/claude",
-      );
-      console.error("   2. Reinstall Claude CLI from: https://claude.ai/code");
-      console.error(
-        "   3. Ensure Claude CLI and @anthropic-ai/claude-code versions are compatible",
+        "   Try specifying a custom `claude` command path using: --claude-path /path/to/claude",
       );
       console.error("");
       console.error(`   Attempted to detect script path from: ${claudePath}`);
-      if (detection.versionOutput) {
-        console.error(`   Claude CLI version: ${detection.versionOutput}`);
-      }
       exit(1);
     }
   } catch (error) {
