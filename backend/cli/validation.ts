@@ -328,14 +328,26 @@ export async function validateClaudeCli(
       }
       return detection.scriptPath;
     } else {
-      // Fallback to the original path if detection fails
-      logger.cli.info(
-        `⚠️  CLI script detection failed, using original path: ${claudePath}`,
+      // Exit with clear error when detection fails
+      console.error("❌ Claude CLI script path detection failed");
+      console.error(
+        "   This can happen when the Claude CLI installation is incompatible with this application.",
       );
+      console.error("");
+      console.error("   Solutions:");
+      console.error(
+        "   1. Specify a custom Claude path using: --claude-path /path/to/claude",
+      );
+      console.error("   2. Reinstall Claude CLI from: https://claude.ai/code");
+      console.error(
+        "   3. Ensure Claude CLI and @anthropic-ai/claude-code versions are compatible",
+      );
+      console.error("");
+      console.error(`   Attempted to detect script path from: ${claudePath}`);
       if (detection.versionOutput) {
-        logger.cli.info(`✅ Claude CLI found: ${detection.versionOutput}`);
+        console.error(`   Claude CLI version: ${detection.versionOutput}`);
       }
-      return claudePath;
+      exit(1);
     }
   } catch (error) {
     console.error("❌ Failed to validate Claude CLI");
