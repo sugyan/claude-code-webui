@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.47](https://github.com/sugyan/claude-code-webui/compare/0.1.46...0.1.47) - 2025-08-16
+- fix: improve error handling when Claude CLI path detection fails by @sugyan in https://github.com/sugyan/claude-code-webui/pull/235
+
 ## [0.1.46](https://github.com/sugyan/claude-code-webui/compare/0.1.45...0.1.46) - 2025-08-13
 - feat: implement LogTape logging system for debug log control by @sugyan in https://github.com/sugyan/claude-code-webui/pull/220
 - feat: simplify runtime abstraction using Node.js standard modules by @sugyan in https://github.com/sugyan/claude-code-webui/pull/223
