@@ -53,15 +53,16 @@
 
 ## 📑 Table of Contents
 
-- [✨ Why Claude Code Web UI?](#why-claude-code-web-ui)
-- [🚀 Quick Start](#quick-start)
-- [⚙️ CLI Options](#️-cli-options)
-- [🔧 Development](#development)
-- [🔒 Security Considerations](#security-considerations)
-- [📚 Documentation](#documentation)
-- [❓ FAQ](#faq)
-- [🤝 Contributing](#contributing)
-- [📄 License](#license)
+- [✨ Why Claude Code Web UI?](#-why-claude-code-web-ui)
+- [🚀 Quick Start](#-quick-start)
+- [⚙️ CLI Options](#-cli-options)
+- [🚨 Troubleshooting](#-troubleshooting)
+- [🔧 Development](#-development)
+- [🔒 Security Considerations](#-security-considerations)
+- [📚 Documentation](#-documentation)
+- [❓ FAQ](#-faq)
+- [🤝 Contributing](#-contributing)
+- [📄 License](#-license)
 
 ---
 
@@ -151,22 +152,61 @@ The backend server supports the following command-line options:
 
 ```bash
 # Default (localhost:8080)
-./claude-code-webui
+claude-code-webui
 
 # Custom port
-./claude-code-webui --port 3000
+claude-code-webui --port 3000
 
 # Bind to all interfaces (accessible from network)
-./claude-code-webui --host 0.0.0.0 --port 9000
+claude-code-webui --host 0.0.0.0 --port 9000
 
 # Enable debug mode
-./claude-code-webui --debug
+claude-code-webui --debug
 
 # Custom Claude CLI path (for non-standard installations or aliases)
-./claude-code-webui --claude-path /path/to/claude
+claude-code-webui --claude-path /path/to/claude
 
 # Using environment variables
-PORT=9000 DEBUG=true ./claude-code-webui
+PORT=9000 DEBUG=true claude-code-webui
+```
+
+---
+
+## 🚨 Troubleshooting
+
+### Claude CLI Path Detection Issues
+
+If you encounter "Claude Code process exited with code 1" or similar errors, this typically indicates Claude CLI path detection failure.
+
+**Quick Solution:**
+```bash
+claude-code-webui --claude-path "$(which claude)"
+```
+
+**Common scenarios requiring explicit path specification:**
+- **Node.js environment managers** (Volta, asdf, nvm, etc.)
+- **Custom installation locations**
+- **Shell aliases or wrapper scripts**
+
+**Environment-specific commands:**
+```bash
+# For Volta users
+claude-code-webui --claude-path "$(volta which claude)"
+
+# For asdf users
+claude-code-webui --claude-path "$(asdf which claude)"
+```
+
+**Native Binary Installation:**
+Currently **not supported** due to TypeScript SDK limitations. Please use npm/yarn installation:
+```bash
+npm install -g @anthropic-ai/claude-code
+```
+
+**Debug Mode:**
+Use `--debug` flag for detailed error information:
+```bash
+claude-code-webui --debug
 ```
 
 ---
@@ -242,10 +282,10 @@ PORT=9000 npm run dev       # Node.js
 
 ```bash
 # Local only (recommended)
-./claude-code-webui --port 8080
+claude-code-webui --port 8080
 
 # Network access (trusted networks only)
-./claude-code-webui --port 8080 --host 0.0.0.0
+claude-code-webui --port 8080 --host 0.0.0.0
 ```
 
 **Never expose to public internet without proper security measures.**
@@ -300,9 +340,9 @@ Download the latest binary from releases or pull the latest code for development
 </details>
 
 <details>
-<summary><strong>Q: What if Claude CLI isn't found?</strong></summary>
+<summary><strong>Q: What if Claude CLI isn't found or I get "process exited with code 1"?</strong></summary>
 
-Ensure Claude CLI is installed and available in your PATH. Run `claude --version` to verify. For custom installations or shell aliases (e.g., `alias claude="/path/to/claude"`), use the `--claude-path` option to specify the exact path to your Claude executable.
+These errors typically indicate Claude CLI path detection issues. See the [Troubleshooting](#-troubleshooting) section for detailed solutions including environment manager workarounds and debug steps.
 
 </details>
 
