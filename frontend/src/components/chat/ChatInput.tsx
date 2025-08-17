@@ -5,6 +5,7 @@ import { useEnterBehavior } from "../../hooks/useEnterBehavior";
 import { EnterModeMenu } from "./EnterModeMenu";
 import { PermissionInputPanel } from "./PermissionInputPanel";
 import { PlanPermissionInputPanel } from "./PlanPermissionInputPanel";
+import type { PermissionMode } from "../../types";
 
 interface PermissionData {
   patterns: string[];
@@ -45,6 +46,8 @@ interface ChatInputProps {
   onSubmit: () => void;
   onAbort: () => void;
   // Permission mode props
+  permissionMode: PermissionMode;
+  onPermissionModeChange: (mode: PermissionMode) => void;
   showPermissions?: boolean;
   permissionData?: PermissionData;
   planPermissionData?: PlanPermissionData;
@@ -57,6 +60,8 @@ export function ChatInput({
   onInputChange,
   onSubmit,
   onAbort,
+  permissionMode,
+  onPermissionModeChange,
   showPermissions = false,
   permissionData,
   planPermissionData,
@@ -131,6 +136,25 @@ export function ChatInput({
     setTimeout(() => setIsComposing(false), 0);
   };
 
+  // Get permission mode status indicator (CLI-style)
+  const getPermissionModeIndicator = (mode: PermissionMode): string => {
+    switch (mode) {
+      case "default":
+        return "🔧 normal mode";
+      case "plan":
+        return "⏸ plan mode";
+      case "acceptEdits":
+        return "⏵⏵ accept edits";
+    }
+  };
+
+  // Get next permission mode for cycling
+  const getNextPermissionMode = (current: PermissionMode): PermissionMode => {
+    const modes: PermissionMode[] = ["default", "plan", "acceptEdits"];
+    const currentIndex = modes.indexOf(current);
+    return modes[(currentIndex + 1) % modes.length];
+  };
+
   // If we're in plan permission mode, show the plan permission panel instead
   if (showPermissions && planPermissionData) {
     return (
@@ -194,10 +218,22 @@ export function ChatInput({
             disabled={!input.trim() || isLoading}
             className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white rounded-lg font-medium transition-all duration-200 shadow-sm hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50 text-sm"
           >
-            {isLoading ? "..." : "Send"}
+            {isLoading ? "..." : permissionMode === "plan" ? "Plan" : "Send"}
           </button>
         </div>
       </form>
+
+      {/* Permission mode status bar */}
+      <button
+        type="button"
+        onClick={() =>
+          onPermissionModeChange(getNextPermissionMode(permissionMode))
+        }
+        className="w-full px-4 py-1 text-xs text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 font-mono text-left transition-colors cursor-pointer"
+        title={`Current: ${getPermissionModeIndicator(permissionMode).split(" ").slice(1).join(" ")} - Click to cycle`}
+      >
+        {getPermissionModeIndicator(permissionMode)}
+      </button>
     </div>
   );
 }

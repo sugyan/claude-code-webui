@@ -430,13 +430,13 @@ export function DemoPage() {
           onInputChange={() => {}} // No-op in demo - intentionally blocks user input to simulate a controlled environment where input is not required or allowed
           onSubmit={handleSendMessage}
           onAbort={() => {}} // No-op in demo
+          permissionMode="default" // Demo always uses default mode
+          onPermissionModeChange={() => {}} // No-op in demo
           showPermissions={isPermissionMode}
           permissionData={permissionData}
           planPermissionData={planPermissionData}
         />
       </div>
-
-      {/* Permission interface - Now handled inline by ChatInput component */}
     </div>
   );
 }

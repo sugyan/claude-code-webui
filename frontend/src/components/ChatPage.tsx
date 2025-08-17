@@ -561,6 +561,8 @@ export function ChatPage() {
               onInputChange={setInput}
               onSubmit={() => sendMessage()}
               onAbort={handleAbort}
+              permissionMode={permissionMode}
+              onPermissionModeChange={setPermissionMode}
               showPermissions={isPermissionMode}
               permissionData={permissionData}
               planPermissionData={planPermissionData}
@@ -568,8 +570,6 @@ export function ChatPage() {
           </>
         )}
       </div>
-
-      {/* Permission interface - Now handled inline by ChatInput component */}
     </div>
   );
 }
