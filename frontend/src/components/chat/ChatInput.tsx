@@ -148,6 +148,18 @@ export function ChatInput({
     }
   };
 
+  // Get clean permission mode name (without emoji)
+  const getPermissionModeName = (mode: PermissionMode): string => {
+    switch (mode) {
+      case "default":
+        return "normal mode";
+      case "plan":
+        return "plan mode";
+      case "acceptEdits":
+        return "accept edits";
+    }
+  };
+
   // Get next permission mode for cycling
   const getNextPermissionMode = (current: PermissionMode): PermissionMode => {
     const modes: PermissionMode[] = ["default", "plan", "acceptEdits"];
@@ -230,7 +242,7 @@ export function ChatInput({
           onPermissionModeChange(getNextPermissionMode(permissionMode))
         }
         className="w-full px-4 py-1 text-xs text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 font-mono text-left transition-colors cursor-pointer"
-        title={`Current: ${getPermissionModeIndicator(permissionMode).split(" ").slice(1).join(" ")} - Click to cycle`}
+        title={`Current: ${getPermissionModeName(permissionMode)} - Click to cycle`}
       >
         {getPermissionModeIndicator(permissionMode)}
       </button>
