@@ -1,7 +1,12 @@
 import { useEffect, useCallback, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
-import type { ChatRequest, ChatMessage, ProjectInfo } from "../types";
+import type {
+  ChatRequest,
+  ChatMessage,
+  ProjectInfo,
+  PermissionMode,
+} from "../types";
 import { useTheme } from "../hooks/useTheme";
 import { useClaudeStreaming } from "../hooks/useClaudeStreaming";
 import { useChatState } from "../hooks/chat/useChatState";
@@ -140,6 +145,7 @@ export function ChatPage() {
       messageContent?: string,
       tools?: string[],
       hideUserMessage = false,
+      overridePermissionMode?: PermissionMode,
     ) => {
       const content = messageContent || input.trim();
       if (!content || isLoading) return;
@@ -170,7 +176,7 @@ export function ChatPage() {
             ...(currentSessionId ? { sessionId: currentSessionId } : {}),
             allowedTools: tools || allowedTools,
             ...(workingDirectory ? { workingDirectory } : {}),
-            permissionMode,
+            permissionMode: overridePermissionMode || permissionMode,
           } as ChatRequest),
         });
 
@@ -316,7 +322,7 @@ export function ChatPage() {
     updatePermissionMode("acceptEdits");
     closePlanModeRequest();
     if (currentSessionId) {
-      sendMessage("accept", allowedTools, true);
+      sendMessage("accept", allowedTools, true, "acceptEdits");
     }
   }, [
     updatePermissionMode,
@@ -330,7 +336,7 @@ export function ChatPage() {
     updatePermissionMode("default");
     closePlanModeRequest();
     if (currentSessionId) {
-      sendMessage("accept", allowedTools, true);
+      sendMessage("accept", allowedTools, true, "default");
     }
   }, [
     updatePermissionMode,
