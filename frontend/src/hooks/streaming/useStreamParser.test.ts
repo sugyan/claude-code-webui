@@ -136,8 +136,8 @@ describe("useStreamParser", () => {
               type: "tool_use",
               id: "plan-789",
               name: "ExitPlanMode",
-              // input field is missing
-            },
+              // input field is intentionally missing
+            } as any,
           ],
         },
       };
@@ -171,12 +171,12 @@ describe("useStreamParser", () => {
           content: [
             {
               type: "tool_use",
-              // id field is missing
+              // id field is intentionally missing
               name: "ExitPlanMode",
               input: {
                 plan: "Test plan content",
               },
-            },
+            } as any,
           ],
         },
       };

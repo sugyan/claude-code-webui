@@ -4,16 +4,24 @@ import { handleChatRequest } from "./chat";
 import type { ChatRequest } from "../../shared/types";
 import { query } from "@anthropic-ai/claude-code";
 
-// Mock Claude Code SDK - using any to avoid complex SDK type issues in tests
-vi.mock("@anthropic-ai/claude-code", () => ({
-  query: vi.fn(),
-  AbortError: class AbortError extends Error {
-    constructor(message: string) {
-      super(message);
-      this.name = "AbortError";
-    }
-  },
-}));
+// Define minimal mock types for Claude Code SDK to maintain type safety in tests
+type MockClaudeCode = {
+  query: typeof vi.fn;
+  AbortError: new (message: string) => Error;
+};
+
+vi.mock(
+  "@anthropic-ai/claude-code",
+  (): MockClaudeCode => ({
+    query: vi.fn(),
+    AbortError: class AbortError extends Error {
+      constructor(message: string) {
+        super(message);
+        this.name = "AbortError";
+      }
+    },
+  }),
+);
 
 // Mock logger
 vi.mock("../utils/logger", () => ({
