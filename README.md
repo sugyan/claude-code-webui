@@ -78,7 +78,6 @@ Instead of being limited to command-line interactions, Claude Code Web UI brings
 | 📱 Desktop bound              | 📱 Mobile-friendly interface |
 | 📝 Plain text output          | 🎨 Rich formatted responses  |
 | 🗂️ Manual directory switching | 📁 Visual project selection  |
-| 🔄 Direct execution only      | 📋 Plan mode for review      |
 
 ### 🎯 Key Features
 
