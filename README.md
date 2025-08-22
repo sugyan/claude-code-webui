@@ -14,10 +14,10 @@
 
 <div align="center">
 
-| Desktop Interface                                                                             | Mobile Experience                                                                           |
-| --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| Desktop Interface                                                                                                                                  | Mobile Experience                                                                                                                                |
+| -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | <img src="https://github.com/sugyan/claude-code-webui/raw/main/docs/images/screenshot-desktop-basic-dark.png" alt="Desktop Interface" width="600"> | <img src="https://github.com/sugyan/claude-code-webui/raw/main/docs/images/screenshot-mobile-basic-dark.png" alt="Mobile Interface" width="250"> |
-| _Chat-based coding interface with instant responses and ready input field_                    | _Mobile-optimized chat experience with touch-friendly design_                               |
+| _Chat-based coding interface with instant responses and ready input field_                                                                         | _Mobile-optimized chat experience with touch-friendly design_                                                                                    |
 
 </div>
 
@@ -26,10 +26,10 @@
 
 <div align="center">
 
-| Desktop (Light)                                                                            | Mobile (Light)                                                                           |
-| ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
+| Desktop (Light)                                                                                                                                 | Mobile (Light)                                                                                                                                |
+| ----------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
 | <img src="https://github.com/sugyan/claude-code-webui/raw/main/docs/images/screenshot-desktop-basic.png" alt="Desktop Light Theme" width="600"> | <img src="https://github.com/sugyan/claude-code-webui/raw/main/docs/images/screenshot-mobile-basic.png" alt="Mobile Light Theme" width="250"> |
-| _Clean light interface for daytime coding sessions_                                        | _iPhone SE optimized light theme interface_                                              |
+| _Clean light interface for daytime coding sessions_                                                                                             | _iPhone SE optimized light theme interface_                                                                                                   |
 
 </div>
 
@@ -40,10 +40,10 @@
 
 <div align="center">
 
-| Desktop Permission Dialog                                                                              | Mobile Permission Dialog                                                                              |
-| ------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| Desktop Permission Dialog                                                                                                                                   | Mobile Permission Dialog                                                                                                                                   |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | <img src="https://github.com/sugyan/claude-code-webui/raw/main/docs/images/screenshot-desktop-fileOperations-dark.png" alt="Permission Dialog" width="600"> | <img src="https://github.com/sugyan/claude-code-webui/raw/main/docs/images/screenshot-mobile-fileOperations-dark.png" alt="Mobile Permission" width="250"> |
-| _Secure tool access with granular permission controls and clear approval workflow_                     | _Touch-optimized permission interface for mobile devices_                                             |
+| _Secure tool access with granular permission controls and clear approval workflow_                                                                          | _Touch-optimized permission interface for mobile devices_                                                                                                  |
 
 </div>
 
@@ -78,6 +78,17 @@ Instead of being limited to command-line interactions, Claude Code Web UI brings
 | 📱 Desktop bound              | 📱 Mobile-friendly interface |
 | 📝 Plain text output          | 🎨 Rich formatted responses  |
 | 🗂️ Manual directory switching | 📁 Visual project selection  |
+| 🔄 Direct execution only      | 📋 Plan mode for review      |
+
+### 🎯 Key Features
+
+- **📋 Permission Mode Switching** - Toggle between normal and plan mode execution
+- **🔄 Real-time streaming responses** - Live Claude Code output in chat interface
+- **📁 Project directory selection** - Visual project picker for context-aware sessions
+- **💬 Conversation history** - Browse and restore previous chat sessions
+- **🛠️ Tool permission management** - Granular control over Claude's tool access
+- **🎨 Dark/light theme support** - Automatic system preference detection
+- **📱 Mobile-responsive design** - Touch-optimized interface for any device
 
 ---
 
@@ -179,16 +190,19 @@ PORT=9000 DEBUG=true claude-code-webui
 If you encounter "Claude Code process exited with code 1" or similar errors, this typically indicates Claude CLI path detection failure.
 
 **Quick Solution:**
+
 ```bash
 claude-code-webui --claude-path "$(which claude)"
 ```
 
 **Common scenarios requiring explicit path specification:**
+
 - **Node.js environment managers** (Volta, asdf, nvm, etc.)
 - **Custom installation locations**
 - **Shell aliases or wrapper scripts**
 
 **Environment-specific commands:**
+
 ```bash
 # For Volta users
 claude-code-webui --claude-path "$(volta which claude)"
@@ -199,12 +213,14 @@ claude-code-webui --claude-path "$(asdf which claude)"
 
 **Native Binary Installation:**
 Currently **not supported** due to TypeScript SDK limitations. Please use npm/yarn installation:
+
 ```bash
 npm install -g @anthropic-ai/claude-code
 ```
 
 **Debug Mode:**
 Use `--debug` flag for detailed error information:
+
 ```bash
 claude-code-webui --debug
 ```

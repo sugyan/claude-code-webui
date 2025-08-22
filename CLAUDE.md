@@ -524,6 +524,8 @@ cd frontend && npm run dev      # Configures proxy to localhost:9000
 
 21. **Enter Key Behavior**: Configurable Enter key behavior with persistent user preferences, supporting both traditional (Enter=Send) and modern (Enter=Newline) interaction patterns.
 
+22. **Permission Mode Switching**: UI-driven plan mode functionality that allows users to toggle between normal execution and plan mode. When plan mode is selected, users can review and approve Claude's planned actions before execution through an intuitive interface.
+
 ## Claude Code SDK Types Reference
 
 **SDK Types**: `frontend/node_modules/@anthropic-ai/claude-code/sdk.d.ts`
@@ -589,6 +591,48 @@ The modular frontend architecture provides several key benefits:
 - **Bundle Optimization**: Tree-shaking is more effective with modular code
 - **Code Splitting**: Easier to implement lazy loading for large features
 - **Memory Efficiency**: Reduced memory footprint with focused hooks
+
+## Permission Mode Switching
+
+This project implements a permission mode switching feature that allows users to toggle between normal execution and plan mode before sending messages to Claude.
+
+### Features
+
+- **Normal Mode**: Direct execution (default behavior)
+- **Plan Mode**: Claude presents a plan for user review and approval before execution
+- **UI Toggle**: Permission mode selector integrated into the chat input interface
+- **Session Persistence**: Permission mode choice is maintained during the browser session
+
+### Implementation Approach
+
+The implementation uses a **UI-driven approach** with the `PlanPermissionInputPanel` component, providing:
+
+- **Three-Option Interface**: "Accept with Edits", "Accept Default", or "Keep Planning"
+- **Seamless Integration**: Built into the existing chat input component
+- **Type Safety**: Full TypeScript support with comprehensive type definitions
+- **State Management**: Uses the `usePermissionMode` hook for state tracking
+
+### Technical Architecture
+
+- **Frontend**: Permission mode state management via `usePermissionMode` hook
+- **Backend**: `permissionMode` parameter passed to Claude Code SDK via the chat API
+- **Types**: Shared type definitions in `shared/types.ts` with frontend extensions
+- **UI Components**: `PlanPermissionInputPanel` for plan approval workflow
+
+### Usage
+
+1. Toggle permission mode using the cycle button in the chat input area
+2. Send message in plan mode to activate plan review workflow
+3. Review plan options in the permission input panel
+4. Choose your preferred action: Accept with Edits, Accept Default, or Keep Planning
+
+### Files Involved
+
+- **Shared Types**: `shared/types.ts` - `ChatRequest.permissionMode` field
+- **Backend API**: `backend/handlers/chat.ts` - Permission mode parameter handling
+- **Frontend State**: `frontend/src/hooks/chat/usePermissionMode.ts` - State management
+- **UI Components**: `frontend/src/components/chat/PlanPermissionInputPanel.tsx` - Plan approval interface
+- **Integration**: `frontend/src/components/chat/ChatInput.tsx` - Mode toggle and panel integration
 
 ## Testing
 
