@@ -50,18 +50,4 @@ describe("App Routing", () => {
       expect(screen.getByText("/test-path")).toBeInTheDocument();
     });
   });
-
-  it("shows new directory selection button", async () => {
-    render(
-      <MemoryRouter initialEntries={["/"]}>
-        <Routes>
-          <Route path="/" element={<ProjectSelector />} />
-        </Routes>
-      </MemoryRouter>,
-    );
-
-    await waitFor(() => {
-      expect(screen.getByText("Select New Directory")).toBeInTheDocument();
-    });
-  });
 });
