@@ -8,6 +8,7 @@ export const UI_CONSTANTS = {
 export const KEYBOARD_SHORTCUTS = {
   ABORT: "Escape",
   SUBMIT: "Enter",
+  PERMISSION_MODE_TOGGLE: "M",
 } as const;
 
 // Message display constants
