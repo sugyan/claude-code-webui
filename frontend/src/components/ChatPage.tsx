@@ -7,14 +7,14 @@ import type {
   ProjectInfo,
   PermissionMode,
 } from "../types";
-import { useTheme } from "../hooks/useTheme";
 import { useClaudeStreaming } from "../hooks/useClaudeStreaming";
 import { useChatState } from "../hooks/chat/useChatState";
 import { usePermissions } from "../hooks/chat/usePermissions";
 import { usePermissionMode } from "../hooks/chat/usePermissionMode";
 import { useAbortController } from "../hooks/chat/useAbortController";
 import { useAutoHistoryLoader } from "../hooks/useHistoryLoader";
-import { ThemeToggle } from "./chat/ThemeToggle";
+import { SettingsButton } from "./SettingsButton";
+import { SettingsModal } from "./SettingsModal";
 import { HistoryButton } from "./chat/HistoryButton";
 import { ChatInput } from "./chat/ChatInput";
 import { ChatMessages } from "./chat/ChatMessages";
@@ -29,6 +29,7 @@ export function ChatPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [projects, setProjects] = useState<ProjectInfo[]>([]);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   // Extract and normalize working directory from URL
   const workingDirectory = (() => {
@@ -48,7 +49,6 @@ export function ChatPage() {
   const isHistoryView = currentView === "history";
   const isLoadedConversation = !!sessionId && !isHistoryView;
 
-  const { theme, toggleTheme } = useTheme();
   const { processStreamLine } = useClaudeStreaming();
   const { abortRequest, createAbortHandler } = useAbortController();
 
@@ -376,6 +376,14 @@ export function ChatPage() {
     navigate({ search: searchParams.toString() });
   }, [navigate]);
 
+  const handleSettingsClick = useCallback(() => {
+    setIsSettingsOpen(true);
+  }, []);
+
+  const handleSettingsClose = useCallback(() => {
+    setIsSettingsOpen(false);
+  }, []);
+
   // Load projects to get encodedName mapping
   useEffect(() => {
     const loadProjects = async () => {
@@ -500,7 +508,7 @@ export function ChatPage() {
           </div>
           <div className="flex items-center gap-3">
             {!isHistoryView && <HistoryButton onClick={handleHistoryClick} />}
-            <ThemeToggle theme={theme} onToggle={toggleTheme} />
+            <SettingsButton onClick={handleSettingsClick} />
           </div>
         </div>
 
@@ -575,6 +583,9 @@ export function ChatPage() {
             />
           </>
         )}
+
+        {/* Settings Modal */}
+        <SettingsModal isOpen={isSettingsOpen} onClose={handleSettingsClose} />
       </div>
     </div>
   );

@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import { ProjectSelector } from "./components/ProjectSelector";
 import { ChatPage } from "./components/ChatPage";
-import { EnterBehaviorProvider } from "./contexts/EnterBehaviorContext";
+import { SettingsProvider } from "./contexts/SettingsContext";
 import { isDevelopment } from "./utils/environment";
 
 // Lazy load DemoPage only in development
@@ -16,7 +16,7 @@ const DemoPage = isDevelopment()
 
 function App() {
   return (
-    <EnterBehaviorProvider>
+    <SettingsProvider>
       <Router>
         <Routes>
           <Route path="/" element={<ProjectSelector />} />
@@ -33,7 +33,7 @@ function App() {
           )}
         </Routes>
       </Router>
-    </EnterBehaviorProvider>
+    </SettingsProvider>
   );
 }
 
