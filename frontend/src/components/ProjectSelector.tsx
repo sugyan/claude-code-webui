@@ -3,11 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { FolderIcon } from "@heroicons/react/24/outline";
 import type { ProjectsResponse, ProjectInfo } from "../types";
 import { getProjectsUrl } from "../config/api";
+import { SettingsButton } from "./SettingsButton";
+import { SettingsModal } from "./SettingsModal";
 
 export function ProjectSelector() {
   const [projects, setProjects] = useState<ProjectInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -37,6 +40,14 @@ export function ProjectSelector() {
     navigate(`/projects${normalizedPath}`);
   };
 
+  const handleSettingsClick = () => {
+    setIsSettingsOpen(true);
+  };
+
+  const handleSettingsClose = () => {
+    setIsSettingsOpen(false);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -58,9 +69,13 @@ export function ProjectSelector() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
       <div className="max-w-4xl mx-auto p-6">
-        <h1 className="text-slate-800 dark:text-slate-100 text-3xl font-bold tracking-tight mb-8">
-          Select a Project
-        </h1>
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-slate-800 dark:text-slate-100 text-3xl font-bold tracking-tight">
+            Select a Project
+          </h1>
+          <SettingsButton onClick={handleSettingsClick} />
+        </div>
 
         <div className="space-y-3">
           {projects.length > 0 && (
@@ -83,6 +98,9 @@ export function ProjectSelector() {
             </>
           )}
         </div>
+
+        {/* Settings Modal */}
+        <SettingsModal isOpen={isSettingsOpen} onClose={handleSettingsClose} />
       </div>
     </div>
   );
