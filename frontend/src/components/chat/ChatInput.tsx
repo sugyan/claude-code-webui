@@ -1,8 +1,7 @@
 import React, { useRef, useEffect, useState } from "react";
 import { StopIcon } from "@heroicons/react/24/solid";
 import { UI_CONSTANTS, KEYBOARD_SHORTCUTS } from "../../utils/constants";
-import { useEnterBehavior } from "../../hooks/useEnterBehavior";
-import { EnterModeMenu } from "./EnterModeMenu";
+import { useEnterBehavior } from "../../hooks/useSettings";
 import { PermissionInputPanel } from "./PermissionInputPanel";
 import { PlanPermissionInputPanel } from "./PlanPermissionInputPanel";
 import type { PermissionMode } from "../../types";
@@ -237,7 +236,6 @@ export function ChatInput({
               <StopIcon className="w-4 h-4" />
             </button>
           )}
-          <EnterModeMenu />
           <button
             type="submit"
             disabled={!input.trim() || isLoading}
