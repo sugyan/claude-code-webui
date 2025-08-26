@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.48](https://github.com/sugyan/claude-code-webui/compare/0.1.47...0.1.48) - 2025-08-26
+- remove: Select New Directory option from project selector by @sugyan in https://github.com/sugyan/claude-code-webui/pull/241
+- Update demo video of README.md by @sugyan in https://github.com/sugyan/claude-code-webui/pull/248
+- Add keyboard shortcut for permission mode cycling by @sugyan in https://github.com/sugyan/claude-code-webui/pull/253
+- Add unified settings page with theme and enter behavior integration by @sugyan in https://github.com/sugyan/claude-code-webui/pull/254
+
 ## [0.1.47](https://github.com/sugyan/claude-code-webui/compare/0.1.46...0.1.47) - 2025-08-22
 - fix: improve error handling when Claude CLI path detection fails by @sugyan in https://github.com/sugyan/claude-code-webui/pull/235
 - feat: implement always-visible permission mode toggle UI by @sugyan in https://github.com/sugyan/claude-code-webui/pull/237
