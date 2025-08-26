@@ -71,6 +71,13 @@ export interface PlanMessage {
   timestamp: number;
 }
 
+// Thinking message for Claude's reasoning process
+export interface ThinkingMessage {
+  type: "thinking";
+  content: string;
+  timestamp: number;
+}
+
 // TimestampedSDKMessage types for conversation history API
 // These extend Claude SDK types with timestamp information
 type WithTimestamp<T> = T & { timestamp: string };
@@ -91,7 +98,8 @@ export type AllMessage =
   | SystemMessage
   | ToolMessage
   | ToolResultMessage
-  | PlanMessage;
+  | PlanMessage
+  | ThinkingMessage;
 
 // Type guard functions
 export function isChatMessage(message: AllMessage): message is ChatMessage {
@@ -118,6 +126,12 @@ export function isToolResultMessage(
 
 export function isPlanMessage(message: AllMessage): message is PlanMessage {
   return message.type === "plan";
+}
+
+export function isThinkingMessage(
+  message: AllMessage,
+): message is ThinkingMessage {
+  return message.type === "thinking";
 }
 
 // Permission mode types (UI-focused subset of SDK PermissionMode)
