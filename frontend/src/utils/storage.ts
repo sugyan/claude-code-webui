@@ -58,10 +58,7 @@ export function setSettings(settings: AppSettings): void {
 
 function migrateLegacySettings(): AppSettings {
   // Get system theme preference
-  const prefersDark =
-    typeof window !== "undefined"
-      ? window.matchMedia("(prefers-color-scheme: dark)").matches
-      : false;
+  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
   const systemDefaultTheme: Theme = prefersDark ? "dark" : "light";
 
   // Load legacy settings

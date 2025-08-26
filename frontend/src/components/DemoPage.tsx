@@ -29,6 +29,9 @@ export function DemoPage() {
   const pauseAtStep = pauseAtParam ? parseInt(pauseAtParam, 10) : undefined;
 
   // Get theme from URL or use system default
+  // NOTE: DemoPage manages its own theme state separately from SettingsContext
+  // to support URL-based theme overrides (?theme=dark) and disable transitions
+  // during demo recording/playback for visual consistency
   const themeParam = searchParams.get("theme");
   const [theme, setTheme] = useState<Theme>(() => {
     if (themeParam === "dark" || themeParam === "light") {

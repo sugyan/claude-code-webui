@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import type { AppSettings, SettingsContextType } from "../types/settings";
 import { getSettings, setSettings } from "../utils/storage";
-import { SettingsContext } from "./SettingsContextDefinition";
+import { SettingsContext } from "./SettingsContextTypes";
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [settings, setSettingsState] = useState<AppSettings>(() =>
