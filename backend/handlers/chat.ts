@@ -50,6 +50,7 @@ async function* executeClaudeCommand(
         executable: "node" as const,
         executableArgs: [],
         pathToClaudeCodeExecutable: cliPath,
+        model: "sonnet", // Always use Sonnet
         ...(sessionId ? { resume: sessionId } : {}),
         ...(allowedTools ? { allowedTools } : {}),
         ...(workingDirectory ? { cwd: workingDirectory } : {}),

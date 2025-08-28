@@ -16,7 +16,7 @@ export interface UsePermissionModeResult {
  */
 export function usePermissionMode(): UsePermissionModeResult {
   const [permissionMode, setPermissionModeState] =
-    useState<PermissionMode>("default");
+    useState<PermissionMode>("acceptEdits");
 
   const setPermissionMode = useCallback((mode: PermissionMode) => {
     setPermissionModeState(mode);

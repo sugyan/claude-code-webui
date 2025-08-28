@@ -79,6 +79,18 @@ export const logger = {
 
   // General application logging
   app: getLogger(["app"]),
+
+  // Authentication logging
+  auth: getLogger(["auth"]),
+
+  // Project management logging
+  project: getLogger(["project"]),
+
+  // User switching logging
+  userSwitch: getLogger(["userSwitch"]),
+
+  // User management logging
+  userManagement: getLogger(["userManagement"]),
 };
 
 /**

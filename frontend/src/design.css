@@ -1,0 +1,326 @@
+/* ===================================
+   Custom Design Overrides
+   Claude Code Web UI - Ultra Theme
+   =================================== */
+
+/* Configure Tailwind with DaisyUI themes */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom CSS Variables for Ultra Theme */
+:root {
+  --ultra-primary: #3b82f6;
+  --ultra-secondary: #8b5cf6;
+  --ultra-accent: #06b6d4;
+  --ultra-neutral: #374151;
+  --ultra-base-100: #ffffff;
+  --ultra-base-200: #f8fafc;
+  --ultra-base-300: #e2e8f0;
+  --ultra-info: #0ea5e9;
+  --ultra-success: #22c55e;
+  --ultra-warning: #f59e0b;
+  --ultra-error: #ef4444;
+}
+
+[data-theme="dark"] {
+  --ultra-primary: #60a5fa;
+  --ultra-secondary: #a78bfa;
+  --ultra-accent: #22d3ee;
+  --ultra-neutral: #1f2937;
+  --ultra-base-100: #111827;
+  --ultra-base-200: #1f2937;
+  --ultra-base-300: #374151;
+  --ultra-info: #38bdf8;
+  --ultra-success: #4ade80;
+  --ultra-warning: #fbbf24;
+  --ultra-error: #f87171;
+}
+
+/* Ultra Theme Base Styles */
+body {
+  @apply bg-base-100 text-base-content;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Ultra Chat Interface */
+.ultra-chat-container {
+  @apply min-h-screen bg-gradient-to-br from-base-100 via-base-200 to-base-300;
+}
+
+.ultra-chat-header {
+  @apply bg-base-100/90 backdrop-blur-sm border-b border-base-300 shadow-sm;
+}
+
+.ultra-chat-messages {
+  @apply bg-base-100/50 backdrop-blur-sm;
+}
+
+.ultra-message-user {
+  @apply bg-primary text-primary-content rounded-2xl rounded-br-md shadow-md;
+}
+
+.ultra-message-assistant {
+  @apply bg-base-200 text-base-content rounded-2xl rounded-bl-md shadow-md border border-base-300;
+}
+
+.ultra-message-system {
+  @apply bg-info/10 text-info-content rounded-xl border border-info/20;
+}
+
+.ultra-message-error {
+  @apply bg-error/10 text-error-content rounded-xl border border-error/20;
+}
+
+/* Ultra Input Components */
+.ultra-input {
+  @apply input input-bordered focus:input-primary transition-all duration-200;
+}
+
+.ultra-textarea {
+  @apply textarea textarea-bordered focus:textarea-primary transition-all duration-200 resize-none;
+}
+
+.ultra-btn-primary {
+  @apply btn btn-primary shadow-md hover:shadow-lg transition-all duration-200;
+}
+
+.ultra-btn-secondary {
+  @apply btn btn-secondary shadow-md hover:shadow-lg transition-all duration-200;
+}
+
+.ultra-btn-ghost {
+  @apply btn btn-ghost hover:bg-base-200 transition-all duration-200;
+}
+
+/* Ultra Cards and Panels */
+.ultra-card {
+  @apply card bg-base-100 shadow-xl border border-base-300 hover:shadow-2xl transition-all duration-300;
+}
+
+.ultra-panel {
+  @apply bg-base-100/80 backdrop-blur-sm rounded-2xl shadow-lg border border-base-300;
+}
+
+/* Ultra Navigation */
+.ultra-navbar {
+  @apply navbar bg-base-100/90 backdrop-blur-sm shadow-md border-b border-base-300;
+}
+
+.ultra-menu {
+  @apply menu bg-base-100 rounded-box shadow-lg border border-base-300;
+}
+
+/* Ultra Animations */
+.ultra-fade-in {
+  animation: ultraFadeIn 0.3s ease-in-out;
+}
+
+.ultra-slide-up {
+  animation: ultraSlideUp 0.4s ease-out;
+}
+
+.ultra-bounce-in {
+  animation: ultraBounceIn 0.5s ease-out;
+}
+
+@keyframes ultraFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes ultraSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes ultraBounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Ultra Scrollbars */
+.ultra-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.ultra-scroll::-webkit-scrollbar-track {
+  @apply bg-base-200;
+}
+
+.ultra-scroll::-webkit-scrollbar-thumb {
+  @apply bg-primary/30 rounded-full;
+}
+
+.ultra-scroll::-webkit-scrollbar-thumb:hover {
+  @apply bg-primary/50;
+}
+
+/* Ultra Code Blocks */
+.ultra-code {
+  @apply bg-base-300 text-base-content rounded-lg p-4 font-mono text-sm border border-base-300;
+}
+
+.ultra-code-inline {
+  @apply bg-base-300 text-base-content px-2 py-1 rounded font-mono text-sm;
+}
+
+/* Ultra Tooltips */
+.ultra-tooltip {
+  @apply tooltip tooltip-primary;
+}
+
+/* Ultra Badges */
+.ultra-badge-success {
+  @apply badge badge-success shadow-sm;
+}
+
+.ultra-badge-warning {
+  @apply badge badge-warning shadow-sm;
+}
+
+.ultra-badge-error {
+  @apply badge badge-error shadow-sm;
+}
+
+.ultra-badge-info {
+  @apply badge badge-info shadow-sm;
+}
+
+/* Ultra Loading States */
+.ultra-loading {
+  @apply loading loading-spinner loading-lg text-primary;
+}
+
+.ultra-skeleton {
+  @apply animate-pulse bg-base-300 rounded;
+}
+
+/* Ultra Responsive Design */
+@media (max-width: 768px) {
+  .ultra-chat-container {
+    @apply px-2;
+  }
+  
+  .ultra-message-user,
+  .ultra-message-assistant {
+    @apply text-sm;
+  }
+}
+
+/* Ultra Focus States */
+.ultra-focus-ring:focus {
+  @apply ring-2 ring-primary ring-offset-2 ring-offset-base-100;
+}
+
+/* Ultra Glass Effect */
+.ultra-glass {
+  @apply bg-base-100/20 backdrop-blur-md border border-base-300/30;
+}
+
+/* Ultra Gradient Text */
+.ultra-gradient-text {
+  background: linear-gradient(135deg, var(--ultra-primary), var(--ultra-secondary));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Ultra Shadow Levels */
+.ultra-shadow-sm { @apply shadow-sm; }
+.ultra-shadow-md { @apply shadow-md; }
+.ultra-shadow-lg { @apply shadow-lg; }
+.ultra-shadow-xl { @apply shadow-xl; }
+.ultra-shadow-2xl { @apply shadow-2xl; }
+
+/* Ultra Border Radius Utilities */
+.ultra-rounded-sm { @apply rounded-sm; }
+.ultra-rounded-md { @apply rounded-md; }
+.ultra-rounded-lg { @apply rounded-lg; }
+.ultra-rounded-xl { @apply rounded-xl; }
+.ultra-rounded-2xl { @apply rounded-2xl; }
+.ultra-rounded-3xl { @apply rounded-3xl; }
+
+/* Ultra Spacing Utilities */
+.ultra-space-y-1 > * + * { @apply mt-1; }
+.ultra-space-y-2 > * + * { @apply mt-2; }
+.ultra-space-y-4 > * + * { @apply mt-4; }
+.ultra-space-y-6 > * + * { @apply mt-6; }
+.ultra-space-y-8 > * + * { @apply mt-8; }
+
+/* Dark mode specific overrides */
+.dark .ultra-message-assistant {
+  @apply bg-base-300 border-base-200;
+}
+
+.dark .ultra-code {
+  @apply bg-base-200 border-base-200;
+}
+
+/* Ultra Theme Toggle Button */
+.ultra-theme-toggle {
+  @apply btn btn-ghost btn-circle transition-all duration-300 hover:rotate-180;
+}
+
+/* Ultra Notification System */
+.ultra-alert {
+  @apply alert shadow-lg border border-base-300;
+}
+
+.ultra-alert-success {
+  @apply alert-success;
+}
+
+.ultra-alert-warning {
+  @apply alert-warning;
+}
+
+.ultra-alert-error {
+  @apply alert-error;
+}
+
+.ultra-alert-info {
+  @apply alert-info;
+}
+
+/* Ultra Modal */
+.ultra-modal {
+  @apply modal;
+}
+
+.ultra-modal-box {
+  @apply modal-box bg-base-100 border border-base-300 shadow-2xl;
+}
+
+/* Custom scrollbar for webkit browsers */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--primary) / 0.3) rgb(var(--base-200));
+}

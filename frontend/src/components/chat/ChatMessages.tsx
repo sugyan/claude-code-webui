@@ -20,9 +20,10 @@ import {
 interface ChatMessagesProps {
   messages: AllMessage[];
   isLoading: boolean;
+  workingDirectory?: string;
 }
 
-export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
+export function ChatMessages({ messages, isLoading, workingDirectory }: ChatMessagesProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
@@ -74,7 +75,7 @@ export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
       className="flex-1 overflow-y-auto bg-white/70 dark:bg-slate-800/70 border border-slate-200/60 dark:border-slate-700/60 p-3 sm:p-6 mb-3 sm:mb-6 rounded-2xl shadow-sm backdrop-blur-sm flex flex-col"
     >
       {messages.length === 0 ? (
-        <EmptyState />
+        <EmptyState workingDirectory={workingDirectory} />
       ) : (
         <>
           {/* Spacer div to push messages to the bottom */}
@@ -88,18 +89,31 @@ export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
   );
 }
 
-function EmptyState() {
+interface EmptyStateProps {
+  workingDirectory?: string;
+}
+
+function EmptyState({ workingDirectory }: EmptyStateProps) {
   return (
     <div className="flex-1 flex items-center justify-center text-center text-slate-500 dark:text-slate-400">
       <div>
         <div className="text-6xl mb-6 opacity-60">
-          <span role="img" aria-label="chat icon">
-            💬
+          <span role="img" aria-label="coding icon">
+            💻
           </span>
         </div>
-        <p className="text-lg font-medium">Start a conversation with Claude</p>
+        <p className="text-lg font-medium">You will start coding with Claude</p>
         <p className="text-sm mt-2 opacity-80">
-          Type your message below to begin
+          {workingDirectory ? (
+            <>
+              The Path of Project is <span className="font-mono text-blue-600 dark:text-blue-400">{workingDirectory}</span>
+            </>
+          ) : (
+            "Project directory not specified"
+          )}
+        </p>
+        <p className="text-sm mt-1 opacity-70">
+          Let me know if you need to add more features, design or modify any pages or sections of the project. Just type your message and let me know.
         </p>
       </div>
     </div>

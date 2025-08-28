@@ -17,6 +17,18 @@ import { handleHistoriesRequest } from "./handlers/histories.ts";
 import { handleConversationRequest } from "./handlers/conversations.ts";
 import { handleChatRequest } from "./handlers/chat.ts";
 import { handleAbortRequest } from "./handlers/abort.ts";
+import { handleLoginRequest, handleVerifyRequest, handleLogoutRequest, requireAuth } from "./handlers/auth.ts";
+import { handleValidatePathRequest, handleCreateProjectRequest } from "./handlers/createProject.ts";
+import { handlePrivilegeCheckRequest, handleListUsersRequest, handleUserSwitchRequest } from "./handlers/userSwitch.ts";
+import { handleUserManagementRequest } from "./handlers/userManagement.ts";
+import { handleFileReadRequest, handleFileWriteRequest } from "./handlers/files.ts";
+import { 
+  rateLimitMiddleware,
+  loginRateLimitMiddleware,
+  securityHeadersMiddleware,
+  requestSizeLimitMiddleware,
+  inputValidationMiddleware,
+} from "./middleware/security.ts";
 import { logger } from "./utils/logger.ts";
 import { readBinaryFile } from "./utils/fs.ts";
 
@@ -35,15 +47,38 @@ export function createApp(
   // Store AbortControllers for each request (shared with chat handler)
   const requestAbortControllers = new Map<string, AbortController>();
 
-  // CORS middleware
+  // CORS middleware - secure configuration
   app.use(
     "*",
     cors({
-      origin: "*",
+      origin: (origin) => {
+        // Allow local development and specific domains
+        const allowedOrigins = [
+          "http://localhost:3000",
+          "http://localhost:3001", 
+          "http://localhost:3002",
+          "https://coding.dannyac.com",
+          "http://127.0.0.1:3000",
+          "http://127.0.0.1:3001",
+          "http://127.0.0.1:3002"
+        ];
+        
+        // Allow requests with no origin (e.g., mobile apps, curl, Postman)
+        if (!origin) return true;
+        
+        return allowedOrigins.includes(origin);
+      },
       allowMethods: ["GET", "POST", "OPTIONS"],
-      allowHeaders: ["Content-Type"],
+      allowHeaders: ["Content-Type", "Authorization"],
+      credentials: true,
     }),
   );
+
+  // Security middleware - apply to all routes
+  app.use("*", securityHeadersMiddleware());
+  app.use("*", rateLimitMiddleware());
+  app.use("*", inputValidationMiddleware());
+  app.use("*", requestSizeLimitMiddleware());
 
   // Configuration middleware - makes app settings available to all handlers
   app.use(
@@ -55,22 +90,43 @@ export function createApp(
     }),
   );
 
-  // API routes
-  app.get("/api/projects", (c) => handleProjectsRequest(c));
+  // Authentication routes with additional login rate limiting
+  app.post("/api/auth/login", loginRateLimitMiddleware(), (c) => handleLoginRequest(c));
+  app.get("/api/auth/verify", (c) => handleVerifyRequest(c));
+  app.post("/api/auth/logout", (c) => handleLogoutRequest(c));
 
-  app.get("/api/projects/:encodedProjectName/histories", (c) =>
+  // Protected API routes
+  app.get("/api/projects", requireAuth(), (c) => handleProjectsRequest(c));
+  app.post("/api/projects/validate-path", requireAuth(), (c) => handleValidatePathRequest(c));
+  app.post("/api/projects/create", requireAuth(), (c) => handleCreateProjectRequest(c));
+
+  // User switching routes (require authentication)
+  app.get("/api/user/privileges", requireAuth(), (c) => handlePrivilegeCheckRequest(c));
+  app.get("/api/user/switchable-users", requireAuth(), (c) => handleListUsersRequest(c));
+  app.post("/api/user/switch", requireAuth(), (c) => handleUserSwitchRequest(c));
+
+  // User management routes (require root privileges)
+  app.post("/api/user/manage", requireAuth(), (c) => handleUserManagementRequest(c));
+
+  // File operations routes (require authentication)
+  app.post("/api/files/read", requireAuth(), (c) => handleFileReadRequest(c));
+  app.post("/api/files/write", requireAuth(), (c) => handleFileWriteRequest(c));
+
+  // History and conversation routes (require authentication)
+  app.get("/api/projects/:encodedProjectName/histories", requireAuth(), (c) =>
     handleHistoriesRequest(c),
   );
 
-  app.get("/api/projects/:encodedProjectName/histories/:sessionId", (c) =>
+  app.get("/api/projects/:encodedProjectName/histories/:sessionId", requireAuth(), (c) =>
     handleConversationRequest(c),
   );
 
-  app.post("/api/abort/:requestId", (c) =>
+  // Chat and abort routes (require authentication)
+  app.post("/api/abort/:requestId", requireAuth(), (c) =>
     handleAbortRequest(c, requestAbortControllers),
   );
 
-  app.post("/api/chat", (c) => handleChatRequest(c, requestAbortControllers));
+  app.post("/api/chat", requireAuth(), (c) => handleChatRequest(c, requestAbortControllers));
 
   // Static file serving with SPA fallback
   // Serve static assets (CSS, JS, images, etc.)

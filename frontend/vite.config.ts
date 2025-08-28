@@ -1,7 +1,6 @@
 /// <reference types="vitest" />
 import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react-swc";
-import tailwindcss from "@tailwindcss/vite";
 import { dirname, resolve } from "path";
 import { fileURLToPath } from "url";
 
@@ -13,7 +12,7 @@ export default defineConfig(({ mode }) => {
   const apiPort = env.PORT || "8080";
 
   return {
-    plugins: [react(), tailwindcss()],
+    plugins: [react()],
     resolve: {
       alias: {
         "@shared": resolve(__dirname, "../shared"),
@@ -21,6 +20,8 @@ export default defineConfig(({ mode }) => {
     },
     server: {
       port: 3000,
+      host: true,
+      allowedHosts: ["coding.dannyac.com"],
       proxy: {
         "/api": {
           target: `http://localhost:${apiPort}`,

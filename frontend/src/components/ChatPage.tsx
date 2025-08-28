@@ -1,6 +1,6 @@
 import { useEffect, useCallback, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { ChevronLeftIcon } from "@heroicons/react/24/outline";
+import { ChevronLeftIcon, HomeIcon, DocumentTextIcon, CodeBracketIcon } from "@heroicons/react/24/outline";
 import type {
   ChatRequest,
   ChatMessage,
@@ -19,6 +19,8 @@ import { HistoryButton } from "./chat/HistoryButton";
 import { ChatInput } from "./chat/ChatInput";
 import { ChatMessages } from "./chat/ChatMessages";
 import { HistoryView } from "./HistoryView";
+import { ClaudeMdEditor } from "./ClaudeMdEditor";
+import { ProjectConfigModal } from "./ProjectConfigModal";
 import { getChatUrl, getProjectsUrl } from "../config/api";
 import { KEYBOARD_SHORTCUTS } from "../utils/constants";
 import { normalizeWindowsPath } from "../utils/pathUtils";
@@ -30,6 +32,8 @@ export function ChatPage() {
   const [searchParams] = useSearchParams();
   const [projects, setProjects] = useState<ProjectInfo[]>([]);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isClaudeMdEditorOpen, setIsClaudeMdEditorOpen] = useState(false);
+  const [isProjectConfigOpen, setIsProjectConfigOpen] = useState(false);
 
   // Extract and normalize working directory from URL
   const workingDirectory = (() => {
@@ -86,6 +90,7 @@ export function ChatPage() {
     sessionId || undefined,
   );
 
+
   // Initialize chat state with loaded history
   const {
     messages,
@@ -110,6 +115,7 @@ export function ChatPage() {
     initialMessages: historyMessages,
     initialSessionId: loadedSessionId || undefined,
   });
+
 
   const {
     allowedTools,
@@ -384,14 +390,44 @@ export function ChatPage() {
     setIsSettingsOpen(false);
   }, []);
 
+  const handleClaudeMdClick = useCallback(() => {
+    setIsClaudeMdEditorOpen(true);
+  }, []);
+
+  const handleClaudeMdClose = useCallback(() => {
+    setIsClaudeMdEditorOpen(false);
+  }, []);
+
+  const handleProjectConfigClick = useCallback(() => {
+    setIsProjectConfigOpen(true);
+  }, []);
+
+  const handleProjectConfigClose = useCallback(() => {
+    setIsProjectConfigOpen(false);
+  }, []);
+
   // Load projects to get encodedName mapping
   useEffect(() => {
     const loadProjects = async () => {
       try {
-        const response = await fetch(getProjectsUrl());
+        const token = localStorage.getItem('auth_token');
+        if (!token) {
+          console.error('No authentication token available');
+          return;
+        }
+
+        const response = await fetch(getProjectsUrl(), {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        
         if (response.ok) {
           const data = await response.json();
           setProjects(data.projects || []);
+        } else {
+          console.error('Failed to load projects:', response.status, response.statusText);
         }
       } catch (error) {
         console.error("Failed to load projects:", error);
@@ -507,6 +543,48 @@ export function ChatPage() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <button
+              onClick={handleBackToProjects}
+              className="btn btn-primary btn-sm flex items-center gap-2 shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden group"
+              title="Back to Projects"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-secondary to-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="relative flex items-center gap-2">
+                <HomeIcon className="w-4 h-4" />
+                <span className="hidden sm:inline">Back To Projects</span>
+              </div>
+            </button>
+            
+            {/* CLAUDE.md Editor Button */}
+            {workingDirectory && (
+              <button
+                onClick={handleClaudeMdClick}
+                className="btn btn-secondary btn-sm flex items-center gap-2 shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden group"
+                title="Edit CLAUDE.md"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-accent to-secondary opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="relative flex items-center gap-2">
+                  <DocumentTextIcon className="w-4 h-4" />
+                  <span className="hidden sm:inline">CLAUDE.md</span>
+                </div>
+              </button>
+            )}
+            
+            {/* Project Config Button */}
+            {workingDirectory && (
+              <button
+                onClick={handleProjectConfigClick}
+                className="btn btn-accent btn-sm flex items-center gap-2 shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden group"
+                title="Configure Project Style"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-secondary to-accent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="relative flex items-center gap-2">
+                  <CodeBracketIcon className="w-4 h-4" />
+                  <span className="hidden sm:inline">Code Style</span>
+                </div>
+              </button>
+            )}
+            
             {!isHistoryView && <HistoryButton onClick={handleHistoryClick} />}
             <SettingsButton onClick={handleSettingsClick} />
           </div>
@@ -565,7 +643,7 @@ export function ChatPage() {
         ) : (
           <>
             {/* Chat Messages */}
-            <ChatMessages messages={messages} isLoading={isLoading} />
+            <ChatMessages messages={messages} isLoading={isLoading} workingDirectory={workingDirectory} />
 
             {/* Input */}
             <ChatInput
@@ -586,6 +664,20 @@ export function ChatPage() {
 
         {/* Settings Modal */}
         <SettingsModal isOpen={isSettingsOpen} onClose={handleSettingsClose} />
+        
+        {/* CLAUDE.md Editor Modal */}
+        <ClaudeMdEditor 
+          isOpen={isClaudeMdEditorOpen} 
+          onClose={handleClaudeMdClose}
+          workingDirectory={workingDirectory}
+        />
+        
+        {/* Project Configuration Modal */}
+        <ProjectConfigModal 
+          isOpen={isProjectConfigOpen} 
+          onClose={handleProjectConfigClose}
+          workingDirectory={workingDirectory}
+        />
       </div>
     </div>
   );
