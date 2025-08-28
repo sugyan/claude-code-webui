@@ -14,6 +14,7 @@ import {
 import { useMessageConverter } from "../useMessageConverter";
 import type { StreamingContext } from "./useMessageProcessor";
 import { useToolHandling } from "./useToolHandling";
+import { isThinkingContentItem } from "../../utils/messageTypes";
 
 export function useStreamParser() {
   const {
@@ -81,11 +82,9 @@ export function useStreamParser() {
   );
 
   const handleThinkingMessage = useCallback(
-    (contentItem: { thinking?: string }, context: StreamingContext) => {
-      if (contentItem.thinking) {
-        const thinkingMessage = createThinkingMessage(contentItem.thinking);
-        context.addMessage(thinkingMessage);
-      }
+    (contentItem: { thinking: string }, context: StreamingContext) => {
+      const thinkingMessage = createThinkingMessage(contentItem.thinking);
+      context.addMessage(thinkingMessage);
     },
     [createThinkingMessage],
   );
@@ -132,7 +131,7 @@ export function useStreamParser() {
       context: StreamingContext,
     ) => {
       for (const contentItem of claudeData.message.content) {
-        if (contentItem.type === "thinking") {
+        if (isThinkingContentItem(contentItem)) {
           handleThinkingMessage(contentItem, context);
         } else if (contentItem.type === "text") {
           handleAssistantTextMessage(contentItem, context);

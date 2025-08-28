@@ -78,6 +78,12 @@ export interface ThinkingMessage {
   timestamp: number;
 }
 
+// Thinking content item from Claude SDK
+export interface ThinkingContentItem {
+  type: "thinking";
+  thinking: string;
+}
+
 // TimestampedSDKMessage types for conversation history API
 // These extend Claude SDK types with timestamp information
 type WithTimestamp<T> = T & { timestamp: string };

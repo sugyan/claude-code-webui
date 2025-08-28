@@ -1,4 +1,4 @@
-import type { SDKMessage } from "../types";
+import type { SDKMessage, ThinkingContentItem } from "../types";
 
 // Type guard functions for SDKMessage
 export function isSystemMessage(
@@ -23,4 +23,18 @@ export function isUserMessage(
   data: SDKMessage,
 ): data is Extract<SDKMessage, { type: "user" }> {
   return data.type === "user";
+}
+
+// Type guard for thinking content items
+export function isThinkingContentItem(
+  item: unknown,
+): item is ThinkingContentItem {
+  return (
+    typeof item === "object" &&
+    item !== null &&
+    "type" in item &&
+    (item as { type?: unknown }).type === "thinking" &&
+    "thinking" in item &&
+    typeof (item as { thinking?: unknown }).thinking === "string"
+  );
 }

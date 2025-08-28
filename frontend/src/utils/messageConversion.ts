@@ -10,6 +10,7 @@ import type {
 } from "../types";
 import { MESSAGE_CONSTANTS } from "./constants";
 import { formatToolArguments } from "./toolUtils";
+import { isThinkingContentItem } from "./messageTypes";
 
 // Generate a summary from tool result content
 function generateSummary(content: string): string {
@@ -210,12 +211,10 @@ export function convertTimestampedSDKMessage(
             // Create tool usage message
             const toolMessage = createToolMessage(toolUse, timestamp);
             toolMessages.push(toolMessage);
-          } else if (item.type === "thinking") {
-            const thinkingItem = item as { thinking: string };
-
+          } else if (isThinkingContentItem(item)) {
             // Create thinking message
             const thinkingMessage = createThinkingMessage(
-              thinkingItem.thinking,
+              item.thinking,
               timestamp,
             );
             thinkingMessages.push(thinkingMessage);
