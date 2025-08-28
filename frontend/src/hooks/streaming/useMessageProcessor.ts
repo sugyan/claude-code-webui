@@ -32,6 +32,7 @@ export function useMessageProcessor() {
     createToolMessage: converter.createToolMessage,
     createResultMessage: converter.createResultMessage,
     createToolResultMessage: converter.createToolResultMessage,
+    createThinkingMessage: converter.createThinkingMessage,
     convertTimestampedSDKMessage: converter.convertTimestampedSDKMessage,
     convertConversationHistory: converter.convertConversationHistory,
   };

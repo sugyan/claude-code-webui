@@ -11,6 +11,7 @@ interface CollapsibleDetailsProps {
   };
   icon?: React.ReactNode;
   badge?: string;
+  defaultExpanded?: boolean;
 }
 
 export function CollapsibleDetails({
@@ -19,8 +20,9 @@ export function CollapsibleDetails({
   colorScheme,
   icon,
   badge,
+  defaultExpanded = false,
 }: CollapsibleDetailsProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const hasDetails = details.trim().length > 0;
 
   return (

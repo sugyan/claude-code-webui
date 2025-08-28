@@ -4,11 +4,13 @@ import type {
   SystemMessage,
   ToolMessage,
   ToolResultMessage,
+  ThinkingMessage,
   SDKMessage,
   TimestampedSDKMessage,
 } from "../types";
 import { MESSAGE_CONSTANTS } from "./constants";
 import { formatToolArguments } from "./toolUtils";
+import { isThinkingContentItem } from "./messageTypes";
 
 // Generate a summary from tool result content
 function generateSummary(content: string): string {
@@ -100,6 +102,20 @@ export function createToolResultMessage(
 }
 
 /**
+ * Create a thinking message from content item
+ */
+export function createThinkingMessage(
+  thinkingContent: string,
+  timestamp?: number,
+): ThinkingMessage {
+  return {
+    type: "thinking",
+    content: thinkingContent,
+    timestamp: timestamp ?? Date.now(),
+  };
+}
+
+/**
  * Convert a TimestampedSDKMessage to AllMessage array
  * This is the core conversion logic used by both streaming and history loading
  */
@@ -175,6 +191,7 @@ export function convertTimestampedSDKMessage(
       >;
       let assistantContent = "";
       const toolMessages: (ToolMessage | ToolResultMessage)[] = [];
+      const thinkingMessages: ThinkingMessage[] = [];
 
       // Check if message.content exists and is an array
       if (
@@ -194,12 +211,22 @@ export function convertTimestampedSDKMessage(
             // Create tool usage message
             const toolMessage = createToolMessage(toolUse, timestamp);
             toolMessages.push(toolMessage);
+          } else if (isThinkingContentItem(item)) {
+            // Create thinking message
+            const thinkingMessage = createThinkingMessage(
+              item.thinking,
+              timestamp,
+            );
+            thinkingMessages.push(thinkingMessage);
           }
           // Note: tool_result is handled in user messages, not assistant messages
         }
       }
 
-      // Add tool messages first
+      // Add thinking messages first (reasoning comes before action)
+      messages.push(...thinkingMessages);
+
+      // Add tool messages second
       messages.push(...toolMessages);
 
       // Add assistant text message if there is text content

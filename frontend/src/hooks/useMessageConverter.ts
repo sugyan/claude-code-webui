@@ -4,6 +4,7 @@ import type {
   SystemMessage,
   ToolMessage,
   ToolResultMessage,
+  ThinkingMessage,
   SDKMessage,
   TimestampedSDKMessage,
 } from "../types";
@@ -12,6 +13,7 @@ import {
   convertResultMessage,
   createToolMessage,
   createToolResultMessage,
+  createThinkingMessage,
   convertTimestampedSDKMessage,
   convertConversationHistory,
 } from "../utils/messageConversion";
@@ -52,6 +54,13 @@ export function useMessageConverter() {
     [],
   );
 
+  const createThinkingMessageCallback = useCallback(
+    (thinkingContent: string): ThinkingMessage => {
+      return createThinkingMessage(thinkingContent);
+    },
+    [],
+  );
+
   const convertTimestampedSDKMessageCallback = useCallback(
     (message: TimestampedSDKMessage): AllMessage[] => {
       return convertTimestampedSDKMessage(message);
@@ -72,6 +81,7 @@ export function useMessageConverter() {
     createToolMessage: createToolMessageCallback,
     createResultMessage: createResultMessageCallback,
     createToolResultMessage: createToolResultMessageCallback,
+    createThinkingMessage: createThinkingMessageCallback,
 
     // Batch converters (for history loading)
     convertTimestampedSDKMessage: convertTimestampedSDKMessageCallback,

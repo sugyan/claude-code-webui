@@ -14,6 +14,7 @@ import {
 import { useMessageConverter } from "../useMessageConverter";
 import type { StreamingContext } from "./useMessageProcessor";
 import { useToolHandling } from "./useToolHandling";
+import { isThinkingContentItem } from "../../utils/messageTypes";
 
 export function useStreamParser() {
   const {
@@ -21,6 +22,7 @@ export function useStreamParser() {
     createToolMessage,
     createResultMessage,
     createToolResultMessage,
+    createThinkingMessage,
   } = useMessageConverter();
 
   const { toolUseCache, processToolResult } = useToolHandling();
@@ -79,6 +81,14 @@ export function useStreamParser() {
     [],
   );
 
+  const handleThinkingMessage = useCallback(
+    (contentItem: { thinking: string }, context: StreamingContext) => {
+      const thinkingMessage = createThinkingMessage(contentItem.thinking);
+      context.addMessage(thinkingMessage);
+    },
+    [createThinkingMessage],
+  );
+
   const handleToolUseMessage = useCallback(
     (
       contentItem: {
@@ -121,14 +131,16 @@ export function useStreamParser() {
       context: StreamingContext,
     ) => {
       for (const contentItem of claudeData.message.content) {
-        if (contentItem.type === "text") {
+        if (isThinkingContentItem(contentItem)) {
+          handleThinkingMessage(contentItem, context);
+        } else if (contentItem.type === "text") {
           handleAssistantTextMessage(contentItem, context);
         } else if (contentItem.type === "tool_use") {
           handleToolUseMessage(contentItem, context);
         }
       }
     },
-    [handleAssistantTextMessage, handleToolUseMessage],
+    [handleThinkingMessage, handleAssistantTextMessage, handleToolUseMessage],
   );
 
   const handleResultMessage = useCallback(
