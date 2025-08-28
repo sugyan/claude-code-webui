@@ -33,8 +33,8 @@ export function isThinkingContentItem(
     typeof item === "object" &&
     item !== null &&
     "type" in item &&
-    (item as { type?: unknown }).type === "thinking" &&
+    item.type === "thinking" &&
     "thinking" in item &&
-    typeof (item as { thinking?: unknown }).thinking === "string"
+    typeof item.thinking === "string"
   );
 }
