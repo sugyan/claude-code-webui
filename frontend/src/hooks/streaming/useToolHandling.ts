@@ -80,11 +80,16 @@ export function useToolHandling() {
         return;
       }
 
+      // Get cached tool_use information to determine tool name
+      const toolUseId = contentItem.tool_use_id || "";
+      const cachedToolInfo = toolUseCache.get(toolUseId);
+      const toolName = cachedToolInfo?.name || "Tool";
+
       // This is a regular tool result - create a ToolResultMessage
-      const toolResultMessage = createToolResultMessage("Tool result", content);
+      const toolResultMessage = createToolResultMessage(toolName, content);
       context.addMessage(toolResultMessage);
     },
-    [handlePermissionError],
+    [handlePermissionError, toolUseCache],
   );
 
   return {

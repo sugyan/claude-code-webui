@@ -290,7 +290,7 @@ describe("useClaudeStreaming", () => {
     expect(mockContext.addMessage).toHaveBeenCalledWith(
       expect.objectContaining({
         type: "tool_result",
-        toolName: "Tool result",
+        toolName: "Tool",
         content: "file1.txt\nfile2.txt\nfile3.txt",
         summary: "3 lines",
         timestamp: expect.any(Number),

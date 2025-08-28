@@ -12,6 +12,7 @@ import {
   isUserMessage,
 } from "../../utils/messageTypes";
 import { useMessageConverter } from "../useMessageConverter";
+import { createTodoMessageFromInput } from "../../utils/messageConversion";
 import type { StreamingContext } from "./useMessageProcessor";
 import { useToolHandling } from "./useToolHandling";
 import { isThinkingContentItem } from "../../utils/messageTypes";
@@ -117,6 +118,16 @@ export function useStreamParser() {
           timestamp: Date.now(),
         };
         context.addMessage(planMessage);
+      } else if (contentItem.name === "TodoWrite") {
+        // Special handling for TodoWrite - create todo message from input
+        const todoMessage = createTodoMessageFromInput(contentItem.input || {});
+        if (todoMessage) {
+          context.addMessage(todoMessage);
+        } else {
+          // Fallback to regular tool message if todo parsing fails
+          const toolMessage = createToolMessage(contentItem);
+          context.addMessage(toolMessage);
+        }
       } else {
         const toolMessage = createToolMessage(contentItem);
         context.addMessage(toolMessage);

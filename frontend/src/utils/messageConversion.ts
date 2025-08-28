@@ -5,6 +5,8 @@ import type {
   ToolMessage,
   ToolResultMessage,
   ThinkingMessage,
+  TodoMessage,
+  TodoItem,
   SDKMessage,
   TimestampedSDKMessage,
 } from "../types";
@@ -113,6 +115,75 @@ export function createThinkingMessage(
     content: thinkingContent,
     timestamp: timestamp ?? Date.now(),
   };
+}
+
+/**
+ * Parse TodoWrite tool result content to extract todo data
+ */
+export function extractTodoDataFromInput(
+  input: Record<string, unknown>,
+): TodoItem[] | null {
+  try {
+    if (input.todos && Array.isArray(input.todos)) {
+      return input.todos as TodoItem[];
+    }
+  } catch (error) {
+    console.debug("Failed to extract todo data from input:", error);
+  }
+  return null;
+}
+
+/**
+ * Check if content appears to be from TodoWrite tool
+ */
+export function isTodoWriteContent(content: string): boolean {
+  return (
+    content.includes("toolUseResult") &&
+    (content.includes("newTodos") || content.includes("oldTodos")) &&
+    content.includes("Todos have been modified successfully")
+  );
+}
+
+/**
+ * Create a todo message from TodoWrite tool use input
+ */
+export function createTodoMessageFromInput(
+  input: Record<string, unknown>,
+  timestamp?: number,
+): TodoMessage | null {
+  const todos = extractTodoDataFromInput(input);
+  if (!todos) {
+    return null;
+  }
+
+  return {
+    type: "todo",
+    todos,
+    timestamp: timestamp ?? Date.now(),
+  };
+}
+
+/**
+ * Create a todo message from TodoWrite tool result content (legacy - for history conversion)
+ */
+export function createTodoMessage(
+  content: string,
+  timestamp?: number,
+): TodoMessage | null {
+  // This is now primarily for historical data conversion
+  try {
+    const parsed = JSON.parse(content);
+    if (parsed.newTodos && Array.isArray(parsed.newTodos)) {
+      return {
+        type: "todo",
+        todos: parsed.newTodos as TodoItem[],
+        timestamp: timestamp ?? Date.now(),
+      };
+    }
+  } catch (error) {
+    console.debug("Failed to parse todo content:", error);
+  }
+  return null;
 }
 
 /**
