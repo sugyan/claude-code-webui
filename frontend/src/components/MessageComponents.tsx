@@ -258,23 +258,18 @@ export function TodoMessageComponent({ message }: TodoMessageComponentProps) {
         />
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-1">
         {message.todos.map((todo, index) => (
-          <div
-            key={index}
-            className="flex items-start gap-3 p-2 bg-amber-100/50 dark:bg-amber-800/30 rounded-lg"
-          >
-            <span className="text-lg flex-shrink-0 mt-0.5">
+          <div key={index} className="flex items-start gap-2">
+            <span className="text-sm flex-shrink-0 mt-0.5">
               {getStatusIcon(todo.status)}
             </span>
             <div className="flex-1 min-w-0">
-              <div
-                className={`text-sm font-medium ${getStatusColor(todo.status)}`}
-              >
+              <div className={`text-sm ${getStatusColor(todo.status)}`}>
                 {todo.content}
               </div>
               {todo.status === "in_progress" && (
-                <div className="text-xs text-amber-600 dark:text-amber-500 mt-1 italic">
+                <div className="text-xs text-amber-600 dark:text-amber-500 italic">
                   {todo.activeForm}
                 </div>
               )}

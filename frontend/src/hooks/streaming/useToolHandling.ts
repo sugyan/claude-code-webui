@@ -85,6 +85,11 @@ export function useToolHandling() {
       const cachedToolInfo = toolUseCache.get(toolUseId);
       const toolName = cachedToolInfo?.name || "Tool";
 
+      // Don't show tool_result for TodoWrite since we already show TodoMessage from tool_use
+      if (toolName === "TodoWrite") {
+        return;
+      }
+
       // This is a regular tool result - create a ToolResultMessage
       const toolResultMessage = createToolResultMessage(toolName, content);
       context.addMessage(toolResultMessage);

@@ -279,6 +279,18 @@ export function convertTimestampedSDKMessage(
               id: string;
             };
 
+            // Special handling for TodoWrite - create TodoMessage instead of ToolMessage
+            if (toolUse.name === "TodoWrite") {
+              const todoMessage = createTodoMessageFromInput(
+                toolUse.input,
+                timestamp,
+              );
+              if (todoMessage) {
+                messages.push(todoMessage);
+                continue; // Skip adding to toolMessages
+              }
+            }
+
             // Create tool usage message
             const toolMessage = createToolMessage(toolUse, timestamp);
             toolMessages.push(toolMessage);
