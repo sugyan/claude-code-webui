@@ -118,6 +118,23 @@ export function createThinkingMessage(
 }
 
 /**
+ * Validate if an object matches the TodoItem interface
+ */
+function isValidTodoItem(item: unknown): item is TodoItem {
+  if (typeof item !== "object" || item === null) {
+    return false;
+  }
+
+  const obj = item as Record<string, unknown>;
+  return (
+    typeof obj.content === "string" &&
+    typeof obj.status === "string" &&
+    ["pending", "in_progress", "completed"].includes(obj.status) &&
+    typeof obj.activeForm === "string"
+  );
+}
+
+/**
  * Parse TodoWrite tool result content to extract todo data
  */
 export function extractTodoDataFromInput(
@@ -125,7 +142,13 @@ export function extractTodoDataFromInput(
 ): TodoItem[] | null {
   try {
     if (input.todos && Array.isArray(input.todos)) {
-      return input.todos as TodoItem[];
+      // Validate each item before casting
+      if (input.todos.every(isValidTodoItem)) {
+        return input.todos as TodoItem[];
+      } else {
+        console.debug("Invalid todo item structure in input:", input.todos);
+        return null;
+      }
     }
   } catch (error) {
     console.debug("Failed to extract todo data from input:", error);
