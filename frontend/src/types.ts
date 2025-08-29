@@ -78,6 +78,20 @@ export interface ThinkingMessage {
   timestamp: number;
 }
 
+// Todo item structure for TodoWrite tool results
+export interface TodoItem {
+  content: string;
+  status: "pending" | "in_progress" | "completed";
+  activeForm: string;
+}
+
+// Todo message for TodoWrite tool result display
+export interface TodoMessage {
+  type: "todo";
+  todos: TodoItem[];
+  timestamp: number;
+}
+
 // Thinking content item from Claude SDK
 export interface ThinkingContentItem {
   type: "thinking";
@@ -105,7 +119,8 @@ export type AllMessage =
   | ToolMessage
   | ToolResultMessage
   | PlanMessage
-  | ThinkingMessage;
+  | ThinkingMessage
+  | TodoMessage;
 
 // Type guard functions
 export function isChatMessage(message: AllMessage): message is ChatMessage {
@@ -138,6 +153,10 @@ export function isThinkingMessage(
   message: AllMessage,
 ): message is ThinkingMessage {
   return message.type === "thinking";
+}
+
+export function isTodoMessage(message: AllMessage): message is TodoMessage {
+  return message.type === "todo";
 }
 
 // Permission mode types (UI-focused subset of SDK PermissionMode)

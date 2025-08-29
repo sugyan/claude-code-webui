@@ -5,6 +5,8 @@ import type {
   ToolMessage,
   ToolResultMessage,
   ThinkingMessage,
+  TodoMessage,
+  TodoItem,
   SDKMessage,
   TimestampedSDKMessage,
 } from "../types";
@@ -116,6 +118,98 @@ export function createThinkingMessage(
 }
 
 /**
+ * Validate if an object matches the TodoItem interface
+ */
+function isValidTodoItem(item: unknown): item is TodoItem {
+  if (typeof item !== "object" || item === null) {
+    return false;
+  }
+
+  const obj = item as Record<string, unknown>;
+  return (
+    typeof obj.content === "string" &&
+    typeof obj.status === "string" &&
+    ["pending", "in_progress", "completed"].includes(obj.status) &&
+    typeof obj.activeForm === "string"
+  );
+}
+
+/**
+ * Parse TodoWrite tool result content to extract todo data
+ */
+export function extractTodoDataFromInput(
+  input: Record<string, unknown>,
+): TodoItem[] | null {
+  try {
+    if (input.todos && Array.isArray(input.todos)) {
+      // Validate each item before casting
+      if (input.todos.every(isValidTodoItem)) {
+        return input.todos as TodoItem[];
+      } else {
+        console.debug("Invalid todo item structure in input:", input.todos);
+        return null;
+      }
+    }
+  } catch (error) {
+    console.debug("Failed to extract todo data from input:", error);
+  }
+  return null;
+}
+
+/**
+ * Check if content appears to be from TodoWrite tool
+ */
+export function isTodoWriteContent(content: string): boolean {
+  return (
+    content.includes("toolUseResult") &&
+    (content.includes("newTodos") || content.includes("oldTodos")) &&
+    content.includes("Todos have been modified successfully")
+  );
+}
+
+/**
+ * Create a todo message from TodoWrite tool use input
+ */
+export function createTodoMessageFromInput(
+  input: Record<string, unknown>,
+  timestamp?: number,
+): TodoMessage | null {
+  const todos = extractTodoDataFromInput(input);
+  if (!todos) {
+    return null;
+  }
+
+  return {
+    type: "todo",
+    todos,
+    timestamp: timestamp ?? Date.now(),
+  };
+}
+
+/**
+ * Create a todo message from TodoWrite tool result content (legacy - for history conversion)
+ */
+export function createTodoMessage(
+  content: string,
+  timestamp?: number,
+): TodoMessage | null {
+  // This is now primarily for historical data conversion
+  try {
+    const parsed = JSON.parse(content);
+    if (parsed.newTodos && Array.isArray(parsed.newTodos)) {
+      return {
+        type: "todo",
+        todos: parsed.newTodos as TodoItem[],
+        timestamp: timestamp ?? Date.now(),
+      };
+    }
+  } catch (error) {
+    console.debug("Failed to parse todo content:", error);
+  }
+  return null;
+}
+
+/**
  * Convert a TimestampedSDKMessage to AllMessage array
  * This is the core conversion logic used by both streaming and history loading
  */
@@ -207,6 +301,18 @@ export function convertTimestampedSDKMessage(
               input: Record<string, unknown>;
               id: string;
             };
+
+            // Special handling for TodoWrite - create TodoMessage instead of ToolMessage
+            if (toolUse.name === "TodoWrite") {
+              const todoMessage = createTodoMessageFromInput(
+                toolUse.input,
+                timestamp,
+              );
+              if (todoMessage) {
+                messages.push(todoMessage);
+                continue; // Skip adding to toolMessages
+              }
+            }
 
             // Create tool usage message
             const toolMessage = createToolMessage(toolUse, timestamp);

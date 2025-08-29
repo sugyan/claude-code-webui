@@ -80,11 +80,21 @@ export function useToolHandling() {
         return;
       }
 
+      // Get cached tool_use information to determine tool name
+      const toolUseId = contentItem.tool_use_id || "";
+      const cachedToolInfo = toolUseCache.get(toolUseId);
+      const toolName = cachedToolInfo?.name || "Tool";
+
+      // Don't show tool_result for TodoWrite since we already show TodoMessage from tool_use
+      if (toolName === "TodoWrite") {
+        return;
+      }
+
       // This is a regular tool result - create a ToolResultMessage
-      const toolResultMessage = createToolResultMessage("Tool result", content);
+      const toolResultMessage = createToolResultMessage(toolName, content);
       context.addMessage(toolResultMessage);
     },
-    [handlePermissionError],
+    [handlePermissionError, toolUseCache],
   );
 
   return {
