@@ -775,8 +775,24 @@ Create pull requests with appropriate labels and essential information:
 
 ```bash
 gh pr create --title "Your PR Title" \
-  --label "appropriate,labels" \
-  --body "Brief description"
+  --label "feature,frontend" \
+  --body "## Type of Change
+- [ ] 🐛 \`bug\` - Bug fix (non-breaking change which fixes an issue)
+- [x] ✨ \`feature\` - New feature (non-breaking change which adds functionality)
+- [ ] 💥 \`breaking\` - Breaking change
+- [ ] 📚 \`documentation\` - Documentation update
+- [ ] ⚡ \`performance\` - Performance improvement
+- [ ] 🔨 \`refactor\` - Code refactoring
+- [ ] 🧪 \`test\` - Adding or updating tests
+- [ ] 🔧 \`chore\` - Maintenance, dependencies, tooling
+- [ ] 🖥️ \`backend\` - Backend-related changes
+- [x] 🎨 \`frontend\` - Frontend-related changes
+
+## Description
+Brief description of what changed and why
+
+## Testing
+Include testing information if relevant"
 ```
 
 **Note**: CHANGELOG.md is now automatically managed by tagpr - no manual updates needed!
