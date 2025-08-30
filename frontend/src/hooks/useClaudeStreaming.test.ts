@@ -2,7 +2,6 @@ import { describe, it, expect, vi } from "vitest";
 import { renderHook } from "@testing-library/react";
 import { useClaudeStreaming } from "./useClaudeStreaming";
 import type { SDKMessage } from "../types";
-import type { UUID } from "crypto";
 import { generateId } from "../utils/id";
 
 describe("useClaudeStreaming", () => {
@@ -26,7 +25,7 @@ describe("useClaudeStreaming", () => {
       apiKeySource: "user" as const,
       cwd: "/test",
       session_id: "test-session-123",
-      uuid: generateId() as UUID,
+      uuid: generateId(),
       tools: ["Bash"],
       mcp_servers: [],
       model: "claude-3-sonnet",
@@ -84,7 +83,7 @@ describe("useClaudeStreaming", () => {
       },
       parent_tool_use_id: null,
       session_id: "test-session-456",
-      uuid: generateId() as UUID,
+      uuid: generateId(),
     };
 
     const streamLine = JSON.stringify({
@@ -124,7 +123,7 @@ describe("useClaudeStreaming", () => {
       },
       parent_tool_use_id: null,
       session_id: "test-session-456",
-      uuid: generateId() as UUID,
+      uuid: generateId(),
     };
 
     const streamLine = JSON.stringify({
@@ -159,7 +158,7 @@ describe("useClaudeStreaming", () => {
       num_turns: 1,
       result: "Task completed",
       session_id: "test-session-789",
-      uuid: generateId() as UUID,
+      uuid: generateId(),
       total_cost_usd: 0.001,
       usage: { input_tokens: 10, output_tokens: 5 },
       permission_denials: [],
@@ -195,7 +194,7 @@ describe("useClaudeStreaming", () => {
       apiKeySource: "user" as const,
       cwd: "/test",
       session_id: "test-session-123",
-      uuid: generateId() as UUID,
+      uuid: generateId(),
       tools: ["Bash"],
       mcp_servers: [],
       model: "claude-3-sonnet",
@@ -246,7 +245,7 @@ describe("useClaudeStreaming", () => {
       },
       parent_tool_use_id: null,
       session_id: "test-session-123",
-      uuid: generateId() as UUID,
+      uuid: generateId(),
     };
 
     const streamLine = JSON.stringify({
@@ -289,7 +288,7 @@ describe("useClaudeStreaming", () => {
       },
       parent_tool_use_id: null,
       session_id: "test-session-123",
-      uuid: generateId() as UUID,
+      uuid: generateId(),
     };
 
     const streamLine = JSON.stringify({
@@ -341,7 +340,7 @@ describe("useClaudeStreaming", () => {
       },
       parent_tool_use_id: null,
       session_id: "test-session-123",
-      uuid: generateId() as UUID,
+      uuid: generateId(),
     };
 
     const streamLine = JSON.stringify({

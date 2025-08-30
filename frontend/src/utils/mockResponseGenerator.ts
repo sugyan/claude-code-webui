@@ -1,5 +1,4 @@
 import type { SDKMessage } from "@anthropic-ai/claude-code";
-import type { UUID } from "crypto";
 import { generateToolPattern } from "./toolUtils";
 import { generateId } from "./id";
 
@@ -46,7 +45,7 @@ export function createSystemMessage(
     apiKeySource: "user",
     cwd: "/Users/demo/claude-code-webui",
     session_id: sessionId,
-    uuid: generateId() as UUID,
+    uuid: generateId(),
     tools: ["Read", "Write", "Edit", "Bash"],
     mcp_servers: [],
     model: "claude-3-5-sonnet-20241022",
@@ -75,7 +74,7 @@ export function createAssistantMessage(
     },
     parent_tool_use_id: null,
     session_id: sessionId,
-    uuid: generateId() as UUID,
+    uuid: generateId(),
   };
 }
 
@@ -111,7 +110,7 @@ export function createCombinedAssistantMessage(
     },
     parent_tool_use_id: null,
     session_id: sessionId,
-    uuid: generateId() as UUID,
+    uuid: generateId(),
   };
 }
 
@@ -137,7 +136,7 @@ export function createResultMessage(
       total_tokens: inputTokens + outputTokens,
     },
     permission_denials: [],
-    uuid: generateId() as UUID,
+    uuid: generateId(),
   };
 }
 
@@ -170,7 +169,7 @@ export function createExitPlanModeToolUse(
     },
     parent_tool_use_id: null,
     session_id: sessionId,
-    uuid: generateId() as UUID,
+    uuid: generateId(),
   };
 }
 
@@ -203,7 +202,7 @@ export function createExitPlanModeToolUseWithId(
     },
     parent_tool_use_id: null,
     session_id: sessionId,
-    uuid: generateId() as UUID,
+    uuid: generateId(),
   };
 }
 
@@ -227,7 +226,7 @@ export function createExitPlanModeToolResult(
     },
     parent_tool_use_id: null,
     session_id: sessionId,
-    uuid: generateId() as UUID,
+    uuid: generateId(),
   };
 }
 
@@ -259,7 +258,7 @@ export function createToolUseMessage(
     },
     parent_tool_use_id: null,
     session_id: sessionId,
-    uuid: generateId() as UUID,
+    uuid: generateId(),
   };
 }
 
