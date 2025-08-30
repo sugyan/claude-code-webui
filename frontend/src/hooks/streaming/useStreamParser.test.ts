@@ -3,6 +3,8 @@ import { renderHook } from "@testing-library/react";
 import { useStreamParser } from "./useStreamParser";
 import type { StreamingContext } from "./useMessageProcessor";
 import type { SDKMessage } from "../../types";
+import type { UUID } from "crypto";
+import { generateId } from "../../utils/id";
 
 // Mock dependencies
 vi.mock("../useMessageConverter", () => ({
@@ -53,6 +55,7 @@ describe("useStreamParser", () => {
       const assistantMessage: Extract<SDKMessage, { type: "assistant" }> = {
         type: "assistant",
         session_id: "test-session",
+        uuid: generateId() as UUID,
         parent_tool_use_id: null,
         message: {
           content: [
@@ -92,6 +95,7 @@ describe("useStreamParser", () => {
       const assistantMessage: Extract<SDKMessage, { type: "assistant" }> = {
         type: "assistant",
         session_id: "test-session",
+        uuid: generateId() as UUID,
         parent_tool_use_id: null,
         message: {
           content: [
@@ -129,6 +133,7 @@ describe("useStreamParser", () => {
       const assistantMessage: Extract<SDKMessage, { type: "assistant" }> = {
         type: "assistant",
         session_id: "test-session",
+        uuid: generateId() as UUID,
         parent_tool_use_id: null,
         message: {
           content: [
@@ -166,6 +171,7 @@ describe("useStreamParser", () => {
       const assistantMessage: Extract<SDKMessage, { type: "assistant" }> = {
         type: "assistant",
         session_id: "test-session",
+        uuid: generateId() as UUID,
         parent_tool_use_id: null,
         message: {
           content: [
@@ -205,6 +211,7 @@ describe("useStreamParser", () => {
       const assistantMessage: Extract<SDKMessage, { type: "assistant" }> = {
         type: "assistant",
         session_id: "test-session",
+        uuid: generateId() as UUID,
         parent_tool_use_id: null,
         message: {
           content: [
@@ -244,6 +251,7 @@ describe("useStreamParser", () => {
       const assistantMessage: Extract<SDKMessage, { type: "assistant" }> = {
         type: "assistant",
         session_id: "test-session",
+        uuid: generateId() as UUID,
         parent_tool_use_id: null,
         message: {
           content: [
@@ -379,6 +387,7 @@ describe("useStreamParser", () => {
       const assistantMessage: Extract<SDKMessage, { type: "assistant" }> = {
         type: "assistant",
         session_id: "test-session",
+        uuid: generateId() as UUID,
         parent_tool_use_id: null,
         message: {
           content: [
@@ -426,6 +435,7 @@ describe("useStreamParser", () => {
       const assistantMessage: Extract<SDKMessage, { type: "assistant" }> = {
         type: "assistant",
         session_id: "test-session",
+        uuid: generateId() as UUID,
         parent_tool_use_id: null,
         message: {
           content: [
@@ -483,6 +493,7 @@ describe("useStreamParser", () => {
       const assistantMessage: Extract<SDKMessage, { type: "assistant" }> = {
         type: "assistant",
         session_id: "session-with-plan",
+        uuid: generateId() as UUID,
         parent_tool_use_id: null,
         message: {
           content: [

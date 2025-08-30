@@ -72,6 +72,7 @@ describe("Plan Rejection Workflow Tests", () => {
         },
         parent_tool_use_id: null,
         session_id: sessionId,
+        uuid: expect.any(String),
       });
     });
 
@@ -132,6 +133,7 @@ describe("Plan Rejection Workflow Tests", () => {
         },
         parent_tool_use_id: null,
         session_id: sessionId,
+        uuid: expect.any(String),
       });
 
       // Should have updated permission mode back to plan
