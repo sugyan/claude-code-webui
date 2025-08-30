@@ -24,7 +24,7 @@
     "node:process": "node:process",
     "commander": "npm:commander@^14.0.0",
     "hono": "jsr:@hono/hono@^4.8.5",
-    "@anthropic-ai/claude-code": "npm:@anthropic-ai/claude-code@1.0.96",
+    "@anthropic-ai/claude-code": "npm:@anthropic-ai/claude-code@1.0.98",
     "@logtape/logtape": "jsr:@logtape/logtape@^1.0.0",
     "@logtape/pretty": "jsr:@logtape/pretty@^1.0.0"
   }
