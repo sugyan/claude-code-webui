@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import { renderHook } from "@testing-library/react";
 import { useClaudeStreaming } from "./useClaudeStreaming";
 import type { SDKMessage } from "../types";
+import { generateId } from "../utils/id";
 
 describe("useClaudeStreaming", () => {
   it("does not extract session_id from system messages", () => {
@@ -24,11 +25,13 @@ describe("useClaudeStreaming", () => {
       apiKeySource: "user" as const,
       cwd: "/test",
       session_id: "test-session-123",
+      uuid: generateId(),
       tools: ["Bash"],
       mcp_servers: [],
       model: "claude-3-sonnet",
       permissionMode: "default" as const,
       slash_commands: [],
+      output_style: "default",
     };
 
     const streamLine = JSON.stringify({
@@ -45,6 +48,7 @@ describe("useClaudeStreaming", () => {
         type: "system",
         subtype: "init",
         session_id: "test-session-123",
+        uuid: expect.any(String),
         timestamp: expect.any(Number),
       }),
     );
@@ -79,6 +83,7 @@ describe("useClaudeStreaming", () => {
       },
       parent_tool_use_id: null,
       session_id: "test-session-456",
+      uuid: generateId(),
     };
 
     const streamLine = JSON.stringify({
@@ -118,6 +123,7 @@ describe("useClaudeStreaming", () => {
       },
       parent_tool_use_id: null,
       session_id: "test-session-456",
+      uuid: generateId(),
     };
 
     const streamLine = JSON.stringify({
@@ -152,6 +158,7 @@ describe("useClaudeStreaming", () => {
       num_turns: 1,
       result: "Task completed",
       session_id: "test-session-789",
+      uuid: generateId(),
       total_cost_usd: 0.001,
       usage: { input_tokens: 10, output_tokens: 5 },
       permission_denials: [],
@@ -187,11 +194,13 @@ describe("useClaudeStreaming", () => {
       apiKeySource: "user" as const,
       cwd: "/test",
       session_id: "test-session-123",
+      uuid: generateId(),
       tools: ["Bash"],
       mcp_servers: [],
       model: "claude-3-sonnet",
       permissionMode: "default" as const,
       slash_commands: [],
+      output_style: "default",
     };
 
     const streamLine = JSON.stringify({
@@ -236,6 +245,7 @@ describe("useClaudeStreaming", () => {
       },
       parent_tool_use_id: null,
       session_id: "test-session-123",
+      uuid: generateId(),
     };
 
     const streamLine = JSON.stringify({
@@ -278,6 +288,7 @@ describe("useClaudeStreaming", () => {
       },
       parent_tool_use_id: null,
       session_id: "test-session-123",
+      uuid: generateId(),
     };
 
     const streamLine = JSON.stringify({
@@ -329,6 +340,7 @@ describe("useClaudeStreaming", () => {
       },
       parent_tool_use_id: null,
       session_id: "test-session-123",
+      uuid: generateId(),
     };
 
     const streamLine = JSON.stringify({

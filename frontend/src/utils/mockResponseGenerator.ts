@@ -45,11 +45,13 @@ export function createSystemMessage(
     apiKeySource: "user",
     cwd: "/Users/demo/claude-code-webui",
     session_id: sessionId,
+    uuid: generateId(),
     tools: ["Read", "Write", "Edit", "Bash"],
     mcp_servers: [],
     model: "claude-3-5-sonnet-20241022",
     permissionMode: "default",
     slash_commands: [],
+    output_style: "default",
   };
 }
 
@@ -72,6 +74,7 @@ export function createAssistantMessage(
     },
     parent_tool_use_id: null,
     session_id: sessionId,
+    uuid: generateId(),
   };
 }
 
@@ -107,6 +110,7 @@ export function createCombinedAssistantMessage(
     },
     parent_tool_use_id: null,
     session_id: sessionId,
+    uuid: generateId(),
   };
 }
 
@@ -132,6 +136,7 @@ export function createResultMessage(
       total_tokens: inputTokens + outputTokens,
     },
     permission_denials: [],
+    uuid: generateId(),
   };
 }
 
@@ -164,6 +169,7 @@ export function createExitPlanModeToolUse(
     },
     parent_tool_use_id: null,
     session_id: sessionId,
+    uuid: generateId(),
   };
 }
 
@@ -196,6 +202,7 @@ export function createExitPlanModeToolUseWithId(
     },
     parent_tool_use_id: null,
     session_id: sessionId,
+    uuid: generateId(),
   };
 }
 
@@ -219,6 +226,7 @@ export function createExitPlanModeToolResult(
     },
     parent_tool_use_id: null,
     session_id: sessionId,
+    uuid: generateId(),
   };
 }
 
@@ -250,6 +258,7 @@ export function createToolUseMessage(
     },
     parent_tool_use_id: null,
     session_id: sessionId,
+    uuid: generateId(),
   };
 }
 

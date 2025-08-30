@@ -1,3 +1,5 @@
+import type { UUID } from "crypto";
+
 /**
  * ID generation utility that works in both secure and non-secure contexts
  *
@@ -6,7 +8,7 @@
  */
 
 /**
- * Generate a unique ID string
+ * Generate a unique UUID string
  *
  * Fallback hierarchy:
  * 1. crypto.randomUUID() - Most secure (HTTPS + localhost only)
@@ -16,7 +18,7 @@
  * Note: Only the first method produces true UUID v4.
  * Others generate UUID-format strings with varying security levels.
  */
-export function generateId(): string {
+export function generateId(): UUID {
   // 1st choice: crypto.randomUUID() (HTTPS + localhost only)
   if (typeof crypto !== "undefined" && crypto.randomUUID) {
     try {
@@ -49,7 +51,7 @@ export function generateId(): string {
         hex.slice(12, 16),
         hex.slice(16, 20),
         hex.slice(20, 32),
-      ].join("-");
+      ].join("-") as UUID;
     } catch {
       console.debug(
         "crypto.getRandomValues() not available, using Math.random() fallback",
@@ -65,5 +67,5 @@ export function generateId(): string {
     const r = (Math.random() * 16) | 0;
     const v = c === "x" ? r : (r & 0x3) | 0x8;
     return v.toString(16);
-  });
+  }) as UUID;
 }
