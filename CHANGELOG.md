@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.49](https://github.com/sugyan/claude-code-webui/compare/0.1.48...0.1.49) - 2025-08-30
+- Implement thinking message display for Claude's reasoning process by @sugyan in https://github.com/sugyan/claude-code-webui/pull/255
+- Enhanced TodoWrite display with visual todo list by @sugyan in https://github.com/sugyan/claude-code-webui/pull/259
+- chore: update @anthropic-ai/claude-code dependency to 1.0.98 by @sugyan in https://github.com/sugyan/claude-code-webui/pull/260
+- docs: optimize CLAUDE.md for better performance by @sugyan in https://github.com/sugyan/claude-code-webui/pull/261
+
 ## [0.1.48](https://github.com/sugyan/claude-code-webui/compare/0.1.47...0.1.48) - 2025-08-26
 - remove: Select New Directory option from project selector by @sugyan in https://github.com/sugyan/claude-code-webui/pull/241
 - Update demo video of README.md by @sugyan in https://github.com/sugyan/claude-code-webui/pull/248
