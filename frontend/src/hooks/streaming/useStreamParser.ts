@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import type {
   StreamResponse,
   SDKMessage,
@@ -11,232 +11,86 @@ import {
   isResultMessage,
   isUserMessage,
 } from "../../utils/messageTypes";
-import { useMessageConverter } from "../useMessageConverter";
-import { createTodoMessageFromInput } from "../../utils/messageConversion";
 import type { StreamingContext } from "./useMessageProcessor";
-import { useToolHandling } from "./useToolHandling";
-import { isThinkingContentItem } from "../../utils/messageTypes";
+import {
+  UnifiedMessageProcessor,
+  type ProcessingContext,
+} from "../../utils/UnifiedMessageProcessor";
 
 export function useStreamParser() {
-  const {
-    createSystemMessage,
-    createToolMessage,
-    createResultMessage,
-    createToolResultMessage,
-    createThinkingMessage,
-  } = useMessageConverter();
+  // Create a single unified processor instance
+  const processor = useMemo(() => new UnifiedMessageProcessor(), []);
 
-  const { toolUseCache, processToolResult } = useToolHandling();
+  // Convert StreamingContext to ProcessingContext
+  const adaptContext = useCallback(
+    (context: StreamingContext): ProcessingContext => {
+      return {
+        // Core message handling
+        addMessage: context.addMessage,
+        updateLastMessage: context.updateLastMessage,
 
-  const handleSystemMessage = useCallback(
-    (
-      claudeData: Extract<SDKMessage, { type: "system" }>,
-      context: StreamingContext,
-    ) => {
-      // Check if this is an init message and if we should show it
-      if (claudeData.subtype === "init") {
-        // Mark that we've received init
-        context.setHasReceivedInit?.(true);
+        // Current assistant message state
+        currentAssistantMessage: context.currentAssistantMessage,
+        setCurrentAssistantMessage: context.setCurrentAssistantMessage,
 
-        const shouldShow = context.shouldShowInitMessage?.() ?? true;
-        if (shouldShow) {
-          const systemMessage = createSystemMessage(claudeData);
-          context.addMessage(systemMessage);
-          context.onInitMessageShown?.();
-        }
-      } else {
-        // Always show non-init system messages
-        const systemMessage = createSystemMessage(claudeData);
-        context.addMessage(systemMessage);
-      }
-    },
-    [createSystemMessage],
-  );
+        // Session handling
+        onSessionId: context.onSessionId,
+        hasReceivedInit: context.hasReceivedInit,
+        setHasReceivedInit: context.setHasReceivedInit,
 
-  const handleAssistantTextMessage = useCallback(
-    (contentItem: { text?: string }, context: StreamingContext) => {
-      let messageToUpdate = context.currentAssistantMessage;
+        // Init message handling
+        shouldShowInitMessage: context.shouldShowInitMessage,
+        onInitMessageShown: context.onInitMessageShown,
 
-      if (!messageToUpdate) {
-        messageToUpdate = {
-          type: "chat",
-          role: "assistant",
-          content: "",
-          timestamp: Date.now(),
-        };
-        context.setCurrentAssistantMessage(messageToUpdate);
-        context.addMessage(messageToUpdate);
-      }
-
-      const updatedContent =
-        (messageToUpdate.content || "") + (contentItem.text || "");
-
-      // Update the current assistant message state
-      const updatedMessage = {
-        ...messageToUpdate,
-        content: updatedContent,
+        // Permission/Error handling
+        onPermissionError: context.onPermissionError,
+        onAbortRequest: context.onAbortRequest,
       };
-      context.setCurrentAssistantMessage(updatedMessage);
-      context.updateLastMessage(updatedContent);
     },
     [],
   );
 
-  const handleThinkingMessage = useCallback(
-    (contentItem: { thinking: string }, context: StreamingContext) => {
-      const thinkingMessage = createThinkingMessage(contentItem.thinking);
-      context.addMessage(thinkingMessage);
-    },
-    [createThinkingMessage],
-  );
-
-  const handleToolUseMessage = useCallback(
-    (
-      contentItem: {
-        id?: string;
-        name?: string;
-        input?: Record<string, unknown>;
-      },
-      context: StreamingContext,
-    ) => {
-      // Cache tool_use information for later permission error handling
-      if (contentItem.id && contentItem.name) {
-        toolUseCache.set(
-          contentItem.id,
-          contentItem.name,
-          contentItem.input || {},
-        );
-      }
-
-      // Special handling for ExitPlanMode - create plan message instead of tool message
-      if (contentItem.name === "ExitPlanMode") {
-        const planContent = (contentItem.input?.plan as string) || "";
-        const planMessage = {
-          type: "plan" as const,
-          plan: planContent,
-          toolUseId: contentItem.id || "",
-          timestamp: Date.now(),
-        };
-        context.addMessage(planMessage);
-      } else if (contentItem.name === "TodoWrite") {
-        // Special handling for TodoWrite - create todo message from input
-        const todoMessage = createTodoMessageFromInput(contentItem.input || {});
-        if (todoMessage) {
-          context.addMessage(todoMessage);
-        } else {
-          // Fallback to regular tool message if todo parsing fails
-          const toolMessage = createToolMessage(contentItem);
-          context.addMessage(toolMessage);
-        }
-      } else {
-        const toolMessage = createToolMessage(contentItem);
-        context.addMessage(toolMessage);
-      }
-    },
-    [createToolMessage, toolUseCache],
-  );
-
-  const handleAssistantMessage = useCallback(
-    (
-      claudeData: Extract<SDKMessage, { type: "assistant" }>,
-      context: StreamingContext,
-    ) => {
-      for (const contentItem of claudeData.message.content) {
-        if (isThinkingContentItem(contentItem)) {
-          handleThinkingMessage(contentItem, context);
-        } else if (contentItem.type === "text") {
-          handleAssistantTextMessage(contentItem, context);
-        } else if (contentItem.type === "tool_use") {
-          handleToolUseMessage(contentItem, context);
-        }
-      }
-    },
-    [handleThinkingMessage, handleAssistantTextMessage, handleToolUseMessage],
-  );
-
-  const handleResultMessage = useCallback(
-    (
-      claudeData: Extract<SDKMessage, { type: "result" }>,
-      context: StreamingContext,
-    ) => {
-      const resultMessage = createResultMessage(claudeData);
-      context.addMessage(resultMessage);
-      context.setCurrentAssistantMessage(null);
-    },
-    [createResultMessage],
-  );
-
-  const handleUserMessage = useCallback(
-    (
-      claudeData: Extract<SDKMessage, { type: "user" }>,
-      context: StreamingContext,
-    ) => {
-      // Check if this user message contains tool_result content
-      const messageContent = claudeData.message.content;
-
-      if (Array.isArray(messageContent)) {
-        for (const contentItem of messageContent) {
-          if (contentItem.type === "tool_result") {
-            processToolResult(contentItem, context, createToolResultMessage);
-          }
-        }
-      }
-      // Note: We don't display regular user messages from the SDK as they represent Claude's internal tool results
-    },
-    [createToolResultMessage, processToolResult],
-  );
-
   const processClaudeData = useCallback(
     (claudeData: SDKMessage, context: StreamingContext) => {
-      // Update sessionId only for the first assistant message after init
-      if (
-        claudeData.type === "assistant" &&
-        context.hasReceivedInit &&
-        claudeData.session_id &&
-        context.onSessionId
-      ) {
-        context.onSessionId(claudeData.session_id);
-      }
+      const processingContext = adaptContext(context);
 
+      // Validate message types before processing
       switch (claudeData.type) {
         case "system":
-          if (isSystemMessage(claudeData)) {
-            handleSystemMessage(claudeData, context);
-          } else {
+          if (!isSystemMessage(claudeData)) {
             console.warn("Invalid system message:", claudeData);
+            return;
           }
           break;
         case "assistant":
-          if (isAssistantMessage(claudeData)) {
-            handleAssistantMessage(claudeData, context);
-          } else {
+          if (!isAssistantMessage(claudeData)) {
             console.warn("Invalid assistant message:", claudeData);
+            return;
           }
           break;
         case "result":
-          if (isResultMessage(claudeData)) {
-            handleResultMessage(claudeData, context);
-          } else {
+          if (!isResultMessage(claudeData)) {
             console.warn("Invalid result message:", claudeData);
+            return;
           }
           break;
         case "user":
-          if (isUserMessage(claudeData)) {
-            handleUserMessage(claudeData, context);
-          } else {
+          if (!isUserMessage(claudeData)) {
             console.warn("Invalid user message:", claudeData);
+            return;
           }
           break;
         default:
           console.log("Unknown Claude message type:", claudeData);
+          return;
       }
+
+      // Process the message using the unified processor
+      processor.processMessage(claudeData, processingContext, {
+        isStreaming: true,
+      });
     },
-    [
-      handleSystemMessage,
-      handleAssistantMessage,
-      handleResultMessage,
-      handleUserMessage,
-    ],
+    [processor, adaptContext],
   );
 
   const processStreamLine = useCallback(
