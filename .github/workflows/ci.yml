@@ -10,6 +10,9 @@ jobs:
   backend:
     name: Backend
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
     strategy:
       matrix:
         node-version: [20, 22, 24]
@@ -25,10 +28,10 @@ jobs:
           cache-dependency-path: backend/package-lock.json
 
       - name: Install backend dependencies
-        run: cd backend && npm ci
+        run: npm ci
 
       - name: Generate version.ts
-        run: cd backend && node scripts/generate-version.js
+        run: node scripts/generate-version.js
 
       - name: Setup Deno
         uses: denoland/setup-deno@v2
@@ -36,32 +39,44 @@ jobs:
           deno-version: v2.x
 
       - name: Install and cache Deno dependencies
-        run: cd backend && deno install && deno cache cli/deno.ts
+        run: deno install && deno cache cli/deno.ts
 
       - name: Format check (Deno)
-        run: cd backend && deno task format:check
+        run: deno task format:check
 
       - name: Format check (Prettier)
-        run: cd backend && npm run format:check
+        run: npm run format:check
 
       - name: Lint (Deno)
-        run: cd backend && deno task lint
+        run: deno task lint
 
       - name: Lint (ESLint)
-        run: cd backend && npm run lint
+        run: npm run lint
 
       - name: Type check (Deno)
-        run: cd backend && deno task check
+        run: deno task check
 
       - name: Type check (TypeScript)
-        run: cd backend && npm run typecheck
+        run: npm run typecheck
 
       - name: Test
-        run: cd backend && npm run test
+        run: npm run test
+
+      - name: Create dummy frontend dist for build
+        run: mkdir -p ../frontend/dist && touch ../frontend/dist/dummy
+
+      - name: Build backend
+        run: npm run build
+
+      - name: Test built CLI
+        run: node dist/cli/node.js -h
 
   frontend:
     name: Frontend
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
     strategy:
       matrix:
         node-version: [20, 22, 24]
@@ -77,22 +92,22 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
-        run: cd frontend && npm ci
+        run: npm ci
 
       - name: Format check
-        run: cd frontend && npm run format:check
+        run: npm run format:check
 
       - name: Lint
-        run: cd frontend && npm run lint
+        run: npm run lint
 
       - name: Type check
-        run: cd frontend && npm run typecheck
+        run: npm run typecheck
 
       - name: Test
-        run: cd frontend && npm test
+        run: npm test
 
       - name: Build
-        run: cd frontend && npm run build
+        run: npm run build
 
   # Summary job for branch protection rules
   ci-success:

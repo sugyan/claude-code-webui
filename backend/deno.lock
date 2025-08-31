@@ -38,12 +38,12 @@
       "jsr:@logtape/pretty@1",
       "jsr:@std/assert@1",
       "jsr:@std/path@1",
-      "npm:@anthropic-ai/claude-code@1.0.98",
+      "npm:@anthropic-ai/claude-code@1.0.90",
       "npm:commander@14"
     ],
     "packageJson": {
       "dependencies": [
-        "npm:@anthropic-ai/claude-code@1.0.98",
+        "npm:@anthropic-ai/claude-code@1.0.90",
         "npm:@hono/node-server@1",
         "npm:@logtape/logtape@1",
         "npm:@logtape/pretty@1",
