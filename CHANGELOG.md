@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.50](https://github.com/sugyan/claude-code-webui/compare/0.1.49...0.1.50) - 2025-08-31
+- fix: unify message processing pipelines between streaming and history by @sugyan in https://github.com/sugyan/claude-code-webui/pull/262
+- ci: add build validation and fix claude-code dependency issue by @sugyan in https://github.com/sugyan/claude-code-webui/pull/264
+
 ## [0.1.49](https://github.com/sugyan/claude-code-webui/compare/0.1.48...0.1.49) - 2025-08-30
 - Implement thinking message display for Claude's reasoning process by @sugyan in https://github.com/sugyan/claude-code-webui/pull/255
 - Enhanced TodoWrite display with visual todo list by @sugyan in https://github.com/sugyan/claude-code-webui/pull/259
