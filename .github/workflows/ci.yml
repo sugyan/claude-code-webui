@@ -62,6 +62,9 @@ jobs:
       - name: Test
         run: npm run test
 
+      - name: Create dummy frontend dist for build
+        run: mkdir -p ../frontend/dist && touch ../frontend/dist/dummy
+
       - name: Build backend
         run: npm run build
 
