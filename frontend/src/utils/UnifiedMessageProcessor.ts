@@ -359,10 +359,15 @@ export class UnifiedMessageProcessor {
 
     // For batch processing, assemble the messages in proper order
     if (!options.isStreaming) {
-      // Add thinking messages first (reasoning comes before action)
-      messages.unshift(...thinkingMessages);
+      const orderedMessages: AllMessage[] = [];
 
-      // Add assistant text message if there is text content
+      // Add thinking messages first (reasoning comes before action)
+      orderedMessages.push(...thinkingMessages);
+
+      // Add tool messages second (actions)
+      orderedMessages.push(...messages);
+
+      // Add assistant text message last if there is text content
       if (assistantContent.trim()) {
         const assistantMessage: ChatMessage = {
           type: "chat",
@@ -370,8 +375,10 @@ export class UnifiedMessageProcessor {
           content: assistantContent.trim(),
           timestamp,
         };
-        messages.push(assistantMessage);
+        orderedMessages.push(assistantMessage);
       }
+
+      return orderedMessages;
     }
 
     return messages;
