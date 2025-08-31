@@ -6,27 +6,6 @@ import type { SDKMessage } from "../../types";
 import { generateId } from "../../utils/id";
 
 // Mock dependencies
-vi.mock("../useMessageConverter", () => ({
-  useMessageConverter: () => ({
-    createSystemMessage: vi.fn((data) => ({ ...data, timestamp: Date.now() })),
-    createToolMessage: vi.fn((data) => ({ ...data, timestamp: Date.now() })),
-    createResultMessage: vi.fn((data) => ({ ...data, timestamp: Date.now() })),
-    createToolResultMessage: vi.fn((data) => ({
-      ...data,
-      timestamp: Date.now(),
-    })),
-  }),
-}));
-
-vi.mock("./useToolHandling", () => ({
-  useToolHandling: () => ({
-    toolUseCache: {
-      set: vi.fn(),
-      get: vi.fn(),
-    },
-    processToolResult: vi.fn(),
-  }),
-}));
 
 describe("useStreamParser", () => {
   let mockContext: StreamingContext;

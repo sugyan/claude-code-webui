@@ -1,6 +1,5 @@
 import type {
   AllMessage,
-  ChatMessage,
   SystemMessage,
   ToolMessage,
   ToolResultMessage,
@@ -12,7 +11,7 @@ import type {
 } from "../types";
 import { MESSAGE_CONSTANTS } from "./constants";
 import { formatToolArguments } from "./toolUtils";
-import { isThinkingContentItem } from "./messageTypes";
+import { UnifiedMessageProcessor } from "./UnifiedMessageProcessor";
 
 // Generate a summary from tool result content
 function generateSummary(content: string): string {
@@ -212,178 +211,36 @@ export function createTodoMessage(
 /**
  * Convert a TimestampedSDKMessage to AllMessage array
  * This is the core conversion logic used by both streaming and history loading
+ * Now uses UnifiedMessageProcessor for consistent behavior across pipelines
  */
 export function convertTimestampedSDKMessage(
   message: TimestampedSDKMessage,
 ): AllMessage[] {
-  const messages: AllMessage[] = [];
-  const timestamp = new Date(message.timestamp).getTime();
+  const processor = new UnifiedMessageProcessor();
 
-  switch (message.type) {
-    case "user": {
-      // Convert user message - check if it contains tool_result or regular text content
-      const sdkUserMessage = message as Extract<
-        TimestampedSDKMessage,
-        { type: "user" }
-      >;
-
-      const messageContent = sdkUserMessage.message.content;
-
-      if (Array.isArray(messageContent)) {
-        for (const contentItem of messageContent) {
-          if (contentItem.type === "tool_result") {
-            // Create tool result message
-            const toolResult = contentItem as {
-              tool_use_id: string;
-              content: string | Array<{ type: string; text?: string }>;
-            };
-
-            let resultContent = "";
-            if (typeof toolResult.content === "string") {
-              resultContent = toolResult.content;
-            } else if (Array.isArray(toolResult.content)) {
-              resultContent = toolResult.content
-                .map((c) => c.text || "")
-                .join("");
-            }
-
-            const toolResultMessage = createToolResultMessage(
-              "Tool", // Default name
-              resultContent,
-              timestamp,
-            );
-            messages.push(toolResultMessage);
-          } else if (contentItem.type === "text") {
-            // Regular text content
-            const userMessage: ChatMessage = {
-              type: "chat",
-              role: "user",
-              content: (contentItem as { text: string }).text,
-              timestamp,
-            };
-            messages.push(userMessage);
-          }
-        }
-      } else if (typeof messageContent === "string") {
-        // Simple string content
-        const userMessage: ChatMessage = {
-          type: "chat",
-          role: "user",
-          content: messageContent,
-          timestamp,
-        };
-        messages.push(userMessage);
-      }
-      break;
-    }
-
-    case "assistant": {
-      // Process assistant message content
-      const sdkAssistantMessage = message as Extract<
-        TimestampedSDKMessage,
-        { type: "assistant" }
-      >;
-      let assistantContent = "";
-      const toolMessages: (ToolMessage | ToolResultMessage)[] = [];
-      const thinkingMessages: ThinkingMessage[] = [];
-
-      // Check if message.content exists and is an array
-      if (
-        sdkAssistantMessage.message?.content &&
-        Array.isArray(sdkAssistantMessage.message.content)
-      ) {
-        for (const item of sdkAssistantMessage.message.content) {
-          if (item.type === "text") {
-            assistantContent += (item as { text: string }).text;
-          } else if (item.type === "tool_use") {
-            const toolUse = item as {
-              name: string;
-              input: Record<string, unknown>;
-              id: string;
-            };
-
-            // Special handling for TodoWrite - create TodoMessage instead of ToolMessage
-            if (toolUse.name === "TodoWrite") {
-              const todoMessage = createTodoMessageFromInput(
-                toolUse.input,
-                timestamp,
-              );
-              if (todoMessage) {
-                messages.push(todoMessage);
-                continue; // Skip adding to toolMessages
-              }
-            }
-
-            // Create tool usage message
-            const toolMessage = createToolMessage(toolUse, timestamp);
-            toolMessages.push(toolMessage);
-          } else if (isThinkingContentItem(item)) {
-            // Create thinking message
-            const thinkingMessage = createThinkingMessage(
-              item.thinking,
-              timestamp,
-            );
-            thinkingMessages.push(thinkingMessage);
-          }
-          // Note: tool_result is handled in user messages, not assistant messages
-        }
-      }
-
-      // Add thinking messages first (reasoning comes before action)
-      messages.push(...thinkingMessages);
-
-      // Add tool messages second
-      messages.push(...toolMessages);
-
-      // Add assistant text message if there is text content
-      if (assistantContent.trim()) {
-        const assistantMessage: ChatMessage = {
-          type: "chat",
-          role: "assistant",
-          content: assistantContent.trim(),
-          timestamp,
-        };
-        messages.push(assistantMessage);
-      }
-      break;
-    }
-
-    case "system": {
-      // Convert system message
-      const systemMessage = convertSystemMessage(message, timestamp);
-      messages.push(systemMessage);
-      break;
-    }
-
-    case "result": {
-      // Convert result message
-      const resultMessage = convertResultMessage(message, timestamp);
-      messages.push(resultMessage);
-      break;
-    }
-
-    default: {
-      console.warn("Unknown message type:", (message as { type: string }).type);
-      break;
-    }
-  }
-
-  return messages;
+  // Use the unified processor to convert the message
+  return processor.processMessage(
+    message,
+    {
+      addMessage: () => {}, // Not used in batch mode
+    },
+    {
+      isStreaming: false,
+      timestamp: new Date(message.timestamp).getTime(),
+    },
+  );
 }
 
 /**
  * Convert an array of TimestampedSDKMessages to AllMessage array
  * Used for batch conversion of conversation history
+ * Now uses UnifiedMessageProcessor's batch processing for optimal performance and consistency
  */
 export function convertConversationHistory(
   timestampedMessages: TimestampedSDKMessage[],
 ): AllMessage[] {
-  const allMessages: AllMessage[] = [];
+  const processor = new UnifiedMessageProcessor();
 
-  for (const message of timestampedMessages) {
-    const converted = convertTimestampedSDKMessage(message);
-    allMessages.push(...converted);
-  }
-
-  return allMessages;
+  // Use the unified processor's batch processing method
+  return processor.processMessagesBatch(timestampedMessages);
 }
