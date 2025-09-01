@@ -1,4 +1,8 @@
 import React, { useState } from "react";
+import {
+  createContentPreview,
+  createMoreLinesIndicator,
+} from "../../utils/contentUtils";
 
 interface CollapsibleDetailsProps {
   label: string;
@@ -12,6 +16,10 @@ interface CollapsibleDetailsProps {
   icon?: React.ReactNode;
   badge?: string;
   defaultExpanded?: boolean;
+  maxPreviewLines?: number;
+  showPreview?: boolean;
+  previewContent?: string;
+  previewSummary?: string;
 }
 
 export function CollapsibleDetails({
@@ -21,9 +29,38 @@ export function CollapsibleDetails({
   icon,
   badge,
   defaultExpanded = false,
+  maxPreviewLines = 5,
+  showPreview = true,
+  previewContent,
+  previewSummary,
 }: CollapsibleDetailsProps) {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const hasDetails = details.trim().length > 0;
+
+  const contentPreview = React.useMemo(() => {
+    if (previewContent !== undefined) {
+      return {
+        preview: previewContent,
+        hasMore: true,
+        totalLines: details.split("\n").length,
+        previewLines: previewContent.split("\n").length,
+      };
+    }
+    // Only create preview if showPreview is enabled
+    if (showPreview) {
+      return createContentPreview(details, maxPreviewLines);
+    }
+    // Return no preview
+    return {
+      preview: "",
+      hasMore: false,
+      totalLines: details.split("\n").length,
+      previewLines: 0,
+    };
+  }, [details, maxPreviewLines, previewContent, showPreview]);
+
+  const shouldShowPreview =
+    showPreview && !isExpanded && hasDetails && contentPreview.hasMore;
 
   return (
     <div
@@ -53,10 +90,33 @@ export function CollapsibleDetails({
         )}
         <span>{label}</span>
         {badge && <span className="opacity-80">({badge})</span>}
+        {previewSummary && !isExpanded && (
+          <span className="opacity-60 text-xs ml-2">{previewSummary}</span>
+        )}
         {hasDetails && (
           <span className="ml-1 opacity-80">{isExpanded ? "▼" : "▶"}</span>
         )}
       </div>
+      {shouldShowPreview && (
+        <div
+          className="mt-2 pl-6 border-l-2 border-dashed opacity-80"
+          style={{ borderColor: "inherit" }}
+        >
+          <pre
+            className={`whitespace-pre-wrap ${colorScheme.content} text-xs font-mono leading-relaxed`}
+          >
+            {contentPreview.preview}
+          </pre>
+          <div
+            className={`${colorScheme.content} text-xs opacity-60 mt-1 italic`}
+          >
+            {createMoreLinesIndicator(
+              contentPreview.totalLines,
+              contentPreview.previewLines,
+            )}
+          </div>
+        </div>
+      )}
       {hasDetails && isExpanded && (
         <pre
           className={`whitespace-pre-wrap ${colorScheme.content} text-xs font-mono leading-relaxed mt-2 pl-6 border-l-2 ${colorScheme.border}`}

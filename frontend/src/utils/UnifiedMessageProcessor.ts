@@ -179,6 +179,7 @@ export class UnifiedMessageProcessor {
       toolName,
       content,
       options.timestamp,
+      undefined, // toolUseResult data - will be handled by streaming processor
     );
     context.addMessage(toolResultMessage);
   }

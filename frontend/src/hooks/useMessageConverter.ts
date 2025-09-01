@@ -48,8 +48,18 @@ export function useMessageConverter() {
   );
 
   const createToolResultMessageCallback = useCallback(
-    (toolName: string, content: string): ToolResultMessage => {
-      return createToolResultMessage(toolName, content);
+    (
+      toolName: string,
+      content: string,
+      timestamp?: number,
+      toolUseResult?: unknown,
+    ): ToolResultMessage => {
+      return createToolResultMessage(
+        toolName,
+        content,
+        timestamp,
+        toolUseResult,
+      );
     },
     [],
   );

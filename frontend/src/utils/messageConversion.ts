@@ -90,6 +90,7 @@ export function createToolResultMessage(
   toolName: string,
   content: string,
   timestamp?: number,
+  toolUseResult?: unknown,
 ): ToolResultMessage {
   const summary = generateSummary(content);
 
@@ -99,6 +100,7 @@ export function createToolResultMessage(
     content,
     summary,
     timestamp: timestamp ?? Date.now(),
+    toolUseResult,
   };
 }
 

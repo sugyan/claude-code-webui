@@ -12,6 +12,11 @@ import { TimestampComponent } from "./TimestampComponent";
 import { MessageContainer } from "./messages/MessageContainer";
 import { CollapsibleDetails } from "./messages/CollapsibleDetails";
 import { MESSAGE_CONSTANTS } from "../utils/constants";
+import {
+  createDiffPreview,
+  createBashPreview,
+  createContentPreview,
+} from "../utils/contentUtils";
 
 interface ChatMessageComponentProps {
   message: ChatMessage;
@@ -134,6 +139,63 @@ interface ToolResultMessageComponentProps {
 export function ToolResultMessageComponent({
   message,
 }: ToolResultMessageComponentProps) {
+  const toolUseResult = message.toolUseResult;
+  let previewContent: string | undefined;
+  let previewSummary: string | undefined;
+  let maxPreviewLines = 5;
+
+  // Handle Edit tool results with structuredPatch
+  if (
+    message.toolName === "Edit" &&
+    toolUseResult &&
+    typeof toolUseResult === "object" &&
+    "structuredPatch" in toolUseResult
+  ) {
+    const diffPreview = createDiffPreview(
+      (toolUseResult as { structuredPatch: unknown[] }).structuredPatch,
+      10,
+    );
+    if (diffPreview.hasMore) {
+      previewContent = diffPreview.preview;
+      previewSummary = diffPreview.summary;
+      maxPreviewLines = 10;
+    }
+  }
+
+  // Handle Bash tool results with stdout/stderr
+  else if (
+    message.toolName === "Bash" &&
+    toolUseResult &&
+    typeof toolUseResult === "object"
+  ) {
+    const bashResult = toolUseResult as { stdout?: string; stderr?: string };
+    const isError = Boolean(bashResult.stderr?.trim());
+    const bashPreview = createBashPreview(
+      bashResult.stdout || "",
+      bashResult.stderr || "",
+      isError,
+      5,
+    );
+    if (bashPreview.hasMore) {
+      previewContent = bashPreview.preview;
+    }
+  }
+
+  // Handle specific tool results that benefit from content preview
+  // Note: Read tool should NOT show preview, only line counts in summary
+  else if (message.toolName === "Grep" && message.content.trim().length > 0) {
+    const contentPreview = createContentPreview(message.content, 5);
+    if (contentPreview.hasMore) {
+      previewContent = contentPreview.preview;
+    }
+  }
+
+  // Determine if preview should be shown for this tool
+  const shouldShowPreview =
+    message.toolName === "Bash" ||
+    message.toolName === "Edit" ||
+    message.toolName === "Grep";
+
   return (
     <CollapsibleDetails
       label={message.toolName}
@@ -146,6 +208,10 @@ export function ToolResultMessageComponent({
         border: "border-emerald-200 dark:border-emerald-700",
         bg: "bg-emerald-50/80 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800",
       }}
+      previewContent={previewContent}
+      previewSummary={previewSummary}
+      maxPreviewLines={maxPreviewLines}
+      showPreview={shouldShowPreview}
     />
   );
 }
