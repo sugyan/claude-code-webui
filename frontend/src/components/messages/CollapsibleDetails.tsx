@@ -20,7 +20,6 @@ interface CollapsibleDetailsProps {
   showPreview?: boolean;
   previewContent?: string;
   previewSummary?: string;
-  alwaysExpanded?: boolean;
 }
 
 export function CollapsibleDetails({
@@ -34,11 +33,8 @@ export function CollapsibleDetails({
   showPreview = true,
   previewContent,
   previewSummary,
-  alwaysExpanded = false,
 }: CollapsibleDetailsProps) {
-  const [isExpanded, setIsExpanded] = useState(
-    defaultExpanded || alwaysExpanded,
-  );
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const hasDetails = details.trim().length > 0;
 
   const contentPreview = React.useMemo(() => {
@@ -71,17 +67,13 @@ export function CollapsibleDetails({
       className={`mb-3 p-3 rounded-lg ${colorScheme.bg} border ${colorScheme.border}`}
     >
       <div
-        className={`${colorScheme.header} text-xs font-medium mb-1 flex items-center gap-2 ${hasDetails && !alwaysExpanded ? "cursor-pointer hover:opacity-80" : ""}`}
-        role={hasDetails && !alwaysExpanded ? "button" : undefined}
-        tabIndex={hasDetails && !alwaysExpanded ? 0 : undefined}
-        aria-expanded={hasDetails && !alwaysExpanded ? isExpanded : undefined}
-        onClick={
-          hasDetails && !alwaysExpanded
-            ? () => setIsExpanded(!isExpanded)
-            : undefined
-        }
+        className={`${colorScheme.header} text-xs font-medium mb-1 flex items-center gap-2 ${hasDetails ? "cursor-pointer hover:opacity-80" : ""}`}
+        role={hasDetails ? "button" : undefined}
+        tabIndex={hasDetails ? 0 : undefined}
+        aria-expanded={hasDetails ? isExpanded : undefined}
+        onClick={hasDetails ? () => setIsExpanded(!isExpanded) : undefined}
         onKeyDown={
-          hasDetails && !alwaysExpanded
+          hasDetails
             ? (e) => {
                 if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
@@ -101,7 +93,7 @@ export function CollapsibleDetails({
         {previewSummary && (
           <span className="opacity-60 text-xs ml-2">{previewSummary}</span>
         )}
-        {hasDetails && !alwaysExpanded && (
+        {hasDetails && (
           <span className="ml-1 opacity-80">{isExpanded ? "▼" : "▶"}</span>
         )}
       </div>

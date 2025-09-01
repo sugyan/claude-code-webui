@@ -49,6 +49,72 @@ export interface DiffPreview {
   removedLines: number;
 }
 
+/**
+ * Simplified Edit result processor - replaces multiple complex functions
+ */
+export function createEditResult(
+  structuredPatch: unknown,
+  fallbackContent: string,
+  maxPreviewLines: number = 20,
+): {
+  details: string;
+  summary: string;
+  defaultExpanded: boolean;
+  previewContent?: string;
+} {
+  if (!Array.isArray(structuredPatch) || structuredPatch.length === 0) {
+    return {
+      details: fallbackContent,
+      summary: "",
+      defaultExpanded: true,
+    };
+  }
+
+  let addedLines = 0;
+  let removedLines = 0;
+  const allLines: string[] = [];
+
+  // Process all lines from structured patch
+  for (const hunk of structuredPatch) {
+    if (!hunk || typeof hunk !== "object") continue;
+    const lines = (hunk as { lines?: string[] }).lines;
+    if (!Array.isArray(lines)) continue;
+
+    for (const line of lines) {
+      if (typeof line !== "string") continue;
+      allLines.push(line);
+
+      if (line.startsWith("+")) {
+        addedLines++;
+      } else if (line.startsWith("-")) {
+        removedLines++;
+      }
+    }
+  }
+
+  const details = allLines.join("\n");
+  const totalLines = allLines.length;
+  const shouldExpand = totalLines <= maxPreviewLines;
+
+  let summary = "";
+  if (addedLines > 0 && removedLines > 0) {
+    summary = `+${addedLines}/-${removedLines} lines`;
+  } else if (addedLines > 0) {
+    summary = `+${addedLines} lines`;
+  } else if (removedLines > 0) {
+    summary = `-${removedLines} lines`;
+  }
+
+  return {
+    details,
+    summary,
+    defaultExpanded: shouldExpand,
+    previewContent: shouldExpand
+      ? undefined
+      : allLines.slice(0, maxPreviewLines).join("\n"),
+  };
+}
+
 export function createDiffPreview(
   structuredPatch: unknown[],
   maxPreviewLines: number = 10,
