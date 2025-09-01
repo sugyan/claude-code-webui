@@ -148,6 +148,7 @@ export class UnifiedMessageProcessor {
     },
     context: ProcessingContext,
     options: ProcessingOptions,
+    toolUseResult?: unknown,
   ): void {
     const content =
       typeof contentItem.content === "string"
@@ -179,7 +180,7 @@ export class UnifiedMessageProcessor {
       toolName,
       content,
       options.timestamp,
-      undefined, // toolUseResult data - will be handled by streaming processor
+      toolUseResult,
     );
     context.addMessage(toolResultMessage);
   }
@@ -428,7 +429,15 @@ export class UnifiedMessageProcessor {
     if (Array.isArray(messageContent)) {
       for (const contentItem of messageContent) {
         if (contentItem.type === "tool_result") {
-          this.processToolResult(contentItem, localContext, options);
+          // Extract toolUseResult from message if it exists
+          const toolUseResult = (message as { toolUseResult?: unknown })
+            .toolUseResult;
+          this.processToolResult(
+            contentItem,
+            localContext,
+            options,
+            toolUseResult,
+          );
         } else if (contentItem.type === "text") {
           // Regular text content
           const userMessage: ChatMessage = {

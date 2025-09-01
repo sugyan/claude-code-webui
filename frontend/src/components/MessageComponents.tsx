@@ -140,9 +140,12 @@ export function ToolResultMessageComponent({
   message,
 }: ToolResultMessageComponentProps) {
   const toolUseResult = message.toolUseResult;
+
   let previewContent: string | undefined;
   let previewSummary: string | undefined;
   let maxPreviewLines = 5;
+  let fullContent = message.content;
+  let shouldAlwaysExpand = false;
 
   // Handle Edit tool results with structuredPatch
   if (
@@ -155,11 +158,33 @@ export function ToolResultMessageComponent({
       (toolUseResult as { structuredPatch: unknown[] }).structuredPatch,
       10,
     );
+    const fullDiffPreview = createDiffPreview(
+      (toolUseResult as { structuredPatch: unknown[] }).structuredPatch,
+      Infinity,
+    );
+
+    // Always show diff summary, and show preview content if there are more lines
+    previewSummary = diffPreview.summary;
     if (diffPreview.hasMore) {
       previewContent = diffPreview.preview;
-      previewSummary = diffPreview.summary;
-      maxPreviewLines = 10;
     }
+
+    // Use full diff content as the details when expanded
+    fullContent = fullDiffPreview.preview;
+
+    // If diff has 20 lines or fewer, always expand (no collapsing)
+    // If more than 20 lines, show first 20 lines by default, expandable to full
+    const totalDiffLines = fullContent.split("\n").length;
+    shouldAlwaysExpand = totalDiffLines <= 20;
+
+    // For diffs > 20 lines, create a 20-line preview for collapsed state
+    if (totalDiffLines > 20) {
+      const lines = fullContent.split("\n");
+      const previewLines = lines.slice(0, 20);
+      previewContent = previewLines.join("\n");
+    }
+
+    maxPreviewLines = 20;
   }
 
   // Handle Bash tool results with stdout/stderr
@@ -199,8 +224,8 @@ export function ToolResultMessageComponent({
   return (
     <CollapsibleDetails
       label={message.toolName}
-      details={message.content}
-      badge={message.summary}
+      details={fullContent}
+      badge={message.toolName === "Edit" ? undefined : message.summary}
       icon={<span className="bg-emerald-400 dark:bg-emerald-500">✓</span>}
       colorScheme={{
         header: "text-emerald-800 dark:text-emerald-300",
@@ -212,6 +237,8 @@ export function ToolResultMessageComponent({
       previewSummary={previewSummary}
       maxPreviewLines={maxPreviewLines}
       showPreview={shouldShowPreview}
+      defaultExpanded={message.toolName === "Edit" && shouldAlwaysExpand}
+      alwaysExpanded={shouldAlwaysExpand}
     />
   );
 }
