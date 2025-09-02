@@ -6,21 +6,11 @@ export interface ContentPreview {
 }
 
 export interface StructuredPatchHunk {
-  oldStart: number;
-  oldLines: number;
-  newStart: number;
-  newLines: number;
   lines: string[];
 }
 
 export interface EditToolUseResult {
   structuredPatch: StructuredPatchHunk[];
-  filePath: string;
-  oldString: string;
-  newString: string;
-  originalFile: string;
-  userModified: boolean;
-  replaceAll: boolean;
 }
 
 export interface BashToolUseResult {
@@ -37,10 +27,6 @@ export function isValidHunk(hunk: unknown): hunk is StructuredPatchHunk {
   return (
     typeof hunk === "object" &&
     hunk !== null &&
-    "oldStart" in hunk &&
-    "oldLines" in hunk &&
-    "newStart" in hunk &&
-    "newLines" in hunk &&
     "lines" in hunk &&
     Array.isArray((hunk as Record<string, unknown>).lines)
   );
@@ -70,7 +56,9 @@ export function isBashToolUseResult(
     typeof result === "object" &&
     result !== null &&
     "stdout" in result &&
-    "stderr" in result
+    typeof (result as Record<string, unknown>).stdout === "string" &&
+    "stderr" in result &&
+    typeof (result as Record<string, unknown>).stderr === "string"
   );
 }
 
@@ -108,14 +96,6 @@ export function createContentPreview(
     totalLines,
     previewLines: maxPreviewLines,
   };
-}
-
-export interface DiffPreview {
-  preview: string;
-  summary: string;
-  hasMore: boolean;
-  addedLines: number;
-  removedLines: number;
 }
 
 /**

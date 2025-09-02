@@ -38,14 +38,13 @@ export function CollapsibleDetails({
   const hasDetails = details.trim().length > 0;
   const isCollapsible = hasDetails && !defaultExpanded;
 
-  const totalLines = React.useMemo(() => details.split("\n").length, [details]);
-
   const contentPreview = React.useMemo(() => {
+    const computedTotalLines = details.split("\n").length;
     if (previewContent !== undefined) {
       return {
         preview: previewContent,
         hasMore: true,
-        totalLines,
+        totalLines: computedTotalLines,
         previewLines: previewContent.split("\n").length,
       };
     }
@@ -57,10 +56,10 @@ export function CollapsibleDetails({
     return {
       preview: "",
       hasMore: false,
-      totalLines,
+      totalLines: computedTotalLines,
       previewLines: 0,
     };
-  }, [details, maxPreviewLines, previewContent, showPreview, totalLines]);
+  }, [details, maxPreviewLines, previewContent, showPreview]);
 
   const shouldShowPreview =
     showPreview && !isExpanded && hasDetails && contentPreview.hasMore;
