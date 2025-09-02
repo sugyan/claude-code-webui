@@ -36,6 +36,7 @@ export function CollapsibleDetails({
 }: CollapsibleDetailsProps) {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const hasDetails = details.trim().length > 0;
+  const isCollapsible = hasDetails && !defaultExpanded;
 
   const contentPreview = React.useMemo(() => {
     if (previewContent !== undefined) {
@@ -67,13 +68,13 @@ export function CollapsibleDetails({
       className={`mb-3 p-3 rounded-lg ${colorScheme.bg} border ${colorScheme.border}`}
     >
       <div
-        className={`${colorScheme.header} text-xs font-medium mb-1 flex items-center gap-2 ${hasDetails ? "cursor-pointer hover:opacity-80" : ""}`}
-        role={hasDetails ? "button" : undefined}
-        tabIndex={hasDetails ? 0 : undefined}
-        aria-expanded={hasDetails ? isExpanded : undefined}
-        onClick={hasDetails ? () => setIsExpanded(!isExpanded) : undefined}
+        className={`${colorScheme.header} text-xs font-medium mb-1 flex items-center gap-2 ${isCollapsible ? "cursor-pointer hover:opacity-80" : ""}`}
+        role={isCollapsible ? "button" : undefined}
+        tabIndex={isCollapsible ? 0 : undefined}
+        aria-expanded={isCollapsible ? isExpanded : undefined}
+        onClick={isCollapsible ? () => setIsExpanded(!isExpanded) : undefined}
         onKeyDown={
-          hasDetails
+          isCollapsible
             ? (e) => {
                 if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
@@ -93,7 +94,7 @@ export function CollapsibleDetails({
         {previewSummary && (
           <span className="opacity-60 text-xs ml-2">{previewSummary}</span>
         )}
-        {hasDetails && (
+        {isCollapsible && (
           <span className="ml-1 opacity-80">{isExpanded ? "▼" : "▶"}</span>
         )}
       </div>

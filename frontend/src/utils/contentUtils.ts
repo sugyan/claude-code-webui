@@ -55,7 +55,7 @@ export interface DiffPreview {
 export function createEditResult(
   structuredPatch: unknown,
   fallbackContent: string,
-  maxPreviewLines: number = 20,
+  autoExpandThreshold: number = 20,
 ): {
   details: string;
   summary: string;
@@ -94,7 +94,7 @@ export function createEditResult(
 
   const details = allLines.join("\n");
   const totalLines = allLines.length;
-  const shouldExpand = totalLines <= maxPreviewLines;
+  const shouldExpand = totalLines <= autoExpandThreshold;
 
   let summary = "";
   if (addedLines > 0 && removedLines > 0) {
@@ -111,7 +111,7 @@ export function createEditResult(
     defaultExpanded: shouldExpand,
     previewContent: shouldExpand
       ? undefined
-      : allLines.slice(0, maxPreviewLines).join("\n"),
+      : allLines.slice(0, autoExpandThreshold).join("\n"),
   };
 }
 

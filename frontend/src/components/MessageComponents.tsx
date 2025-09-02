@@ -157,12 +157,13 @@ export function ToolResultMessageComponent({
     const editResult = createEditResult(
       (toolUseResult as { structuredPatch: unknown }).structuredPatch,
       message.content,
+      20, // autoExpandThreshold: auto-expand if 20 lines or fewer
     );
     displayContent = editResult.details;
     previewSummary = editResult.summary;
     previewContent = editResult.previewContent;
     defaultExpanded = editResult.defaultExpanded;
-    maxPreviewLines = 20;
+    maxPreviewLines = 20; // Use 20 for Edit results to match previewContent
   }
 
   // Handle Bash tool results with stdout/stderr
