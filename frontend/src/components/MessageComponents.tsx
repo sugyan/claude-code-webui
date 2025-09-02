@@ -7,6 +7,7 @@ import type {
   ThinkingMessage,
   TodoMessage,
   TodoItem,
+  HooksMessage,
 } from "../types";
 import { TimestampComponent } from "./TimestampComponent";
 import { MessageContainer } from "./messages/MessageContainer";
@@ -64,9 +65,23 @@ interface SystemMessageComponentProps {
 export function SystemMessageComponent({
   message,
 }: SystemMessageComponentProps) {
+  // Type guard to check if the message is a hooks message
+  const isHooksMessage = (msg: SystemMessage): msg is HooksMessage => {
+    return (
+      msg.type === "system" &&
+      "content" in msg &&
+      typeof msg.content === "string" &&
+      !("subtype" in msg)
+    );
+  };
+
   // Generate details based on message type and subtype
   const getDetails = () => {
-    if (message.type === "system" && message.subtype === "init") {
+    if (
+      message.type === "system" &&
+      "subtype" in message &&
+      message.subtype === "init"
+    ) {
       return [
         `Model: ${message.model}`,
         `Session: ${message.session_id.substring(0, MESSAGE_CONSTANTS.SESSION_ID_DISPLAY_LENGTH)}`,
@@ -84,6 +99,12 @@ export function SystemMessageComponent({
       return details.join("\n");
     } else if (message.type === "error") {
       return message.message;
+    } else if (isHooksMessage(message)) {
+      // This is a hooks message - show only the content
+      // Remove ANSI escape sequences for cleaner display
+      const escapeChar = String.fromCharCode(27); // ESC character
+      const ansiRegex = new RegExp(`${escapeChar}\\[[0-9;]*m`, "g");
+      return message.content.replace(ansiRegex, "");
     }
     return JSON.stringify(message, null, 2);
   };
@@ -102,7 +123,7 @@ export function SystemMessageComponent({
     <CollapsibleDetails
       label={getLabel()}
       details={details}
-      badge={message.subtype}
+      badge={"subtype" in message ? message.subtype : undefined}
       icon={<span className="bg-blue-400 dark:bg-blue-500">⚙</span>}
       colorScheme={{
         header: "text-blue-800 dark:text-blue-300",
