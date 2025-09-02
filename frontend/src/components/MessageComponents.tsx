@@ -21,6 +21,21 @@ import {
   isBashToolUseResult,
 } from "../utils/contentUtils";
 
+// ANSI escape sequence regex for cleaning hooks messages
+const ANSI_REGEX = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, "g");
+
+// Type guard to check if the message is a hooks message
+function isHooksMessage(
+  msg: SystemMessage,
+): msg is HooksMessage & { timestamp: number } {
+  return (
+    msg.type === "system" &&
+    "content" in msg &&
+    typeof msg.content === "string" &&
+    !("subtype" in msg)
+  );
+}
+
 interface ChatMessageComponentProps {
   message: ChatMessage;
 }
@@ -65,16 +80,6 @@ interface SystemMessageComponentProps {
 export function SystemMessageComponent({
   message,
 }: SystemMessageComponentProps) {
-  // Type guard to check if the message is a hooks message
-  const isHooksMessage = (msg: SystemMessage): msg is HooksMessage => {
-    return (
-      msg.type === "system" &&
-      "content" in msg &&
-      typeof msg.content === "string" &&
-      !("subtype" in msg)
-    );
-  };
-
   // Generate details based on message type and subtype
   const getDetails = () => {
     if (
@@ -102,9 +107,7 @@ export function SystemMessageComponent({
     } else if (isHooksMessage(message)) {
       // This is a hooks message - show only the content
       // Remove ANSI escape sequences for cleaner display
-      const escapeChar = String.fromCharCode(27); // ESC character
-      const ansiRegex = new RegExp(`${escapeChar}\\[[0-9;]*m`, "g");
-      return message.content.replace(ansiRegex, "");
+      return message.content.replace(ANSI_REGEX, "");
     }
     return JSON.stringify(message, null, 2);
   };

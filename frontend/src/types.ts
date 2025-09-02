@@ -36,7 +36,6 @@ export type HooksMessage = {
   content: string;
   level?: string;
   toolUseID?: string;
-  timestamp: number;
 };
 
 // System message extending SDK types with timestamp
