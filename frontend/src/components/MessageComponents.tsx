@@ -16,6 +16,8 @@ import {
   createEditResult,
   createBashPreview,
   createContentPreview,
+  isEditToolUseResult,
+  isBashToolUseResult,
 } from "../utils/contentUtils";
 
 interface ChatMessageComponentProps {
@@ -148,14 +150,9 @@ export function ToolResultMessageComponent({
   let defaultExpanded = false;
 
   // Handle Edit tool results with structuredPatch
-  if (
-    message.toolName === "Edit" &&
-    toolUseResult &&
-    typeof toolUseResult === "object" &&
-    "structuredPatch" in toolUseResult
-  ) {
+  if (message.toolName === "Edit" && isEditToolUseResult(toolUseResult)) {
     const editResult = createEditResult(
-      (toolUseResult as { structuredPatch: unknown }).structuredPatch,
+      toolUseResult.structuredPatch,
       message.content,
       20, // autoExpandThreshold: auto-expand if 20 lines or fewer
     );
@@ -167,16 +164,11 @@ export function ToolResultMessageComponent({
   }
 
   // Handle Bash tool results with stdout/stderr
-  else if (
-    message.toolName === "Bash" &&
-    toolUseResult &&
-    typeof toolUseResult === "object"
-  ) {
-    const bashResult = toolUseResult as { stdout?: string; stderr?: string };
-    const isError = Boolean(bashResult.stderr?.trim());
+  else if (message.toolName === "Bash" && isBashToolUseResult(toolUseResult)) {
+    const isError = Boolean(toolUseResult.stderr?.trim());
     const bashPreview = createBashPreview(
-      bashResult.stdout || "",
-      bashResult.stderr || "",
+      toolUseResult.stdout || "",
+      toolUseResult.stderr || "",
       isError,
       5,
     );

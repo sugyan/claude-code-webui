@@ -5,6 +5,75 @@ export interface ContentPreview {
   previewLines: number;
 }
 
+export interface StructuredPatchHunk {
+  oldStart: number;
+  oldLines: number;
+  newStart: number;
+  newLines: number;
+  lines: string[];
+}
+
+export interface EditToolUseResult {
+  structuredPatch: StructuredPatchHunk[];
+  filePath: string;
+  oldString: string;
+  newString: string;
+  originalFile: string;
+  userModified: boolean;
+  replaceAll: boolean;
+}
+
+export interface BashToolUseResult {
+  stdout: string;
+  stderr: string;
+  interrupted: boolean;
+  isImage: boolean;
+}
+
+/**
+ * Type guard functions for tool use results
+ */
+export function isValidHunk(hunk: unknown): hunk is StructuredPatchHunk {
+  return (
+    typeof hunk === "object" &&
+    hunk !== null &&
+    "oldStart" in hunk &&
+    "oldLines" in hunk &&
+    "newStart" in hunk &&
+    "newLines" in hunk &&
+    "lines" in hunk &&
+    Array.isArray((hunk as Record<string, unknown>).lines)
+  );
+}
+
+export function isValidStructuredPatch(
+  patch: unknown,
+): patch is StructuredPatchHunk[] {
+  return Array.isArray(patch) && patch.every(isValidHunk);
+}
+
+export function isEditToolUseResult(
+  result: unknown,
+): result is EditToolUseResult {
+  return (
+    typeof result === "object" &&
+    result !== null &&
+    "structuredPatch" in result &&
+    isValidStructuredPatch((result as Record<string, unknown>).structuredPatch)
+  );
+}
+
+export function isBashToolUseResult(
+  result: unknown,
+): result is BashToolUseResult {
+  return (
+    typeof result === "object" &&
+    result !== null &&
+    "stdout" in result &&
+    "stderr" in result
+  );
+}
+
 export function createContentPreview(
   content: string,
   maxPreviewLines: number = 5,
@@ -62,7 +131,7 @@ export function createEditResult(
   defaultExpanded: boolean;
   previewContent?: string;
 } {
-  if (!Array.isArray(structuredPatch) || structuredPatch.length === 0) {
+  if (!isValidStructuredPatch(structuredPatch)) {
     return {
       details: fallbackContent,
       summary: "",
@@ -76,12 +145,7 @@ export function createEditResult(
 
   // Process all lines from structured patch
   for (const hunk of structuredPatch) {
-    if (!hunk || typeof hunk !== "object") continue;
-    const lines = (hunk as { lines?: string[] }).lines;
-    if (!Array.isArray(lines)) continue;
-
-    for (const line of lines) {
-      if (typeof line !== "string") continue;
+    for (const line of hunk.lines) {
       allLines.push(line);
 
       if (line.startsWith("+")) {
@@ -112,62 +176,6 @@ export function createEditResult(
     previewContent: shouldExpand
       ? undefined
       : allLines.slice(0, autoExpandThreshold).join("\n"),
-  };
-}
-
-export function createDiffPreview(
-  structuredPatch: unknown[],
-  maxPreviewLines: number = 10,
-): DiffPreview {
-  if (!structuredPatch || structuredPatch.length === 0) {
-    return {
-      preview: "",
-      summary: "",
-      hasMore: false,
-      addedLines: 0,
-      removedLines: 0,
-    };
-  }
-
-  let addedLines = 0;
-  let removedLines = 0;
-  const previewLines: string[] = [];
-  let lineCount = 0;
-
-  for (const patch of structuredPatch) {
-    const patchObj = patch as { lines: string[] };
-    for (const line of patchObj.lines) {
-      if (line.startsWith("+")) {
-        addedLines++;
-      } else if (line.startsWith("-")) {
-        removedLines++;
-      }
-
-      if (lineCount < maxPreviewLines) {
-        previewLines.push(line);
-        lineCount++;
-      }
-    }
-  }
-
-  const preview = previewLines.join("\n");
-  const hasMore = lineCount >= maxPreviewLines;
-
-  let summary = "";
-  if (addedLines > 0 && removedLines > 0) {
-    summary = `+${addedLines}/-${removedLines} lines`;
-  } else if (addedLines > 0) {
-    summary = `+${addedLines} lines`;
-  } else if (removedLines > 0) {
-    summary = `-${removedLines} lines`;
-  }
-
-  return {
-    preview,
-    summary,
-    hasMore,
-    addedLines,
-    removedLines,
   };
 }
 
