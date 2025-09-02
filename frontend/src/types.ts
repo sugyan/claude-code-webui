@@ -54,6 +54,7 @@ export type ToolResultMessage = {
   content: string;
   summary: string;
   timestamp: number;
+  toolUseResult?: unknown; // Contains structured data like structuredPatch, stdout, stderr etc.
 };
 
 // Plan approval dialog state
