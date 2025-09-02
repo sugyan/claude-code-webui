@@ -7,6 +7,7 @@ import type {
   ThinkingMessage,
   TodoMessage,
   TodoItem,
+  HooksMessage,
 } from "../types";
 import { TimestampComponent } from "./TimestampComponent";
 import { MessageContainer } from "./messages/MessageContainer";
@@ -19,6 +20,21 @@ import {
   isEditToolUseResult,
   isBashToolUseResult,
 } from "../utils/contentUtils";
+
+// ANSI escape sequence regex for cleaning hooks messages
+const ANSI_REGEX = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, "g");
+
+// Type guard to check if the message is a hooks message
+function isHooksMessage(
+  msg: SystemMessage,
+): msg is HooksMessage & { timestamp: number } {
+  return (
+    msg.type === "system" &&
+    "content" in msg &&
+    typeof msg.content === "string" &&
+    !("subtype" in msg)
+  );
+}
 
 interface ChatMessageComponentProps {
   message: ChatMessage;
@@ -66,7 +82,11 @@ export function SystemMessageComponent({
 }: SystemMessageComponentProps) {
   // Generate details based on message type and subtype
   const getDetails = () => {
-    if (message.type === "system" && message.subtype === "init") {
+    if (
+      message.type === "system" &&
+      "subtype" in message &&
+      message.subtype === "init"
+    ) {
       return [
         `Model: ${message.model}`,
         `Session: ${message.session_id.substring(0, MESSAGE_CONSTANTS.SESSION_ID_DISPLAY_LENGTH)}`,
@@ -84,6 +104,10 @@ export function SystemMessageComponent({
       return details.join("\n");
     } else if (message.type === "error") {
       return message.message;
+    } else if (isHooksMessage(message)) {
+      // This is a hooks message - show only the content
+      // Remove ANSI escape sequences for cleaner display
+      return message.content.replace(ANSI_REGEX, "");
     }
     return JSON.stringify(message, null, 2);
   };
@@ -102,7 +126,7 @@ export function SystemMessageComponent({
     <CollapsibleDetails
       label={getLabel()}
       details={details}
-      badge={message.subtype}
+      badge={"subtype" in message ? message.subtype : undefined}
       icon={<span className="bg-blue-400 dark:bg-blue-500">⚙</span>}
       colorScheme={{
         header: "text-blue-800 dark:text-blue-300",

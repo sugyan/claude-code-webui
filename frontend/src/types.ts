@@ -30,12 +30,21 @@ export type AbortMessage = {
   timestamp: number;
 };
 
+// Hooks message for hook execution notifications
+export type HooksMessage = {
+  type: "system";
+  content: string;
+  level?: string;
+  toolUseID?: string;
+};
+
 // System message extending SDK types with timestamp
 export type SystemMessage = (
   | SDKSystemMessage
   | SDKResultMessage
   | ErrorMessage
   | AbortMessage
+  | HooksMessage
 ) & {
   timestamp: number;
 };
