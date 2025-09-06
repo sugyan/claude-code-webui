@@ -28,7 +28,7 @@ const DOUBLE_BACKSLASH_REGEX = /\\\\/g;
  */
 async function parseCmdScript(cmdPath: string): Promise<string | null> {
   try {
-    logger.validation.debug(`Parsing Windows .cmd script: ${cmdPath}`);
+    logger.cli.debug(`Parsing Windows .cmd script: ${cmdPath}`);
     const cmdContent = await readTextFile(cmdPath);
 
     // Extract directory of the .cmd file for resolving relative paths
@@ -45,32 +45,26 @@ async function parseCmdScript(cmdPath: string): Promise<string | null> {
         const relativePath = pathMatch[1];
         const absolutePath = join(cmdDir, relativePath);
 
-        logger.validation.debug(`Found CLI script reference: ${relativePath}`);
-        logger.validation.debug(`Resolved absolute path: ${absolutePath}`);
+        logger.cli.debug(`Found CLI script reference: ${relativePath}`);
+        logger.cli.debug(`Resolved absolute path: ${absolutePath}`);
 
         // Verify the resolved path exists
         if (await exists(absolutePath)) {
-          logger.validation.debug(`.cmd parsing successful: ${absolutePath}`);
+          logger.cli.debug(`.cmd parsing successful: ${absolutePath}`);
           return absolutePath;
         } else {
-          logger.validation.debug(
-            `Resolved path does not exist: ${absolutePath}`,
-          );
+          logger.cli.debug(`Resolved path does not exist: ${absolutePath}`);
         }
       } else {
-        logger.validation.debug(
-          `Could not extract relative path from: ${fullPath}`,
-        );
+        logger.cli.debug(`Could not extract relative path from: ${fullPath}`);
       }
     } else {
-      logger.validation.debug(
-        `No CLI script execution pattern found in .cmd content`,
-      );
+      logger.cli.debug(`No CLI script execution pattern found in .cmd content`);
     }
 
     return null;
   } catch (error) {
-    logger.validation.debug(
+    logger.cli.debug(
       `Failed to parse .cmd script: ${error instanceof Error ? error.message : String(error)}`,
     );
     return null;
@@ -202,7 +196,7 @@ export async function detectClaudeCliPath(
     });
   } catch (error) {
     // Log error for debugging but don't crash the application
-    logger.validation.debug(
+    logger.cli.debug(
       `PATH wrapping detection failed: ${error instanceof Error ? error.message : String(error)}`,
     );
     pathWrappingResult = null;
@@ -215,7 +209,7 @@ export async function detectClaudeCliPath(
 
   // Try Windows .cmd parsing fallback if PATH wrapping didn't work
   if (isWindows && claudePath.endsWith(".cmd")) {
-    logger.validation.debug(
+    logger.cli.debug(
       "PATH wrapping method failed, trying .cmd parsing fallback...",
     );
     try {
@@ -238,7 +232,7 @@ export async function detectClaudeCliPath(
         return { scriptPath: cmdParsedPath, versionOutput };
       }
     } catch (fallbackError) {
-      logger.validation.debug(
+      logger.cli.debug(
         `.cmd parsing fallback failed: ${fallbackError instanceof Error ? fallbackError.message : String(fallbackError)}`,
       );
     }
@@ -280,9 +274,9 @@ export async function validateClaudeCli(
       const candidates = await runtime.findExecutable("claude");
 
       if (candidates.length === 0) {
-        console.error("❌ Claude CLI not found in PATH");
-        console.error("   Please install claude-code globally:");
-        console.error(
+        logger.cli.error("❌ Claude CLI not found in PATH");
+        logger.cli.error("   Please install claude-code globally:");
+        logger.cli.error(
           "   Visit: https://claude.ai/code for installation instructions",
         );
         exit(1);
@@ -292,19 +286,19 @@ export async function validateClaudeCli(
       if (isWindows && candidates.length > 1) {
         const cmdCandidate = candidates.find((path) => path.endsWith(".cmd"));
         claudePath = cmdCandidate || candidates[0];
-        logger.validation.debug(
+        logger.cli.debug(
           `Found Claude CLI candidates: ${candidates.join(", ")}`,
         );
-        logger.validation.debug(
+        logger.cli.debug(
           `Using Claude CLI path: ${claudePath} (Windows .cmd preferred)`,
         );
       } else {
         // Use the first candidate (most likely to be the correct one)
         claudePath = candidates[0];
-        logger.validation.debug(
+        logger.cli.debug(
           `Found Claude CLI candidates: ${candidates.join(", ")}`,
         );
-        logger.validation.debug(`Using Claude CLI path: ${claudePath}`);
+        logger.cli.debug(`Using Claude CLI path: ${claudePath}`);
       }
     }
 
@@ -312,7 +306,7 @@ export async function validateClaudeCli(
     const isCmdFile = claudePath.endsWith(".cmd");
 
     if (isWindows && isCmdFile) {
-      logger.validation.debug(
+      logger.cli.debug(
         "Detected Windows .cmd file - fallback parsing available if needed",
       );
     }
@@ -329,19 +323,21 @@ export async function validateClaudeCli(
       return detection.scriptPath;
     } else {
       // Show warning but continue with fallback when detection fails
-      console.warn("⚠️  Claude CLI script path detection failed");
-      console.warn("   Falling back to using the claude executable directly.");
-      console.warn("   This may not work properly, but continuing anyway.");
-      console.warn("");
-      console.warn(`   Using fallback path: ${claudePath}`);
+      logger.cli.warn("⚠️  Claude CLI script path detection failed");
+      logger.cli.warn(
+        "   Falling back to using the claude executable directly.",
+      );
+      logger.cli.warn("   This may not work properly, but continuing anyway.");
+      logger.cli.warn("");
+      logger.cli.warn(`   Using fallback path: ${claudePath}`);
       if (detection.versionOutput) {
         logger.cli.info(`✅ Claude CLI found: ${detection.versionOutput}`);
       }
       return claudePath;
     }
   } catch (error) {
-    console.error("❌ Failed to validate Claude CLI");
-    console.error(
+    logger.cli.error("❌ Failed to validate Claude CLI");
+    logger.cli.error(
       `   Error: ${error instanceof Error ? error.message : String(error)}`,
     );
     exit(1);
