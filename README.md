@@ -211,7 +211,7 @@ claude-code-webui --claude-path "$(asdf which claude)"
 ```
 
 **Native Binary Installation:**
-Supported. The application will automatically detect and fall back to using the native binary if script path detection fails.
+Supported. Script path detection may fail and show warnings, but the application will work correctly as long as the Claude executable path is valid.
 
 **Debug Mode:**
 Use `--debug` flag for detailed error information:
