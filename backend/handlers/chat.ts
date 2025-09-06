@@ -1,9 +1,5 @@
 import { Context } from "hono";
-import {
-  AbortError,
-  query,
-  type PermissionMode,
-} from "@anthropic-ai/claude-code";
+import { query, type PermissionMode } from "@anthropic-ai/claude-code";
 import type { ChatRequest, StreamResponse } from "../../shared/types.ts";
 import { logger } from "../utils/logger.ts";
 
@@ -68,9 +64,11 @@ async function* executeClaudeCommand(
     yield { type: "done" };
   } catch (error) {
     // Check if error is due to abort
-    if (error instanceof AbortError) {
-      yield { type: "aborted" };
-    } else {
+    // TODO: Re-enable when AbortError is properly exported from Claude SDK
+    // if (error instanceof AbortError) {
+    //   yield { type: "aborted" };
+    // } else {
+    {
       logger.chat.error("Claude Code execution failed: {error}", { error });
       yield {
         type: "error",
