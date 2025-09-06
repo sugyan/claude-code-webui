@@ -65,9 +65,6 @@ export const logger = {
   // CLI and startup logging
   cli: getLogger(["cli"]),
 
-  // Claude CLI validation and detection
-  validation: getLogger(["validation"]),
-
   // Chat handling and streaming
   chat: getLogger(["chat"]),
 

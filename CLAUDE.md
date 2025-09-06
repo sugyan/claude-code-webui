@@ -254,7 +254,10 @@ cd backend && deno task build  # Local building
 
 1. Create feature branch: `git checkout -b feature/name`
 2. Commit changes (Lefthook runs `make check`)
-3. Push and create PR with appropriate labels
+3. Push and create PR with appropriate labels:
+   ```bash
+   gh pr create --title "..." --body "..." --label "bug" --label "backend"
+   ```
 4. Include Type of Change checkboxes and description
 5. Request review and merge after approval
 

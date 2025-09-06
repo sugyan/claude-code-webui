@@ -211,11 +211,7 @@ claude-code-webui --claude-path "$(asdf which claude)"
 ```
 
 **Native Binary Installation:**
-Currently **not supported** due to TypeScript SDK limitations. Please use npm/yarn installation:
-
-```bash
-npm install -g @anthropic-ai/claude-code
-```
+Supported. The application will automatically detect and fall back to using the native binary if script path detection fails.
 
 **Debug Mode:**
 Use `--debug` flag for detailed error information:
