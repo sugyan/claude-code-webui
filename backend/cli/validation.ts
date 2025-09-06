@@ -328,18 +328,16 @@ export async function validateClaudeCli(
       }
       return detection.scriptPath;
     } else {
-      // Exit with clear error when detection fails
-      console.error("❌ Claude CLI script path detection failed");
-      console.error(
-        "   This can happen when the Claude CLI installation is incompatible with this application.",
-      );
-      console.error("");
-      console.error(
-        "   Try specifying a custom `claude` command path using: --claude-path /path/to/claude",
-      );
-      console.error("");
-      console.error(`   Attempted to detect script path from: ${claudePath}`);
-      exit(1);
+      // Show warning but continue with fallback when detection fails
+      console.warn("⚠️  Claude CLI script path detection failed");
+      console.warn("   Falling back to using the claude executable directly.");
+      console.warn("   This may not work properly, but continuing anyway.");
+      console.warn("");
+      console.warn(`   Using fallback path: ${claudePath}`);
+      if (detection.versionOutput) {
+        logger.cli.info(`✅ Claude CLI found: ${detection.versionOutput}`);
+      }
+      return claudePath;
     }
   } catch (error) {
     console.error("❌ Failed to validate Claude CLI");
