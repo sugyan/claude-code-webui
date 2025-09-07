@@ -135,6 +135,9 @@ jobs:
   npm-publish:
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write # Required for OIDC authentication
+      contents: read # Required for repository access
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -177,11 +180,7 @@ jobs:
       - name: Publish to npm (dry-run)
         run: npm publish --dry-run
         working-directory: backend
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish to npm
         run: npm publish
         working-directory: backend
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

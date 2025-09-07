@@ -10,8 +10,8 @@
 	# Use "v" prefix for tags (v1.0.0, v1.0.1, etc.)
 	vPrefix = false
 
-	# Create GitHub Releases automatically
-	release = true
+	# Create GitHub Releases automatically as draft
+	release = draft
 
 	# Version file location - now using package.json
 	versionFile = backend/package.json
