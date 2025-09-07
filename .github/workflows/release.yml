@@ -158,6 +158,9 @@ jobs:
             backend/package-lock.json
             frontend/package-lock.json
 
+      - name: Update npm to latest version
+        run: npm install -g npm@latest
+
       - name: Install backend dependencies
         run: npm ci
         working-directory: backend
