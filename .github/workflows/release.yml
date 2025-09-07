@@ -122,12 +122,18 @@ jobs:
         with:
           path: ./artifacts
 
-      - name: Create release
+      - name: Upload release assets
         uses: softprops/action-gh-release@v2
         with:
           files: |
             artifacts/*/*
             frontend/demo-recordings/*.webm
+          draft: true
+          prerelease: false
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
           generate_release_notes: true
           draft: false
           prerelease: false
@@ -151,6 +157,9 @@ jobs:
           cache-dependency-path: |
             backend/package-lock.json
             frontend/package-lock.json
+
+      - name: Update npm to latest version
+        run: npm install -g npm@latest
 
       - name: Install backend dependencies
         run: npm ci
