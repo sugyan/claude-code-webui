@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { FolderIcon } from "@heroicons/react/24/outline";
 import type { ProjectsResponse, ProjectInfo } from "../types";
 import { getProjectsUrl } from "../config/api";
 import { SettingsButton } from "./SettingsButton";
 import { SettingsModal } from "./SettingsModal";
+import ProjectsSidebar from "./sidebar/ProjectsSidebar";
 
 export function ProjectSelector() {
   const [projects, setProjects] = useState<ProjectInfo[]>([]);
@@ -48,6 +49,34 @@ export function ProjectSelector() {
     setIsSettingsOpen(false);
   };
 
+  // Handle conversation selection from sidebar  
+  const handleConversationSelect = useCallback(async (projectEncodedName: string, conversationId: string) => {
+    try {
+      // Fetch the Claude projects to get the decoded path
+      const response = await fetch(`${import.meta.env.VITE_API_BASE || 'http://localhost:8080'}/api/claude/projects`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch Claude projects');
+      }
+      
+      const data = await response.json();
+      const project = data.projects.find((p: any) => p.encodedName === projectEncodedName);
+      
+      if (!project) {
+        console.error('Project not found for encoded name:', projectEncodedName);
+        return;
+      }
+      
+      // Use the decoded path from the API
+      const workingDir = project.path;
+      console.log(`[ProjectSelector] Navigating to: ${workingDir} with session: ${conversationId}`);
+      
+      // Navigate to the project with the session ID to continue the conversation
+      navigate(`/projects/${encodeURIComponent(workingDir)}?sessionId=${conversationId}`);
+    } catch (error) {
+      console.error('Error selecting conversation:', error);
+    }
+  }, [navigate]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -68,39 +97,50 @@ export function ProjectSelector() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
-      <div className="max-w-4xl mx-auto p-6">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-slate-800 dark:text-slate-100 text-3xl font-bold tracking-tight">
-            Select a Project
-          </h1>
-          <SettingsButton onClick={handleSettingsClick} />
-        </div>
+      <div className="h-screen flex">
+        {/* Claude Projects Sidebar */}
+        <ProjectsSidebar 
+          onConversationSelect={handleConversationSelect}
+          activeProjectPath={undefined}
+          activeSessionId={undefined}
+          className="w-80 h-full"
+        />
+        
+        {/* Main Content Area */}
+        <div className="flex-1 flex flex-col max-w-6xl mx-auto p-3 sm:p-6">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-8">
+            <h1 className="text-slate-800 dark:text-slate-100 text-3xl font-bold tracking-tight">
+              Select a Project
+            </h1>
+            <SettingsButton onClick={handleSettingsClick} />
+          </div>
 
-        <div className="space-y-3">
-          {projects.length > 0 && (
-            <>
-              <h2 className="text-slate-700 dark:text-slate-300 text-lg font-medium mb-4">
-                Recent Projects
-              </h2>
-              {projects.map((project) => (
-                <button
-                  key={project.path}
-                  onClick={() => handleProjectSelect(project.path)}
-                  className="w-full flex items-center gap-3 p-4 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-lg transition-colors text-left"
-                >
-                  <FolderIcon className="h-5 w-5 text-slate-500 dark:text-slate-400 flex-shrink-0" />
-                  <span className="text-slate-800 dark:text-slate-200 font-mono text-sm">
-                    {project.path}
-                  </span>
-                </button>
-              ))}
-            </>
-          )}
-        </div>
+          <div className="space-y-3">
+            {projects.length > 0 && (
+              <>
+                <h2 className="text-slate-700 dark:text-slate-300 text-lg font-medium mb-4">
+                  Recent Projects
+                </h2>
+                {projects.map((project) => (
+                  <button
+                    key={project.path}
+                    onClick={() => handleProjectSelect(project.path)}
+                    className="w-full flex items-center gap-3 p-4 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-lg transition-colors text-left"
+                  >
+                    <FolderIcon className="h-5 w-5 text-slate-500 dark:text-slate-400 flex-shrink-0" />
+                    <span className="text-slate-800 dark:text-slate-200 font-mono text-sm">
+                      {project.path}
+                    </span>
+                  </button>
+                ))}
+              </>
+            )}
+          </div>
 
-        {/* Settings Modal */}
-        <SettingsModal isOpen={isSettingsOpen} onClose={handleSettingsClose} />
+          {/* Settings Modal */}
+          <SettingsModal isOpen={isSettingsOpen} onClose={handleSettingsClose} />
+        </div>
       </div>
     </div>
   );

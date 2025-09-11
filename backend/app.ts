@@ -17,6 +17,10 @@ import { handleHistoriesRequest } from "./handlers/histories.ts";
 import { handleConversationRequest } from "./handlers/conversations.ts";
 import { handleChatRequest } from "./handlers/chat.ts";
 import { handleAbortRequest } from "./handlers/abort.ts";
+import { 
+  handleClaudeProjectsRequest, 
+  handleProjectConversationsRequest 
+} from "./handlers/claudeProjects.ts";
 import { logger } from "./utils/logger.ts";
 import { readBinaryFile } from "./utils/fs.ts";
 
@@ -57,6 +61,12 @@ export function createApp(
 
   // API routes
   app.get("/api/projects", (c) => handleProjectsRequest(c));
+  
+  // New Claude projects discovery endpoints
+  app.get("/api/claude/projects", (c) => handleClaudeProjectsRequest(c));
+  app.get("/api/claude/projects/:encodedProjectName/conversations", (c) =>
+    handleProjectConversationsRequest(c),
+  );
 
   app.get("/api/projects/:encodedProjectName/histories", (c) =>
     handleHistoriesRequest(c),
