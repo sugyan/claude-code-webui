@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { getClaudeProjectsUrl, getClaudeProjectConversationsUrl } from '../config/api';
 import type { 
   ClaudeProject, 
   ClaudeProjectsResponse, 
@@ -20,7 +21,6 @@ export interface UseProjectConversationsReturn {
   refetch: () => void;
 }
 
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8080';
 
 /**
  * Hook to fetch all Claude projects from .claude/projects directory
@@ -35,7 +35,7 @@ export function useClaudeProjects(): UseClaudeProjectsReturn {
       setLoading(true);
       setError(null);
       
-      const response = await fetch(`${API_BASE}/api/claude/projects`);
+      const response = await fetch(getClaudeProjectsUrl());
       if (!response.ok) {
         throw new Error(`Failed to fetch projects: ${response.statusText}`);
       }
@@ -82,7 +82,7 @@ export function useProjectConversations(encodedProjectName: string | null): UseP
       setLoading(true);
       setError(null);
       
-      const response = await fetch(`${API_BASE}/api/claude/projects/${encodedProjectName}/conversations`);
+      const response = await fetch(getClaudeProjectConversationsUrl(encodedProjectName));
       if (!response.ok) {
         throw new Error(`Failed to fetch conversations: ${response.statusText}`);
       }

@@ -5,6 +5,7 @@ import { SettingsButton } from "./SettingsButton";
 import { SettingsModal } from "./SettingsModal";
 import ProjectsSidebar from "./sidebar/ProjectsSidebar";
 import { useClaudeProjects } from "../hooks/useClaudeProjects";
+import { getClaudeProjectConversationsUrl } from "../config/api";
 import type { ClaudeProject } from "../../../shared/types";
 
 export function ProjectSelector() {
@@ -17,7 +18,7 @@ export function ProjectSelector() {
   const handleProjectSelect = async (project: ClaudeProject) => {
     try {
       // Fetch the conversations for this project to get the latest one
-      const response = await fetch(`${import.meta.env.VITE_API_BASE || 'http://localhost:8082'}/api/claude/projects/${project.encodedName}/conversations`);
+      const response = await fetch(getClaudeProjectConversationsUrl(project.encodedName));
       if (!response.ok) {
         throw new Error('Failed to fetch conversations');
       }

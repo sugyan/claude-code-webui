@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronDownIcon, ChevronRightIcon, FolderIcon, ChatBubbleLeftIcon } from '@heroicons/react/24/outline';
+import { ChevronDownIcon, ChevronRightIcon, FolderIcon, ChatBubbleLeftIcon, PlusIcon } from '@heroicons/react/24/outline';
 import { useClaudeProjects, useProjectConversations } from '../../hooks/useClaudeProjects';
 import type { ClaudeProject, ConversationSummary } from '../../../../shared/types';
 
@@ -284,6 +284,22 @@ export default function ProjectsSidebar({ onConversationSelect, activeProjectPat
           ))
         )}
       </div>
+      
+      {/* New Chat Button - only show when we have an active project */}
+      {activeProjectPath && (
+        <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-700 p-4">
+          <button
+            onClick={() => {
+              // Navigate to new chat for the current project
+              navigate(`/projects/${encodeURIComponent(activeProjectPath)}`);
+            }}
+            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg transition-colors"
+          >
+            <PlusIcon className="w-4 h-4" />
+            New Chat
+          </button>
+        </div>
+      )}
     </div>
   );
 }
