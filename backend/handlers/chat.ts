@@ -2,6 +2,26 @@ import { Context } from "hono";
 import { query, type PermissionMode } from "@anthropic-ai/claude-code";
 import type { ChatRequest, StreamResponse } from "../../shared/types.ts";
 import { logger } from "../utils/logger.ts";
+import { getPlatform } from "../utils/os.ts";
+
+/**
+ * Gets the Node.js executable path for the current platform
+ * Uses different strategies to handle Windows path issues
+ * @returns The Node.js executable path or command
+ */
+function getNodeExecutablePath(): string {
+  const isWindows = getPlatform() === "windows";
+  
+  if (isWindows) {
+    // On Windows, always use the full executable path to avoid PATH issues
+    const execPath = process.execPath;
+    logger.chat.debug(`Node.js executable path: ${execPath}`);
+    return execPath;
+  }
+  
+  // On non-Windows systems, process.execPath should work fine
+  return process.execPath || "node";
+}
 
 /**
  * Executes a Claude command and yields streaming responses
@@ -39,18 +59,24 @@ async function* executeClaudeCommand(
     abortController = new AbortController();
     requestAbortControllers.set(requestId, abortController);
 
+    const nodeExecutable = getNodeExecutablePath();
+    const queryOptions = {
+      abortController,
+      executable: nodeExecutable,
+      executableArgs: [],
+      pathToClaudeCodeExecutable: cliPath,
+      env: { ...process.env }, // Explicitly pass environment to ensure PATH inheritance
+      ...(sessionId ? { resume: sessionId } : {}),
+      ...(allowedTools ? { allowedTools } : {}),
+      ...(workingDirectory ? { cwd: workingDirectory } : {}),
+      ...(permissionMode ? { permissionMode } : {}),
+    };
+
+    logger.chat.debug("Claude SDK query options: {options}", { options: queryOptions });
+
     for await (const sdkMessage of query({
       prompt: processedMessage,
-      options: {
-        abortController,
-        executable: "node" as const,
-        executableArgs: [],
-        pathToClaudeCodeExecutable: cliPath,
-        ...(sessionId ? { resume: sessionId } : {}),
-        ...(allowedTools ? { allowedTools } : {}),
-        ...(workingDirectory ? { cwd: workingDirectory } : {}),
-        ...(permissionMode ? { permissionMode } : {}),
-      },
+      options: queryOptions,
     })) {
       // Debug logging of raw SDK messages with detailed content
       logger.chat.debug("Claude SDK Message: {sdkMessage}", { sdkMessage });
