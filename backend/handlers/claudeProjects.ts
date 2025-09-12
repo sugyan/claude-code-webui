@@ -57,7 +57,7 @@ function getDisplayName(encodedName: string): string {
   
   // For a typical path like "Users-Windows10-new-Documents-web-game2"
   // We want to find the project name after "Documents" or similar directory indicators
-  const commonDirs = ["Users", "Documents", "Desktop", "Projects", "Code", "Development"];
+  const commonDirs = ["Users", "Documents", "Desktop", "Projects", "Development"];
   
   // Find the last common directory and take everything after it
   let projectStartIndex = -1;
