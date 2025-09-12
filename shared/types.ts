@@ -4,8 +4,21 @@ export interface StreamResponse {
   error?: string;
 }
 
+export interface ImageData {
+  id: string;
+  name: string;
+  size: number;
+  type: string; // mime type like 'image/jpeg'
+  data: string; // base64 encoded data
+}
+
+export interface MultimodalMessage {
+  text: string;
+  images: ImageData[];
+}
+
 export interface ChatRequest {
-  message: string;
+  message: string | MultimodalMessage;
   sessionId?: string;
   requestId: string;
   allowedTools?: string[];
