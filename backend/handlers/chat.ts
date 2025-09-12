@@ -3,6 +3,7 @@ import { query, type PermissionMode } from "@anthropic-ai/claude-code";
 import type { ChatRequest, StreamResponse } from "../../shared/types.ts";
 import { logger } from "../utils/logger.ts";
 import { getPlatform } from "../utils/os.ts";
+import { dirname } from "path";
 
 /**
  * Gets the runtime type for Claude SDK
@@ -69,7 +70,7 @@ async function* executeClaudeCommand(
     if (isWindows && runtimeType === "node") {
       // On Windows, ensure Node.js directory is in PATH
       const nodePath = process.execPath;
-      const nodeDir = require('path').dirname(nodePath);
+      const nodeDir = dirname(nodePath);
       const currentPath = env.PATH || env.Path || "";
       
       // Add Node.js directory to PATH if it's not already there
