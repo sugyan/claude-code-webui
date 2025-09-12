@@ -12,6 +12,7 @@ import type {
 import { TimestampComponent } from "./TimestampComponent";
 import { MessageContainer } from "./messages/MessageContainer";
 import { CollapsibleDetails } from "./messages/CollapsibleDetails";
+import { SimpleDiffHighlighter } from "./SimpleDiffHighlighter";
 import { MarkdownRenderer } from "./MarkdownRenderer";
 import { MESSAGE_CONSTANTS } from "../utils/constants";
 import {
@@ -234,6 +235,7 @@ export function ToolResultMessageComponent({
       maxPreviewLines={maxPreviewLines}
       showPreview={shouldShowPreview}
       defaultExpanded={defaultExpanded}
+      useDiffHighlighter={message.toolName === "Edit"}
     />
   );
 }

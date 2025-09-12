@@ -4,6 +4,7 @@ import {
   createMoreLinesIndicator,
 } from "../../utils/contentUtils";
 import { MarkdownRenderer } from "../MarkdownRenderer";
+import { SimpleDiffHighlighter } from "../SimpleDiffHighlighter";
 
 interface CollapsibleDetailsProps {
   label: string;
@@ -22,6 +23,7 @@ interface CollapsibleDetailsProps {
   previewContent?: string;
   previewSummary?: string;
   useMarkdown?: boolean;
+  useDiffHighlighter?: boolean;
 }
 
 export function CollapsibleDetails({
@@ -36,6 +38,7 @@ export function CollapsibleDetails({
   previewContent,
   previewSummary,
   useMarkdown = false,
+  useDiffHighlighter = false,
 }: CollapsibleDetailsProps) {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const hasDetails = details.trim().length > 0;
@@ -107,11 +110,15 @@ export function CollapsibleDetails({
           className="mt-2 pl-6 border-l-2 border-dashed opacity-80"
           style={{ borderColor: "inherit" }}
         >
-          <pre
-            className={`whitespace-pre-wrap ${colorScheme.content} text-xs font-mono leading-relaxed`}
-          >
-            {contentPreview.preview}
-          </pre>
+          {useDiffHighlighter ? (
+            <SimpleDiffHighlighter content={contentPreview.preview} className="text-xs leading-relaxed" />
+          ) : (
+            <pre
+              className={`whitespace-pre-wrap ${colorScheme.content} text-xs font-mono leading-relaxed`}
+            >
+              {contentPreview.preview}
+            </pre>
+          )}
           <div
             className={`${colorScheme.content} text-xs opacity-60 mt-1 italic`}
           >
@@ -126,7 +133,9 @@ export function CollapsibleDetails({
         <div
           className={`${colorScheme.content} text-xs leading-relaxed mt-2 pl-6 border-l-2 ${colorScheme.border}`}
         >
-          {useMarkdown ? (
+          {useDiffHighlighter ? (
+            <SimpleDiffHighlighter content={details} />
+          ) : useMarkdown ? (
             <MarkdownRenderer content={details} />
           ) : (
             <pre className="whitespace-pre-wrap font-mono leading-relaxed">
