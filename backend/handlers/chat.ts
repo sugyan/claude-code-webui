@@ -14,16 +14,15 @@ function getRuntimeType(): "bun" | "deno" | "node" {
   if (typeof (globalThis as any).Deno !== "undefined") {
     return "deno";
   }
-  
+
   // Check for Bun runtime
   if (typeof (globalThis as any).Bun !== "undefined") {
     return "bun";
   }
-  
+
   // Default to Node.js
   return "node";
 }
-
 
 /**
  * Executes a Claude command and yields streaming responses
@@ -62,24 +61,24 @@ async function* executeClaudeCommand(
     requestAbortControllers.set(requestId, abortController);
 
     const runtimeType = getRuntimeType();
-    
+
     // Prepare environment with Windows-specific PATH handling
     const env = { ...process.env };
     const isWindows = getPlatform() === "windows";
-    
+
     if (isWindows && runtimeType === "node") {
       // On Windows, ensure Node.js directory is in PATH
       const nodePath = process.execPath;
       const nodeDir = dirname(nodePath);
       const currentPath = env.PATH || env.Path || "";
-      
+
       // Add Node.js directory to PATH if it's not already there
       if (!currentPath.includes(nodeDir)) {
         env.PATH = `${nodeDir};${currentPath}`;
         logger.chat.debug(`Added Node.js directory to PATH: ${nodeDir}`);
       }
     }
-    
+
     const queryOptions = {
       abortController,
       executable: runtimeType,
