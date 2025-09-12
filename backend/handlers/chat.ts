@@ -79,25 +79,19 @@ async function* executeClaudeCommand(
       }
     }
 
-    const queryOptions = {
-      abortController,
-      executable: runtimeType,
-      executableArgs: [],
-      pathToClaudeCodeExecutable: cliPath,
-      env,
-      ...(sessionId ? { resume: sessionId } : {}),
-      ...(allowedTools ? { allowedTools } : {}),
-      ...(workingDirectory ? { cwd: workingDirectory } : {}),
-      ...(permissionMode ? { permissionMode } : {}),
-    };
-
-    logger.chat.debug("Claude SDK query options: {options}", {
-      options: queryOptions,
-    });
-
     for await (const sdkMessage of query({
       prompt: processedMessage,
-      options: queryOptions,
+      options: {
+        abortController,
+        executable: runtimeType,
+        executableArgs: [],
+        pathToClaudeCodeExecutable: cliPath,
+        env,
+        ...(sessionId ? { resume: sessionId } : {}),
+        ...(allowedTools ? { allowedTools } : {}),
+        ...(workingDirectory ? { cwd: workingDirectory } : {}),
+        ...(permissionMode ? { permissionMode } : {}),
+      },
     })) {
       // Debug logging of raw SDK messages with detailed content
       logger.chat.debug("Claude SDK Message: {sdkMessage}", { sdkMessage });
