@@ -3,7 +3,7 @@ import { query, type PermissionMode } from "@anthropic-ai/claude-code";
 import type { ChatRequest, StreamResponse } from "../../shared/types.ts";
 import { logger } from "../utils/logger.ts";
 import { getPlatform } from "../utils/os.ts";
-import { dirname } from "path";
+import { dirname } from "node:path";
 
 /**
  * Gets the runtime type for Claude SDK
