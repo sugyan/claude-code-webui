@@ -48,10 +48,10 @@ function ConversationItem({
   return (
     <div
       onClick={onSelect}
-      className={`group px-3 py-2 cursor-pointer transition-all duration-150 ${
+      className={`group pl-12 pr-3 py-2 cursor-pointer transition-all duration-150 ${
         isActive 
-          ? 'bg-green-50 dark:bg-green-900/30 border-l-2 border-green-500' 
-          : 'border-l-2 border-transparent hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-blue-500'
+          ? 'bg-green-50 dark:bg-green-900/30 border-l-4 border-green-500' 
+          : 'border-l-4 border-transparent hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500'
       }`}
     >
       <div className="flex items-start gap-2">
@@ -122,39 +122,40 @@ function ProjectItem({ project, isActive, activeSessionId, onConversationSelect 
 
   return (
     <div className="border-b border-gray-200 dark:border-gray-700">
-      {/* Project Header */}
+      {/* Project Header - Unified hover area */}
       <div
-        className={`flex items-center gap-2 transition-colors ${
+        className={`group flex items-center transition-colors cursor-pointer ${
           isActive 
             ? 'bg-blue-50 dark:bg-blue-900/30 border-l-4 border-blue-500' 
-            : 'hover:bg-gray-50 dark:hover:bg-gray-700'
+            : 'border-l-4 border-transparent hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
         }`}
+        onClick={handleProjectClick}
       >
-        {/* Left side: Expand/Collapse button */}
+        {/* Expand/Collapse button - full height click area */}
         <div
-          onClick={toggleExpanded}
-          className="flex items-center gap-2 px-4 py-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 rounded-l"
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleExpanded();
+          }}
+          className="flex items-center gap-2 px-4 self-stretch cursor-pointer hover:bg-gray-200/70 dark:hover:bg-gray-600/70 transition-colors"
         >
           {isExpanded ? (
-            <ChevronDownIcon className={`h-4 w-4 ${isActive ? 'text-blue-600' : 'text-gray-500'}`} />
+            <ChevronDownIcon className={`h-4 w-4 transition-transform ${isActive ? 'text-blue-600' : 'text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-300'}`} />
           ) : (
-            <ChevronRightIcon className={`h-4 w-4 ${isActive ? 'text-blue-600' : 'text-gray-500'}`} />
+            <ChevronRightIcon className={`h-4 w-4 transition-transform ${isActive ? 'text-blue-600' : 'text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-300'}`} />
           )}
-          <FolderIcon className={`h-5 w-5 ${isActive ? 'text-blue-600' : 'text-blue-500'}`} />
+          <FolderIcon className={`h-5 w-5 ${isActive ? 'text-blue-600' : 'text-blue-500 group-hover:text-blue-600'}`} />
         </div>
         
-        {/* Right side: Project details */}
-        <div
-          onClick={handleProjectClick}
-          className="flex-1 px-4 py-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600"
-        >
+        {/* Project details */}
+        <div className="flex-1 pr-4 py-3 min-w-0">
           <div className={`font-medium ${
             isActive ? 'text-blue-900 dark:text-blue-100' : 'text-gray-900 dark:text-gray-100'
           }`}>
             {project.displayName}
           </div>
           <div className={`text-sm ${
-            isActive ? 'text-blue-600 dark:text-blue-300' : 'text-gray-500 dark:text-gray-400'
+            isActive ? 'text-blue-600 dark:text-blue-300' : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300'
           }`}>
             {project.conversationCount} conversations
             {project.lastModified && (
