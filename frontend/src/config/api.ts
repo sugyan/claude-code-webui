@@ -4,6 +4,7 @@ export const API_CONFIG = {
     CHAT: "/api/chat",
     ABORT: "/api/abort",
     PROJECTS: "/api/projects",
+    CLAUDE_PROJECTS: "/api/claude/projects",
     HISTORIES: "/api/projects",
     CONVERSATIONS: "/api/projects",
   },
@@ -41,4 +42,14 @@ export const getConversationUrl = (
   sessionId: string,
 ) => {
   return `${API_CONFIG.ENDPOINTS.CONVERSATIONS}/${encodedProjectName}/histories/${sessionId}`;
+};
+
+// Helper function to get Claude projects URL
+export const getClaudeProjectsUrl = () => {
+  return API_CONFIG.ENDPOINTS.CLAUDE_PROJECTS;
+};
+
+// Helper function to get Claude project conversations URL
+export const getClaudeProjectConversationsUrl = (encodedProjectName: string) => {
+  return `${API_CONFIG.ENDPOINTS.CLAUDE_PROJECTS}/${encodedProjectName}/conversations`;
 };

@@ -1,6 +1,7 @@
 import { useEffect, useCallback, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { ChevronLeftIcon } from "@heroicons/react/24/outline";
+import { ChevronLeftIcon, HomeIcon } from "@heroicons/react/24/outline";
+import { getClaudeProjectsUrl, getClaudeProjectConversationsUrl } from "../config/api";
 import type {
   ChatRequest,
   ChatMessage,
@@ -445,7 +446,7 @@ export function ChatPage() {
   const handleConversationSelect = useCallback(async (projectEncodedName: string, conversationId: string) => {
     try {
       // Fetch the Claude projects to get the decoded path
-      const response = await fetch(`${import.meta.env.VITE_API_BASE || 'http://localhost:8080'}/api/claude/projects`);
+      const response = await fetch(getClaudeProjectsUrl());
       if (!response.ok) {
         throw new Error('Failed to fetch Claude projects');
       }
@@ -475,7 +476,7 @@ export function ChatPage() {
   useEffect(() => {
     const loadProjects = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_BASE || 'http://localhost:8080'}/api/claude/projects`);
+        const response = await fetch(getClaudeProjectsUrl());
         if (response.ok) {
           const data = await response.json();
           setProjects(data.projects || []);
@@ -506,7 +507,7 @@ export function ChatPage() {
         if (!currentProject) return;
 
         // Then get the conversations for this project
-        const conversationsResponse = await fetch(`${import.meta.env.VITE_API_BASE || 'http://localhost:8080'}/api/claude/projects/${currentProject.encodedName}/conversations`);
+        const conversationsResponse = await fetch(getClaudeProjectConversationsUrl(currentProject.encodedName));
         if (!conversationsResponse.ok) return;
 
         const conversationsData = await conversationsResponse.json();
@@ -594,9 +595,9 @@ export function ChatPage() {
             )}
             {isLoadedConversation && (
               <button
-                onClick={handleBackToHistory}
+                onClick={handleBackToProjects}
                 className="p-2 rounded-lg bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 transition-all duration-200 backdrop-blur-sm shadow-sm hover:shadow-md"
-                aria-label="Back to history"
+                aria-label="Back to home"
               >
                 <ChevronLeftIcon className="w-5 h-5 text-slate-600 dark:text-slate-400" />
               </button>
@@ -606,9 +607,10 @@ export function ChatPage() {
                 <div className="flex items-center">
                   <button
                     onClick={handleBackToProjects}
-                    className="text-slate-800 dark:text-slate-100 text-lg sm:text-3xl font-bold tracking-tight hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 rounded-md px-1 -mx-1"
-                    aria-label="Back to project selection"
+                    className="flex items-center gap-2 text-slate-800 dark:text-slate-100 text-lg sm:text-3xl font-bold tracking-tight hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 rounded-md px-1 -mx-1"
+                    aria-label="Back to home"
                   >
+                    <HomeIcon className="w-5 h-5 sm:w-7 sm:h-7" />
                     {getProjectDisplayName(workingDirectory)}
                   </button>
                   {(isHistoryView || sessionId) && (
@@ -633,22 +635,6 @@ export function ChatPage() {
                   )}
                 </div>
               </nav>
-              {workingDirectory && (
-                <div className="flex items-center text-sm font-mono mt-1">
-                  <button
-                    onClick={handleBackToProjectChat}
-                    className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 rounded px-1 -mx-1 cursor-pointer"
-                    aria-label={`Return to new chat in ${workingDirectory}`}
-                  >
-                    {workingDirectory}
-                  </button>
-                  {sessionId && (
-                    <span className="ml-2 text-xs text-slate-600 dark:text-slate-400">
-                      Session: {sessionId.substring(0, 8)}...
-                    </span>
-                  )}
-                </div>
-              )}
             </div>
           </div>
           <div className="flex items-center gap-3">
