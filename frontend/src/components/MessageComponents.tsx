@@ -233,6 +233,7 @@ export function ToolResultMessageComponent({
       maxPreviewLines={maxPreviewLines}
       showPreview={shouldShowPreview}
       defaultExpanded={defaultExpanded}
+      useDiffHighlighter={message.toolName === "Edit"}
     />
   );
 }
