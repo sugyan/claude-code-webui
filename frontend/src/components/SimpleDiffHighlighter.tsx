@@ -1,3 +1,4 @@
+import React from 'react';
 import { hasDiffContent, parseDiffLines, type DiffLine } from '../utils/simpleDiffDetector';
 import { useTheme } from '../hooks/useSettings';
 
@@ -13,42 +14,28 @@ interface DiffLineProps {
 
 function DiffLineComponent({ line, isDark }: DiffLineProps) {
   const getLineStyles = () => {
-    const baseStyles = "block px-2 py-1 text-sm font-mono";
-    
     switch (line.type) {
       case 'addition':
         return isDark
-          ? `${baseStyles} bg-green-900/50 text-green-300 border-l-2 border-green-500`
-          : `${baseStyles} bg-green-50 text-green-700 border-l-2 border-green-400`;
+          ? `bg-green-900/30 text-green-300`
+          : `bg-green-50 text-green-700`;
       
       case 'removal':
         return isDark
-          ? `${baseStyles} bg-red-900/50 text-red-300 border-l-2 border-red-500`
-          : `${baseStyles} bg-red-50 text-red-700 border-l-2 border-red-400`;
+          ? `bg-red-900/30 text-red-300`
+          : `bg-red-50 text-red-700`;
       
       default: // context
         return isDark
-          ? `${baseStyles} text-emerald-300`
-          : `${baseStyles} text-emerald-700`;
-    }
-  };
-
-  const getPrefix = () => {
-    switch (line.type) {
-      case 'addition':
-        return <span className="text-green-500 font-bold mr-1">+</span>;
-      case 'removal':
-        return <span className="text-red-500 font-bold mr-1">-</span>;
-      default:
-        return <span className="text-transparent mr-1"> </span>; // Maintain alignment
+          ? `text-emerald-300`
+          : `text-emerald-700`;
     }
   };
 
   return (
-    <div className={getLineStyles()}>
-      {getPrefix()}
-      <span>{line.originalContent}</span>
-    </div>
+    <span className={getLineStyles()}>
+      {line.content}
+    </span>
   );
 }
 
@@ -62,7 +49,7 @@ export function SimpleDiffHighlighter({ content, className = '' }: SimpleDiffHig
   // If not a diff, render as plain pre
   if (!isDiff) {
     return (
-      <pre className={`whitespace-pre-wrap font-mono text-sm ${className}`}>
+      <pre className={`whitespace-pre-wrap font-mono leading-relaxed ${className}`}>
         {content}
       </pre>
     );
@@ -72,14 +59,16 @@ export function SimpleDiffHighlighter({ content, className = '' }: SimpleDiffHig
   const diffLines = parseDiffLines(content);
   
   return (
-    <div className={`font-mono text-sm ${className}`}>
+    <pre className={`whitespace-pre-wrap font-mono leading-relaxed ${className}`}>
       {diffLines.map((line, index) => (
-        <DiffLineComponent
-          key={index}
-          line={line}
-          isDark={isDark}
-        />
+        <React.Fragment key={index}>
+          <DiffLineComponent
+            line={line}
+            isDark={isDark}
+          />
+          {index < diffLines.length - 1 && '\n'}
+        </React.Fragment>
       ))}
-    </div>
+    </pre>
   );
 }

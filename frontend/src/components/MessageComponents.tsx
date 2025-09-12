@@ -12,7 +12,6 @@ import type {
 import { TimestampComponent } from "./TimestampComponent";
 import { MessageContainer } from "./messages/MessageContainer";
 import { CollapsibleDetails } from "./messages/CollapsibleDetails";
-import { SimpleDiffHighlighter } from "./SimpleDiffHighlighter";
 import { MarkdownRenderer } from "./MarkdownRenderer";
 import { MESSAGE_CONSTANTS } from "../utils/constants";
 import {
