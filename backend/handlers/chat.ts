@@ -5,23 +5,24 @@ import { logger } from "../utils/logger.ts";
 import { getPlatform } from "../utils/os.ts";
 
 /**
- * Gets the Node.js executable path for the current platform
- * Uses different strategies to handle Windows path issues
- * @returns The Node.js executable path or command
+ * Gets the runtime type for Claude SDK
+ * @returns The runtime type that Claude SDK expects
  */
-function getNodeExecutablePath(): string {
-  const isWindows = getPlatform() === "windows";
-
-  if (isWindows) {
-    // On Windows, always use the full executable path to avoid PATH issues
-    const execPath = process.execPath;
-    logger.chat.debug(`Node.js executable path: ${execPath}`);
-    return execPath;
+function getRuntimeType(): "bun" | "deno" | "node" {
+  // Check for Deno runtime
+  if (typeof (globalThis as any).Deno !== "undefined") {
+    return "deno";
   }
-
-  // On non-Windows systems, process.execPath should work fine
-  return process.execPath || "node";
+  
+  // Check for Bun runtime
+  if (typeof (globalThis as any).Bun !== "undefined") {
+    return "bun";
+  }
+  
+  // Default to Node.js
+  return "node";
 }
+
 
 /**
  * Executes a Claude command and yields streaming responses
@@ -59,13 +60,31 @@ async function* executeClaudeCommand(
     abortController = new AbortController();
     requestAbortControllers.set(requestId, abortController);
 
-    const nodeExecutable = getNodeExecutablePath();
+    const runtimeType = getRuntimeType();
+    
+    // Prepare environment with Windows-specific PATH handling
+    const env = { ...process.env };
+    const isWindows = getPlatform() === "windows";
+    
+    if (isWindows && runtimeType === "node") {
+      // On Windows, ensure Node.js directory is in PATH
+      const nodePath = process.execPath;
+      const nodeDir = require('path').dirname(nodePath);
+      const currentPath = env.PATH || env.Path || "";
+      
+      // Add Node.js directory to PATH if it's not already there
+      if (!currentPath.includes(nodeDir)) {
+        env.PATH = `${nodeDir};${currentPath}`;
+        logger.chat.debug(`Added Node.js directory to PATH: ${nodeDir}`);
+      }
+    }
+    
     const queryOptions = {
       abortController,
-      executable: nodeExecutable,
+      executable: runtimeType,
       executableArgs: [],
       pathToClaudeCodeExecutable: cliPath,
-      env: { ...process.env }, // Explicitly pass environment to ensure PATH inheritance
+      env,
       ...(sessionId ? { resume: sessionId } : {}),
       ...(allowedTools ? { allowedTools } : {}),
       ...(workingDirectory ? { cwd: workingDirectory } : {}),
