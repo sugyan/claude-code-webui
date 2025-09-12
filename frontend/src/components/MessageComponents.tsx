@@ -12,6 +12,7 @@ import type {
 import { TimestampComponent } from "./TimestampComponent";
 import { MessageContainer } from "./messages/MessageContainer";
 import { CollapsibleDetails } from "./messages/CollapsibleDetails";
+import { MarkdownRenderer } from "./MarkdownRenderer";
 import { MESSAGE_CONSTANTS } from "../utils/constants";
 import {
   createEditResult,
@@ -66,9 +67,9 @@ export function ChatMessageComponent({ message }: ChatMessageComponentProps) {
           }`}
         />
       </div>
-      <pre className="whitespace-pre-wrap text-sm font-mono leading-relaxed">
-        {message.content}
-      </pre>
+      <div className="text-sm leading-relaxed">
+        <MarkdownRenderer content={message.content} />
+      </div>
     </MessageContainer>
   );
 }
@@ -265,9 +266,9 @@ export function PlanMessageComponent({ message }: PlanMessageComponentProps) {
           Here is Claude's plan:
         </p>
         <div className="bg-blue-100/50 dark:bg-blue-800/30 border border-blue-200 dark:border-blue-700 rounded-lg p-3">
-          <pre className="text-sm text-blue-900 dark:text-blue-100 whitespace-pre-wrap font-mono leading-relaxed">
-            {message.plan}
-          </pre>
+          <div className="text-sm text-blue-900 dark:text-blue-100 leading-relaxed">
+            <MarkdownRenderer content={message.plan} />
+          </div>
         </div>
       </div>
     </MessageContainer>
@@ -294,6 +295,7 @@ export function ThinkingMessageComponent({
         bg: "bg-purple-50/60 dark:bg-purple-900/15 border border-purple-200 dark:border-purple-800",
       }}
       defaultExpanded={true}
+      useMarkdown={true}
     />
   );
 }
