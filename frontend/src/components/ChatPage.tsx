@@ -20,7 +20,7 @@ import { HistoryButton } from "./chat/HistoryButton";
 import { ChatInput } from "./chat/ChatInput";
 import { ChatMessages } from "./chat/ChatMessages";
 import { HistoryView } from "./HistoryView";
-import { getChatUrl, getProjectsUrl } from "../config/api";
+import { getChatUrl } from "../config/api";
 import { KEYBOARD_SHORTCUTS } from "../utils/constants";
 import { normalizeWindowsPath } from "../utils/pathUtils";
 import type { StreamingContext } from "../hooks/streaming/useMessageProcessor";
