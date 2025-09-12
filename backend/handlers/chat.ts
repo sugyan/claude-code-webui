@@ -11,14 +11,14 @@ import { getPlatform } from "../utils/os.ts";
  */
 function getNodeExecutablePath(): string {
   const isWindows = getPlatform() === "windows";
-  
+
   if (isWindows) {
     // On Windows, always use the full executable path to avoid PATH issues
     const execPath = process.execPath;
     logger.chat.debug(`Node.js executable path: ${execPath}`);
     return execPath;
   }
-  
+
   // On non-Windows systems, process.execPath should work fine
   return process.execPath || "node";
 }
@@ -72,7 +72,9 @@ async function* executeClaudeCommand(
       ...(permissionMode ? { permissionMode } : {}),
     };
 
-    logger.chat.debug("Claude SDK query options: {options}", { options: queryOptions });
+    logger.chat.debug("Claude SDK query options: {options}", {
+      options: queryOptions,
+    });
 
     for await (const sdkMessage of query({
       prompt: processedMessage,
