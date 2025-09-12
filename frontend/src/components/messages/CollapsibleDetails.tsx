@@ -3,6 +3,7 @@ import {
   createContentPreview,
   createMoreLinesIndicator,
 } from "../../utils/contentUtils";
+import { MarkdownRenderer } from "../MarkdownRenderer";
 
 interface CollapsibleDetailsProps {
   label: string;
@@ -20,6 +21,7 @@ interface CollapsibleDetailsProps {
   showPreview?: boolean;
   previewContent?: string;
   previewSummary?: string;
+  useMarkdown?: boolean;
 }
 
 export function CollapsibleDetails({
@@ -33,6 +35,7 @@ export function CollapsibleDetails({
   showPreview = true,
   previewContent,
   previewSummary,
+  useMarkdown = false,
 }: CollapsibleDetailsProps) {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const hasDetails = details.trim().length > 0;
@@ -120,11 +123,17 @@ export function CollapsibleDetails({
         </div>
       )}
       {hasDetails && isExpanded && (
-        <pre
-          className={`whitespace-pre-wrap ${colorScheme.content} text-xs font-mono leading-relaxed mt-2 pl-6 border-l-2 ${colorScheme.border}`}
+        <div
+          className={`${colorScheme.content} text-xs leading-relaxed mt-2 pl-6 border-l-2 ${colorScheme.border}`}
         >
-          {details}
-        </pre>
+          {useMarkdown ? (
+            <MarkdownRenderer content={details} />
+          ) : (
+            <pre className="whitespace-pre-wrap font-mono leading-relaxed">
+              {details}
+            </pre>
+          )}
+        </div>
       )}
     </div>
   );
