@@ -11,12 +11,18 @@ import { dirname } from "node:path";
  */
 function getRuntimeType(): "bun" | "deno" | "node" {
   // Check for Deno runtime
-  if ("Deno" in globalThis && typeof (globalThis as { Deno?: unknown }).Deno !== "undefined") {
+  if (
+    "Deno" in globalThis &&
+    typeof (globalThis as { Deno?: unknown }).Deno !== "undefined"
+  ) {
     return "deno";
   }
 
   // Check for Bun runtime
-  if ("Bun" in globalThis && typeof (globalThis as { Bun?: unknown }).Bun !== "undefined") {
+  if (
+    "Bun" in globalThis &&
+    typeof (globalThis as { Bun?: unknown }).Bun !== "undefined"
+  ) {
     return "bun";
   }
 
