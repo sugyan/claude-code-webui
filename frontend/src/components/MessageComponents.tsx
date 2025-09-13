@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import type {
   ChatMessage,
   SystemMessage,
@@ -12,6 +13,7 @@ import type {
 import { TimestampComponent } from "./TimestampComponent";
 import { MessageContainer } from "./messages/MessageContainer";
 import { CollapsibleDetails } from "./messages/CollapsibleDetails";
+import { MarkdownRenderer } from "./MarkdownRenderer";
 import { MESSAGE_CONSTANTS } from "../utils/constants";
 import {
   createEditResult,
@@ -41,6 +43,7 @@ interface ChatMessageComponentProps {
 }
 
 export function ChatMessageComponent({ message }: ChatMessageComponentProps) {
+  const [showSource, setShowSource] = useState(false);
   const isUser = message.role === "user";
   const colorScheme = isUser
     ? "bg-blue-600 text-white"
@@ -59,16 +62,41 @@ export function ChatMessageComponent({ message }: ChatMessageComponentProps) {
         >
           {isUser ? "User" : "Claude"}
         </div>
-        <TimestampComponent
-          timestamp={message.timestamp}
-          className={`text-xs opacity-70 ${
-            isUser ? "text-blue-200" : "text-slate-500 dark:text-slate-500"
-          }`}
-        />
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowSource(!showSource)}
+            className={`text-xs px-2 py-1 rounded-md transition-colors ${
+              isUser
+                ? "text-blue-200 hover:text-blue-100 hover:bg-blue-500/20"
+                : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-300/20 dark:hover:bg-slate-600/20"
+            }`}
+            title="Toggle markdown source view"
+          >
+            {showSource ? "Hide" : "MD"}
+          </button>
+          <TimestampComponent
+            timestamp={message.timestamp}
+            className={`text-xs opacity-70 ${
+              isUser ? "text-blue-200" : "text-slate-500 dark:text-slate-500"
+            }`}
+          />
+        </div>
       </div>
-      <pre className="whitespace-pre-wrap text-sm font-mono leading-relaxed">
-        {message.content}
-      </pre>
+      {showSource ? (
+        <div className={`text-xs font-mono p-3 rounded-lg border ${
+          isUser
+            ? "bg-blue-500/20 border-blue-400/30 text-blue-100"
+            : "bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300"
+        }`}>
+          <div className="text-xs opacity-70 mb-2 font-sans">Markdown Source:</div>
+          <pre className="whitespace-pre-wrap overflow-x-auto">{message.content}</pre>
+        </div>
+      ) : (
+        <MarkdownRenderer
+          content={message.content}
+          className="text-sm leading-relaxed"
+        />
+      )}
     </MessageContainer>
   );
 }
