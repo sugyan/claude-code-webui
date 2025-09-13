@@ -11,12 +11,12 @@ import { dirname } from "node:path";
  */
 function getRuntimeType(): "bun" | "deno" | "node" {
   // Check for Deno runtime
-  if (typeof (globalThis as any).Deno !== "undefined") {
+  if ("Deno" in globalThis && typeof (globalThis as { Deno?: unknown }).Deno !== "undefined") {
     return "deno";
   }
 
   // Check for Bun runtime
-  if (typeof (globalThis as any).Bun !== "undefined") {
+  if ("Bun" in globalThis && typeof (globalThis as { Bun?: unknown }).Bun !== "undefined") {
     return "bun";
   }
 
@@ -74,7 +74,7 @@ async function* executeClaudeCommand(
 
       // Add Node.js directory to PATH if it's not already there
       if (!currentPath.includes(nodeDir)) {
-        env.PATH = `${nodeDir};${currentPath}`;
+        env.PATH = currentPath ? `${nodeDir};${currentPath}` : nodeDir;
         logger.chat.debug(`Added Node.js directory to PATH: ${nodeDir}`);
       }
     }
