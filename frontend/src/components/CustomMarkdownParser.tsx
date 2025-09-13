@@ -470,20 +470,6 @@ export class CustomMarkdownParser {
     return ast.children.map((node, index) => {
       switch (node.type) {
         case 'code_block':
-          // Special handling for markdown language - render as markdown instead of code
-          if (node.meta?.language === 'markdown') {
-            return (
-              <div key={index} className="bg-slate-100 dark:bg-slate-800 rounded-lg p-4 my-3 border border-slate-200 dark:border-slate-700">
-                <div className="text-xs text-slate-500 dark:text-slate-400 mb-2 font-mono">markdown</div>
-                <div className="prose prose-sm max-w-none dark:prose-invert">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                    {node.content || ''}
-                  </ReactMarkdown>
-                </div>
-              </div>
-            );
-          }
-
           return (
             <SyntaxHighlighter
               key={index}
