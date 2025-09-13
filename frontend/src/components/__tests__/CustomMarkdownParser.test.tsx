@@ -5,25 +5,6 @@ import React from "react";
 
 describe("CustomMarkdownParser", () => {
   it("should handle nested fenced code blocks correctly", () => {
-    const markdown = `# Documentation Example
-
-Here's a Python function:
-
-\`\`\`python
-def greet(name):
-    return f"Hello, {name}!"
-\`\`\`
-
-And here's a JavaScript version:
-
-\`\`\`javascript
-function greet(name) {
-    return \`Hello, \${name}!\`;
-}
-\`\`\`
-
-Both do the same thing!`;
-
     const nestedMarkdown = `\`\`\`markdown
 # Documentation Example
 
