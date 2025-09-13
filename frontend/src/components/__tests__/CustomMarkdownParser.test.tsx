@@ -47,19 +47,19 @@ Both do the same thing!
 
     const parser = new CustomMarkdownParser(nestedMarkdown, false);
     const tokens = parser.tokenize();
-    
+
     // Should have one fenced code block token (the outer one)
-    const codeBlocks = tokens.filter(t => t.type === 'fenced_code_block');
+    const codeBlocks = tokens.filter((t) => t.type === "fenced_code_block");
     expect(codeBlocks).toHaveLength(1);
-    
+
     // The outer block should be identified as markdown
-    expect(codeBlocks[0].meta.language).toBe('markdown');
-    
+    expect(codeBlocks[0].meta.language).toBe("markdown");
+
     // The content should include the nested blocks intact
-    expect(codeBlocks[0].content).toContain('```python');
-    expect(codeBlocks[0].content).toContain('```javascript');
-    expect(codeBlocks[0].content).toContain('def greet(name):');
-    expect(codeBlocks[0].content).toContain('function greet(name)');
+    expect(codeBlocks[0].content).toContain("```python");
+    expect(codeBlocks[0].content).toContain("```javascript");
+    expect(codeBlocks[0].content).toContain("def greet(name):");
+    expect(codeBlocks[0].content).toContain("function greet(name)");
   });
 
   it("should correctly match opening and closing backtick counts", () => {
@@ -72,11 +72,11 @@ This should be part of the code
 
     const parser = new CustomMarkdownParser(markdown, false);
     const tokens = parser.tokenize();
-    
-    const codeBlocks = tokens.filter(t => t.type === 'fenced_code_block');
+
+    const codeBlocks = tokens.filter((t) => t.type === "fenced_code_block");
     expect(codeBlocks).toHaveLength(1);
     expect(codeBlocks[0].meta.backtickCount).toBe(4);
-    expect(codeBlocks[0].content).toContain('const nested = ```');
+    expect(codeBlocks[0].content).toContain("const nested = ```");
   });
 
   it("should not close code block with different backtick count", () => {
@@ -88,11 +88,13 @@ This should still be inside the block
 
     const parser = new CustomMarkdownParser(markdown, false);
     const tokens = parser.tokenize();
-    
-    const codeBlocks = tokens.filter(t => t.type === 'fenced_code_block');
+
+    const codeBlocks = tokens.filter((t) => t.type === "fenced_code_block");
     expect(codeBlocks).toHaveLength(1);
-    expect(codeBlocks[0].content).toContain('````');
-    expect(codeBlocks[0].content).toContain('This should still be inside the block');
+    expect(codeBlocks[0].content).toContain("````");
+    expect(codeBlocks[0].content).toContain(
+      "This should still be inside the block",
+    );
   });
 
   it("should render nested blocks correctly", () => {
@@ -106,18 +108,18 @@ print("Hello")
 
     const parser = new CustomMarkdownParser(nestedMarkdown, false);
     const result = parser.parse();
-    
+
     // Render and check the result
     const { container } = render(<div>{result}</div>);
-    
+
     // Should have one code block rendered
     const codeBlocks = container.querySelectorAll('[class*="language-"]');
     expect(codeBlocks).toHaveLength(1);
-    
+
     // Should preserve the nested content
     const codeContent = container.textContent;
-    expect(codeContent).toContain('# Example');
-    expect(codeContent).toContain('```python');
+    expect(codeContent).toContain("# Example");
+    expect(codeContent).toContain("```python");
     expect(codeContent).toContain('print("Hello")');
   });
 });
