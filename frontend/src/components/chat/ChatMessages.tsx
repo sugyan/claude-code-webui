@@ -19,6 +19,7 @@ import {
   TodoMessageComponent,
   LoadingComponent,
 } from "../MessageComponents";
+import { MessageSquare } from "lucide-react";
 // import { UI_CONSTANTS } from "../../utils/constants"; // Unused for now
 
 interface ChatMessagesProps {
@@ -100,10 +101,8 @@ function EmptyState() {
   return (
     <div className="flex-1 flex items-center justify-center text-center text-slate-500 dark:text-slate-400">
       <div>
-        <div className="text-6xl mb-6 opacity-60">
-          <span role="img" aria-label="chat icon">
-            💬
-          </span>
+        <div className="mb-6 opacity-60">
+          <MessageSquare className="w-16 h-16 mx-auto" />
         </div>
         <p className="text-lg font-medium">Start a conversation with Claude</p>
         <p className="text-sm mt-2 opacity-80">

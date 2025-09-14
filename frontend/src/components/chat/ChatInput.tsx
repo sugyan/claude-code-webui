@@ -152,11 +152,11 @@ export function ChatInput({
   const getPermissionModeIndicator = (mode: PermissionMode): string => {
     switch (mode) {
       case "default":
-        return "🔧 normal mode";
+        return "normal mode";
       case "plan":
-        return "⏸ plan mode";
+        return "plan mode";
       case "acceptEdits":
-        return "⏵⏵ accept edits";
+        return "accept edits";
     }
   };
 
