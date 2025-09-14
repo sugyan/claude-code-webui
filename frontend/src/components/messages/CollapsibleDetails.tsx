@@ -105,7 +105,7 @@ export function CollapsibleDetails({
           style={{ borderColor: "inherit" }}
         >
           <pre
-            className={`whitespace-pre-wrap ${colorScheme.content} text-xs font-mono leading-relaxed`}
+            className={`whitespace-pre-wrap break-words overflow-x-auto ${colorScheme.content} text-xs font-mono leading-relaxed`}
           >
             {contentPreview.preview}
           </pre>
@@ -121,7 +121,7 @@ export function CollapsibleDetails({
       )}
       {hasDetails && isExpanded && (
         <pre
-          className={`whitespace-pre-wrap ${colorScheme.content} text-xs font-mono leading-relaxed mt-2 pl-6 border-l-2 ${colorScheme.border}`}
+          className={`whitespace-pre-wrap break-words overflow-x-auto ${colorScheme.content} text-xs font-mono leading-relaxed mt-2 pl-6 border-l-2 ${colorScheme.border}`}
         >
           {details}
         </pre>
