@@ -21,7 +21,8 @@ import { useChatState } from "../hooks/chat/useChatState";
 import { usePermissions } from "../hooks/chat/usePermissions";
 import { usePermissionMode } from "../hooks/chat/usePermissionMode";
 import { useAbortController } from "../hooks/chat/useAbortController";
-import { useAutoHistoryLoader } from "../hooks/useHistoryLoader";
+import { useAutoCachedHistoryLoader } from "../hooks/useCachedHistoryLoader";
+import { useSessionCache } from "../hooks/useSessionCache";
 import { normalizeWindowsPath } from "../utils/pathUtils";
 import type { StreamingContext } from "../hooks/streaming/useMessageProcessor";
 import { SettingsButton } from "./SettingsButton";
@@ -95,20 +96,36 @@ export function SplitView() {
     encodedName: string,
   ) => {
     const updatedProjects = [...projects];
-    updatedProjects[projectIndex].loadingSessions = true;
+    const project = updatedProjects[projectIndex];
+    project.loadingSessions = true;
     setProjects(updatedProjects);
 
     try {
       const response = await fetch(getHistoriesUrl(encodedName));
       if (response.ok) {
         const data = await response.json();
-        updatedProjects[projectIndex].sessions = data.conversations || [];
+        const sessions = data.conversations || [];
+        project.sessions = sessions;
+
+        // Preload the most recent 3 sessions for faster switching
+        const recentSessions = sessions.slice(0, 3);
+        for (const session of recentSessions) {
+          try {
+            await preloadSession(project.path, session.sessionId, encodedName);
+          } catch (error) {
+            console.warn(
+              "Failed to preload session:",
+              session.sessionId,
+              error,
+            );
+          }
+        }
       }
     } catch (error) {
       console.error("Failed to load sessions:", error);
-      updatedProjects[projectIndex].sessions = [];
+      project.sessions = [];
     } finally {
-      updatedProjects[projectIndex].loadingSessions = false;
+      project.loadingSessions = false;
       setProjects([...updatedProjects]);
     }
   };
@@ -188,6 +205,8 @@ export function SplitView() {
   const { processStreamLine } = useClaudeStreaming();
   const { abortRequest, createAbortHandler } = useAbortController();
   const { permissionMode, setPermissionMode } = usePermissionMode();
+  const { preloadSession, setCachedSession, updateScrollPosition } =
+    useSessionCache();
 
   // Load conversation history if sessionId is provided
   const {
@@ -195,7 +214,10 @@ export function SplitView() {
     loading: historyLoading,
     error: historyError,
     sessionId: loadedSessionId,
-  } = useAutoHistoryLoader(
+    fromCache: historyFromCache,
+    scrollPosition: historyScrollPosition,
+  } = useAutoCachedHistoryLoader(
+    selectedProject || undefined,
     getEncodedName() || undefined,
     sessionId || undefined,
   );
@@ -294,9 +316,38 @@ export function SplitView() {
         const streamingContext: StreamingContext = {
           currentAssistantMessage,
           setCurrentAssistantMessage,
-          addMessage,
-          updateLastMessage,
-          onSessionId: setCurrentSessionId,
+          addMessage: (msg: ChatMessage) => {
+            addMessage(msg);
+            // Update cache when new messages are added during streaming
+            if (currentSessionId && selectedProject) {
+              const updatedMessages = [...messages, msg];
+              setCachedSession(
+                selectedProject,
+                currentSessionId,
+                updatedMessages,
+              );
+            }
+          },
+          updateLastMessage: (msg: ChatMessage) => {
+            updateLastMessage(msg);
+            // Update cache when messages are updated during streaming
+            if (currentSessionId && selectedProject) {
+              const updatedMessages = [...messages];
+              updatedMessages[updatedMessages.length - 1] = msg;
+              setCachedSession(
+                selectedProject,
+                currentSessionId,
+                updatedMessages,
+              );
+            }
+          },
+          onSessionId: (sessionId: string) => {
+            setCurrentSessionId(sessionId);
+            // Cache the conversation when we get a session ID
+            if (selectedProject && messages.length > 0) {
+              setCachedSession(selectedProject, sessionId, messages);
+            }
+          },
           shouldShowInitMessage: () => !hasShownInitMessage,
           onInitMessageShown: () => setHasShownInitMessage(true),
           get hasReceivedInit() {
@@ -406,6 +457,16 @@ export function SplitView() {
   const handlePermissionDeny = useCallback(() => {
     closePermissionRequest();
   }, [closePermissionRequest]);
+
+  // Handle scroll position changes to update cache
+  const handleScrollPositionChange = useCallback(
+    (position: number) => {
+      if (selectedProject && currentSessionId) {
+        updateScrollPosition(selectedProject, currentSessionId, position);
+      }
+    },
+    [selectedProject, currentSessionId, updateScrollPosition],
+  );
 
   // Create permission data for inline permission interface
   const permissionData = permissionRequest
@@ -603,8 +664,15 @@ export function SplitView() {
                       {getProjectDisplayName(selectedProject)}
                     </h1>
                     {currentSessionId && (
-                      <div className="text-sm text-slate-500 dark:text-slate-400 font-mono">
-                        Session: {currentSessionId.substring(0, 8)}...
+                      <div className="text-sm text-slate-500 dark:text-slate-400 font-mono flex items-center gap-2">
+                        <span>
+                          Session: {currentSessionId.substring(0, 8)}...
+                        </span>
+                        {historyFromCache && (
+                          <span className="text-xs bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full">
+                            cached
+                          </span>
+                        )}
                       </div>
                     )}
                   </div>
@@ -648,7 +716,15 @@ export function SplitView() {
                 </div>
               ) : (
                 <>
-                  <ChatMessages messages={messages} isLoading={isLoading} />
+                  <ChatMessages
+                    messages={messages}
+                    isLoading={isLoading}
+                    restoreScrollPosition={historyScrollPosition}
+                    onScrollPositionChange={handleScrollPositionChange}
+                    shouldAutoScroll={
+                      !historyFromCache || historyScrollPosition === undefined
+                    }
+                  />
                   <ChatInput
                     input={input}
                     isLoading={isLoading}
