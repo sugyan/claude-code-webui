@@ -66,7 +66,7 @@ export function ChatMessageComponent({ message }: ChatMessageComponentProps) {
           }`}
         />
       </div>
-      <pre className="whitespace-pre-wrap text-sm font-mono leading-relaxed">
+      <pre className="whitespace-pre-wrap break-words overflow-x-auto text-sm font-mono leading-relaxed">
         {message.content}
       </pre>
     </MessageContainer>
@@ -265,7 +265,7 @@ export function PlanMessageComponent({ message }: PlanMessageComponentProps) {
           Here is Claude's plan:
         </p>
         <div className="bg-blue-100/50 dark:bg-blue-800/30 border border-blue-200 dark:border-blue-700 rounded-lg p-3">
-          <pre className="text-sm text-blue-900 dark:text-blue-100 whitespace-pre-wrap font-mono leading-relaxed">
+          <pre className="text-sm text-blue-900 dark:text-blue-100 whitespace-pre-wrap break-words overflow-x-auto font-mono leading-relaxed">
             {message.plan}
           </pre>
         </div>
