@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.56](https://github.com/sugyan/claude-code-webui/compare/0.1.55...0.1.56) - 2025-09-18
+- chore(deps): Bump @hono/node-server from 1.17.0 to 1.19.1 in /backend by @dependabot[bot] in https://github.com/sugyan/claude-code-webui/pull/314
+- chore(deps): Bump actions/download-artifact from 4.3.0 to 5.0.0 by @dependabot[bot] in https://github.com/sugyan/claude-code-webui/pull/307
+- chore(deps): Bump actions/setup-node from 4.4.0 to 5.0.0 by @dependabot[bot] in https://github.com/sugyan/claude-code-webui/pull/306
+- chore(deps-dev): Bump esbuild from 0.25.6 to 0.25.9 in /backend by @dependabot[bot] in https://github.com/sugyan/claude-code-webui/pull/312
+- chore(deps-dev): Bump @types/node from 20.19.4 to 24.3.0 in /backend by @dependabot[bot] in https://github.com/sugyan/claude-code-webui/pull/308
+- chore(deps-dev): Bump typescript-eslint from 8.33.1 to 8.42.0 in /frontend by @dependabot[bot] in https://github.com/sugyan/claude-code-webui/pull/313
+- chore(deps-dev): Bump @types/react from 19.1.6 to 19.1.12 in /frontend by @dependabot[bot] in https://github.com/sugyan/claude-code-webui/pull/316
+- Fix release workflow: Generate version.ts before Deno dependency caching by @sugyan in https://github.com/sugyan/claude-code-webui/pull/317
+
 ## [0.1.55](https://github.com/sugyan/claude-code-webui/compare/0.1.54...0.1.55) - 2025-09-18
 - chore(deps): Bump hono from 4.8.5 to 4.9.7 in /backend by @dependabot[bot] in https://github.com/sugyan/claude-code-webui/pull/288
 - chore(deps): Bump esbuild and vitest in /backend by @dependabot[bot] in https://github.com/sugyan/claude-code-webui/pull/289
