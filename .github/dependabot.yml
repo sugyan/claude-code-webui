@@ -11,6 +11,8 @@ updates:
       default-days: 7
       semver-major-days: 30
       semver-minor-days: 14
+    labels:
+      - "dependencies"
 
   # Backend npm dependencies
   - package-ecosystem: "npm"
@@ -23,6 +25,8 @@ updates:
       default-days: 7
       semver-major-days: 30
       semver-minor-days: 14
+    labels:
+      - "dependencies"
 
   # GitHub Actions
   - package-ecosystem: "github-actions"
@@ -33,3 +37,5 @@ updates:
     open-pull-requests-limit: 3
     cooldown:
       default-days: 7
+    labels:
+      - "dependencies"
