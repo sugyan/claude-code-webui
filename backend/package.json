@@ -63,14 +63,14 @@
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
-    "@typescript-eslint/eslint-plugin": "^8.0.0",
-    "@typescript-eslint/parser": "^8.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.44.0",
+    "@typescript-eslint/parser": "^8.44.0",
     "esbuild": "^0.25.6",
     "eslint": "^9.0.0",
     "prettier": "^3.6.2",
     "rimraf": "^6.0.0",
     "tsx": "^4.0.0",
-    "typescript": "^5.0.0",
+    "typescript": "^5.9.0",
     "vitest": "^3.2.4"
   },
   "peerDependencies": {

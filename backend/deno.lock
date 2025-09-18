@@ -48,8 +48,8 @@
         "npm:@logtape/logtape@1",
         "npm:@logtape/pretty@1",
         "npm:@types/node@20",
-        "npm:@typescript-eslint/eslint-plugin@8",
-        "npm:@typescript-eslint/parser@8",
+        "npm:@typescript-eslint/eslint-plugin@^8.44.0",
+        "npm:@typescript-eslint/parser@^8.44.0",
         "npm:commander@14",
         "npm:esbuild@~0.25.6",
         "npm:eslint@9",
@@ -57,8 +57,8 @@
         "npm:prettier@^3.6.2",
         "npm:rimraf@6",
         "npm:tsx@4",
-        "npm:typescript@5",
-        "npm:vitest@2"
+        "npm:typescript@^5.9.0",
+        "npm:vitest@^3.2.4"
       ]
     }
   }
