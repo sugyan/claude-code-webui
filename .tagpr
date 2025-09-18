@@ -15,3 +15,7 @@
 
 	# Version file location - now using package.json
 	versionFile = backend/package.json
+
+	# Custom labels for version determination (excludes dependabot auto-labels)
+	majorLabels = ["breaking-change", "major-release"]
+	minorLabels = ["feature", "enhancement"]
