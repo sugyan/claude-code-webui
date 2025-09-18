@@ -12,9 +12,9 @@ jobs:
       pull-requests: write
       actions: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
         with:
           token: ${{ secrets.GH_PAT }}
-      - uses: Songmu/tagpr@v1
+      - uses: Songmu/tagpr@9c294c8b7b1815a5f3b7c61d6ee6aa50ac25b030 # v1.8.4
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
