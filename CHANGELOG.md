@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.55](https://github.com/sugyan/claude-code-webui/compare/0.1.54...0.1.55) - 2025-09-18
+- chore(deps): Bump hono from 4.8.5 to 4.9.7 in /backend by @dependabot[bot] in https://github.com/sugyan/claude-code-webui/pull/288
+- chore(deps): Bump esbuild and vitest in /backend by @dependabot[bot] in https://github.com/sugyan/claude-code-webui/pull/289
+- Add Dependabot configuration with cooldown settings by @sugyan in https://github.com/sugyan/claude-code-webui/pull/290
+- chore(deps): Bump @logtape/pretty from 1.0.4 to 1.0.5 in /backend by @dependabot[bot] in https://github.com/sugyan/claude-code-webui/pull/300
+- chore(deps): Bump Songmu/tagpr from 1.8.4 to 1.9.0 by @dependabot[bot] in https://github.com/sugyan/claude-code-webui/pull/294
+- chore(deps): Bump actions/github-script from 7.1.0 to 8.0.0 by @dependabot[bot] in https://github.com/sugyan/claude-code-webui/pull/292
+- chore(deps): Bump react-dom and @types/react-dom in /frontend by @dependabot[bot] in https://github.com/sugyan/claude-code-webui/pull/303
+- chore(deps-dev): Bump eslint from 9.30.1 to 9.34.0 in /backend by @dependabot[bot] in https://github.com/sugyan/claude-code-webui/pull/295
+- chore(deps): Bump actions/checkout from 4.3.0 to 5.0.0 by @dependabot[bot] in https://github.com/sugyan/claude-code-webui/pull/293
+- chore(deps-dev): Bump @tailwindcss/vite from 4.1.8 to 4.1.13 in /frontend by @dependabot[bot] in https://github.com/sugyan/claude-code-webui/pull/304
+- chore(deps-dev): Bump @typescript-eslint/parser from 8.36.0 to 8.42.0 in /backend by @dependabot[bot] in https://github.com/sugyan/claude-code-webui/pull/298
+- chore(deps-dev): Bump vitest from 3.2.3 to 3.2.4 in /frontend by @dependabot[bot] in https://github.com/sugyan/claude-code-webui/pull/297
+- chore(deps-dev): Bump eslint from 9.28.0 to 9.34.0 in /frontend by @dependabot[bot] in https://github.com/sugyan/claude-code-webui/pull/299
+- chore(deps-dev): Bump vite from 6.3.5 to 7.1.2 in /frontend by @dependabot[bot] in https://github.com/sugyan/claude-code-webui/pull/301
+- chore(deps-dev): Bump typescript from 5.8.3 to 5.9.2 in /backend by @dependabot[bot] in https://github.com/sugyan/claude-code-webui/pull/302
+- Fix dependabot and tagpr labels conflict by @sugyan in https://github.com/sugyan/claude-code-webui/pull/305
+
 ## [0.1.54](https://github.com/sugyan/claude-code-webui/compare/0.1.53...0.1.54) - 2025-09-18
 - Fix path encoding for Windows usernames with underscores by @BoQsc in https://github.com/sugyan/claude-code-webui/pull/276
 - security: Pin GitHub Actions to commit hashes using pinact by @sugyan in https://github.com/sugyan/claude-code-webui/pull/287
