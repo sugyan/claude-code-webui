@@ -30,7 +30,7 @@
   "devDependencies": {
     "@anthropic-ai/claude-code": "1.0.108",
     "@eslint/js": "^9.25.0",
-    "@playwright/test": "^1.48.2",
+    "@playwright/test": "^1.55.0",
     "@tailwindcss/vite": "^4.1.13",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
