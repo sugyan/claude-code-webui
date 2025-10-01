@@ -152,11 +152,11 @@ export function ChatInput({
   const getPermissionModeIndicator = (mode: PermissionMode): string => {
     switch (mode) {
       case "default":
-        return "🔧 normal mode";
+        return "normal mode";
       case "plan":
-        return "⏸ plan mode";
+        return "plan mode";
       case "acceptEdits":
-        return "⏵⏵ accept edits";
+        return "accept edits";
     }
   };
 
@@ -209,7 +209,7 @@ export function ChatInput({
   }
 
   return (
-    <div className="flex-shrink-0">
+    <div className="flex-shrink-0 min-w-0">
       <form onSubmit={handleSubmit} className="relative">
         <textarea
           ref={inputRef}

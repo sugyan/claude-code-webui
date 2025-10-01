@@ -47,7 +47,7 @@
         "npm:@hono/node-server@1",
         "npm:@logtape/logtape@1",
         "npm:@logtape/pretty@1",
-        "npm:@types/node@20",
+        "npm:@types/node@^24.3.0",
         "npm:@typescript-eslint/eslint-plugin@^8.44.0",
         "npm:@typescript-eslint/parser@^8.44.0",
         "npm:commander@14",

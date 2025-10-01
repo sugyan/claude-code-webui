@@ -20,6 +20,18 @@ import {
   isEditToolUseResult,
   isBashToolUseResult,
 } from "../utils/contentUtils";
+import {
+  Settings,
+  Wrench,
+  CheckCircle,
+  ClipboardList,
+  Brain,
+  Clock,
+  CheckCheck,
+  RotateCcw,
+  Loader,
+  MessageSquare,
+} from "lucide-react";
 
 // ANSI escape sequence regex for cleaning hooks messages
 const ANSI_REGEX = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, "g");
@@ -66,7 +78,7 @@ export function ChatMessageComponent({ message }: ChatMessageComponentProps) {
           }`}
         />
       </div>
-      <pre className="whitespace-pre-wrap text-sm font-mono leading-relaxed">
+      <pre className="whitespace-pre-wrap break-words overflow-x-auto text-sm font-mono leading-relaxed">
         {message.content}
       </pre>
     </MessageContainer>
@@ -127,7 +139,7 @@ export function SystemMessageComponent({
       label={getLabel()}
       details={details}
       badge={"subtype" in message ? message.subtype : undefined}
-      icon={<span className="bg-blue-400 dark:bg-blue-500">⚙</span>}
+      icon={<Settings className="w-4 h-4 text-white" />}
       colorScheme={{
         header: "text-blue-800 dark:text-blue-300",
         content: "text-blue-700 dark:text-blue-300",
@@ -150,7 +162,7 @@ export function ToolMessageComponent({ message }: ToolMessageComponentProps) {
     >
       <div className="text-xs font-semibold mb-2 opacity-90 text-emerald-700 dark:text-emerald-300 flex items-center gap-2">
         <div className="w-4 h-4 bg-emerald-500 dark:bg-emerald-600 rounded-full flex items-center justify-center text-white text-xs">
-          🔧
+          <Wrench className="w-3 h-3" />
         </div>
         {message.content}
       </div>
@@ -221,7 +233,7 @@ export function ToolResultMessageComponent({
       label={message.toolName}
       details={displayContent}
       badge={message.toolName === "Edit" ? undefined : message.summary}
-      icon={<span className="bg-emerald-400 dark:bg-emerald-500">✓</span>}
+      icon={<CheckCircle className="w-4 h-4 text-white" />}
       colorScheme={{
         header: "text-emerald-800 dark:text-emerald-300",
         content: "text-emerald-700 dark:text-emerald-300",
@@ -250,7 +262,7 @@ export function PlanMessageComponent({ message }: PlanMessageComponentProps) {
       <div className="mb-3 flex items-center justify-between gap-4">
         <div className="text-xs font-semibold opacity-90 text-blue-700 dark:text-blue-300 flex items-center gap-2">
           <div className="w-4 h-4 bg-blue-500 dark:bg-blue-600 rounded-full flex items-center justify-center text-white text-xs">
-            📋
+            <ClipboardList className="w-3 h-3" />
           </div>
           Ready to code?
         </div>
@@ -265,7 +277,7 @@ export function PlanMessageComponent({ message }: PlanMessageComponentProps) {
           Here is Claude's plan:
         </p>
         <div className="bg-blue-100/50 dark:bg-blue-800/30 border border-blue-200 dark:border-blue-700 rounded-lg p-3">
-          <pre className="text-sm text-blue-900 dark:text-blue-100 whitespace-pre-wrap font-mono leading-relaxed">
+          <pre className="text-sm text-blue-900 dark:text-blue-100 whitespace-pre-wrap break-words overflow-x-auto font-mono leading-relaxed">
             {message.plan}
           </pre>
         </div>
@@ -286,7 +298,7 @@ export function ThinkingMessageComponent({
       label="Claude's Reasoning"
       details={message.content}
       badge="thinking"
-      icon={<span className="bg-purple-400 dark:bg-purple-500">💭</span>}
+      icon={<Brain className="w-4 h-4 text-white" />}
       colorScheme={{
         header: "text-purple-700 dark:text-purple-300",
         content: "text-purple-600 dark:text-purple-400 italic",
@@ -306,12 +318,15 @@ export function TodoMessageComponent({ message }: TodoMessageComponentProps) {
   const getStatusIcon = (status: TodoItem["status"]) => {
     switch (status) {
       case "completed":
-        return { icon: "✅", label: "Completed" };
+        return { icon: <CheckCheck className="w-4 h-4" />, label: "Completed" };
       case "in_progress":
-        return { icon: "🔄", label: "In progress" };
+        return {
+          icon: <RotateCcw className="w-4 h-4" />,
+          label: "In progress",
+        };
       case "pending":
       default:
-        return { icon: "⏳", label: "Pending" };
+        return { icon: <Clock className="w-4 h-4" />, label: "Pending" };
     }
   };
 
@@ -338,7 +353,7 @@ export function TodoMessageComponent({ message }: TodoMessageComponentProps) {
             className="w-4 h-4 bg-amber-500 dark:bg-amber-600 rounded-full flex items-center justify-center text-white text-xs"
             aria-hidden="true"
           >
-            📋
+            <ClipboardList className="w-3 h-3" />
           </div>
           Todo List Updated
         </div>
@@ -353,12 +368,12 @@ export function TodoMessageComponent({ message }: TodoMessageComponentProps) {
           const statusIcon = getStatusIcon(todo.status);
           return (
             <div key={index} className="flex items-start gap-2">
-              <span
-                className="text-sm flex-shrink-0 mt-0.5"
+              <div
+                className="flex-shrink-0 mt-0.5"
                 aria-label={statusIcon.label}
               >
                 {statusIcon.icon}
-              </span>
+              </div>
               <div className="flex-1 min-w-0">
                 <div className={`text-sm ${getStatusColor(todo.status)}`}>
                   {todo.content}
@@ -392,7 +407,7 @@ export function LoadingComponent() {
         Claude
       </div>
       <div className="flex items-center gap-2 text-sm">
-        <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+        <Loader className="w-4 h-4 animate-spin" />
         <span className="animate-pulse">Thinking...</span>
       </div>
     </MessageContainer>
