@@ -123,7 +123,7 @@ jobs:
           path: ./artifacts
 
       - name: Upload release assets
-        uses: softprops/action-gh-release@6cbd405e2c4e67a21c47fa9e383d020e4e28b836 # v2.3.3
+        uses: softprops/action-gh-release@6da8fa9354ddfdc4aeace5fc48d7f679b5214090 # v2.4.1
         with:
           files: |
             artifacts/*/*
@@ -132,7 +132,7 @@ jobs:
           prerelease: false
 
       - name: Publish release
-        uses: softprops/action-gh-release@6cbd405e2c4e67a21c47fa9e383d020e4e28b836 # v2.3.3
+        uses: softprops/action-gh-release@6da8fa9354ddfdc4aeace5fc48d7f679b5214090 # v2.4.1
         with:
           generate_release_notes: true
           draft: false
