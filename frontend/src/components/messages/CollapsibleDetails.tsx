@@ -3,6 +3,7 @@ import {
   createContentPreview,
   createMoreLinesIndicator,
 } from "../../utils/contentUtils";
+import { SimpleDiffHighlighter } from "../SimpleDiffHighlighter";
 
 interface CollapsibleDetailsProps {
   label: string;
@@ -20,6 +21,7 @@ interface CollapsibleDetailsProps {
   showPreview?: boolean;
   previewContent?: string;
   previewSummary?: string;
+  useDiffHighlighter?: boolean;
 }
 
 export function CollapsibleDetails({
@@ -33,6 +35,7 @@ export function CollapsibleDetails({
   showPreview = true,
   previewContent,
   previewSummary,
+  useDiffHighlighter = false,
 }: CollapsibleDetailsProps) {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const hasDetails = details.trim().length > 0;
@@ -104,11 +107,15 @@ export function CollapsibleDetails({
           className="mt-2 pl-6 border-l-2 border-dashed opacity-80"
           style={{ borderColor: "inherit" }}
         >
-          <pre
-            className={`whitespace-pre-wrap ${colorScheme.content} text-xs font-mono leading-relaxed`}
-          >
-            {contentPreview.preview}
-          </pre>
+          {useDiffHighlighter ? (
+            <SimpleDiffHighlighter content={contentPreview.preview} className="text-xs leading-relaxed" />
+          ) : (
+            <pre
+              className={`whitespace-pre-wrap ${colorScheme.content} text-xs font-mono leading-relaxed`}
+            >
+              {contentPreview.preview}
+            </pre>
+          )}
           <div
             className={`${colorScheme.content} text-xs opacity-60 mt-1 italic`}
           >
@@ -120,11 +127,17 @@ export function CollapsibleDetails({
         </div>
       )}
       {hasDetails && isExpanded && (
-        <pre
-          className={`whitespace-pre-wrap ${colorScheme.content} text-xs font-mono leading-relaxed mt-2 pl-6 border-l-2 ${colorScheme.border}`}
+        <div
+          className={`${colorScheme.content} text-xs leading-relaxed mt-2 pl-6 border-l-2 ${colorScheme.border}`}
         >
-          {details}
-        </pre>
+          {useDiffHighlighter ? (
+            <SimpleDiffHighlighter content={details} />
+          ) : (
+            <pre className="whitespace-pre-wrap font-mono leading-relaxed">
+              {details}
+            </pre>
+          )}
+        </div>
       )}
     </div>
   );
