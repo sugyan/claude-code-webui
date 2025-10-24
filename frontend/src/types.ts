@@ -5,6 +5,7 @@ import type {
   SDKResultMessage,
   PermissionMode as SDKPermissionMode,
 } from "@anthropic-ai/claude-code";
+import type { ImageData } from "../../shared/types";
 
 // Chat message for user/assistant interactions (not part of SDKMessage)
 export interface ChatMessage {
@@ -12,6 +13,8 @@ export interface ChatMessage {
   role: "user" | "assistant";
   content: string;
   timestamp: number;
+  // Optional images for multimodal user messages
+  images?: ImageData[];
 }
 
 // Error message for streaming errors

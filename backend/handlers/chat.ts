@@ -1,7 +1,79 @@
 import { Context } from "hono";
-import { query, type PermissionMode } from "@anthropic-ai/claude-code";
-import type { ChatRequest, StreamResponse } from "../../shared/types.ts";
+import { query, type PermissionMode, type SDKUserMessage } from "@anthropic-ai/claude-code";
+import type { ChatRequest, StreamResponse, MultimodalMessage, ImageData } from "../../shared/types.ts";
 import { logger } from "../utils/logger.ts";
+import { getPlatform } from "../utils/os.ts";
+
+/**
+ * Gets the runtime type for Claude SDK
+ * @returns The runtime type that Claude SDK expects
+ */
+function getRuntimeType(): "bun" | "deno" | "node" {
+  // Check for Deno runtime
+  if (typeof (globalThis as any).Deno !== "undefined") {
+    return "deno";
+  }
+  
+  // Check for Bun runtime
+  if (typeof (globalThis as any).Bun !== "undefined") {
+    return "bun";
+  }
+  
+  // Default to Node.js
+  return "node";
+}
+
+/**
+ * Type guard to check if a message is multimodal
+ */
+function isMultimodalMessage(message: string | MultimodalMessage): message is MultimodalMessage {
+  return typeof message === 'object' && message !== null && 'text' in message && 'images' in message;
+}
+
+/**
+ * Creates an SDKUserMessage from multimodal content
+ */
+function createMultimodalSDKMessage(message: MultimodalMessage, sessionId?: string): SDKUserMessage {
+  // Build content array with text and images
+  const content = [];
+  
+  // Add text content if present
+  if (message.text.trim()) {
+    content.push({
+      type: 'text' as const,
+      text: message.text
+    });
+  }
+  
+  // Add image content blocks
+  for (const image of message.images) {
+    content.push({
+      type: 'image' as const,
+      source: {
+        type: 'base64' as const,
+        media_type: image.type,
+        data: image.data
+      }
+    });
+  }
+  
+  return {
+    type: 'user' as const,
+    message: {
+      role: 'user' as const,
+      content: content
+    },
+    session_id: sessionId || '',
+    parent_tool_use_id: null
+  };
+}
+
+/**
+ * Creates an async iterable from a single SDKUserMessage
+ */
+async function* createSDKMessageIterable(sdkMessage: SDKUserMessage): AsyncIterable<SDKUserMessage> {
+  yield sdkMessage;
+}
 
 /**
  * Executes a Claude command and yields streaming responses
@@ -16,7 +88,7 @@ import { logger } from "../utils/logger.ts";
  * @returns AsyncGenerator yielding StreamResponse objects
  */
 async function* executeClaudeCommand(
-  message: string,
+  message: string | MultimodalMessage,
   requestId: string,
   requestAbortControllers: Map<string, AbortController>,
   cliPath: string,
@@ -28,53 +100,71 @@ async function* executeClaudeCommand(
   let abortController: AbortController;
 
   try {
-    // Process commands that start with '/'
-    let processedMessage = message;
-    if (message.startsWith("/")) {
-      // Remove the '/' and send just the command
-      processedMessage = message.substring(1);
-    }
-
     // Create and store AbortController for this request
     abortController = new AbortController();
     requestAbortControllers.set(requestId, abortController);
 
-    for await (const sdkMessage of query({
-      prompt: processedMessage,
-      options: {
-        abortController,
-        executable: "node" as const,
-        executableArgs: [],
-        pathToClaudeCodeExecutable: cliPath,
-        ...(sessionId ? { resume: sessionId } : {}),
-        ...(allowedTools ? { allowedTools } : {}),
-        ...(workingDirectory ? { cwd: workingDirectory } : {}),
-        ...(permissionMode ? { permissionMode } : {}),
-      },
-    })) {
-      // Debug logging of raw SDK messages with detailed content
-      logger.chat.debug("Claude SDK Message: {sdkMessage}", { sdkMessage });
+    const runtimeType = getRuntimeType();
+    const queryOptions = {
+      abortController,
+      executable: runtimeType,
+      executableArgs: [],
+      pathToClaudeCodeExecutable: cliPath,
+      env: { ...process.env },
+      ...(sessionId ? { resume: sessionId } : {}),
+      ...(allowedTools ? { allowedTools } : {}),
+      ...(workingDirectory ? { cwd: workingDirectory } : {}),
+      ...(permissionMode ? { permissionMode } : {}),
+    };
 
-      yield {
-        type: "claude_json",
-        data: sdkMessage,
-      };
+    logger.chat.debug("Claude SDK query options: {options}", { options: queryOptions });
+
+    // Handle multimodal vs text-only messages
+    if (isMultimodalMessage(message)) {
+      // Multimodal message with images
+      logger.chat.debug("Processing multimodal message with {imageCount} images", { imageCount: message.images.length });
+      
+      const sdkMessage = createMultimodalSDKMessage(message, sessionId);
+      const messageIterable = createSDKMessageIterable(sdkMessage);
+      
+      for await (const sdkMessage of query({
+        prompt: messageIterable,
+        options: queryOptions,
+      })) {
+        logger.chat.debug("Claude SDK Message: {sdkMessage}", { sdkMessage });
+        yield {
+          type: "claude_json",
+          data: sdkMessage,
+        };
+      }
+    } else {
+      // Text-only message
+      let processedMessage = message;
+      if (message.startsWith("/")) {
+        processedMessage = message.substring(1);
+      }
+      
+      logger.chat.debug("Processing text-only message");
+      
+      for await (const sdkMessage of query({
+        prompt: processedMessage,
+        options: queryOptions,
+      })) {
+        logger.chat.debug("Claude SDK Message: {sdkMessage}", { sdkMessage });
+        yield {
+          type: "claude_json",
+          data: sdkMessage,
+        };
+      }
     }
 
     yield { type: "done" };
   } catch (error) {
-    // Check if error is due to abort
-    // TODO: Re-enable when AbortError is properly exported from Claude SDK
-    // if (error instanceof AbortError) {
-    //   yield { type: "aborted" };
-    // } else {
-    {
-      logger.chat.error("Claude Code execution failed: {error}", { error });
-      yield {
-        type: "error",
-        error: error instanceof Error ? error.message : String(error),
-      };
-    }
+    logger.chat.error("Claude Code execution failed: {error}", { error });
+    yield {
+      type: "error",
+      error: error instanceof Error ? error.message : String(error),
+    };
   } finally {
     // Clean up AbortController from map
     if (requestAbortControllers.has(requestId)) {

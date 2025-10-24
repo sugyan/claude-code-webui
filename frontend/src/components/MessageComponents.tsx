@@ -66,6 +66,28 @@ export function ChatMessageComponent({ message }: ChatMessageComponentProps) {
           }`}
         />
       </div>
+      
+      {/* Display images if present (for user messages) */}
+      {message.images && message.images.length > 0 && (
+        <div className="mb-3">
+          <div className="grid grid-cols-2 gap-2 max-w-md">
+            {message.images.map((image) => (
+              <div key={image.id} className="relative group">
+                <img
+                  src={`data:${image.type};base64,${image.data}`}
+                  alt={image.name}
+                  className="w-full aspect-square object-cover rounded-lg border border-white/20 hover:border-white/40 transition-colors"
+                  title={`${image.name} (${(image.size / 1024).toFixed(1)} KB)`}
+                />
+                <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs p-1 rounded-b-lg truncate opacity-0 group-hover:opacity-100 transition-opacity">
+                  {image.name}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      
       <pre className="whitespace-pre-wrap text-sm font-mono leading-relaxed">
         {message.content}
       </pre>
