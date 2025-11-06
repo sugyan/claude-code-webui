@@ -439,6 +439,15 @@ export function ChatPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-4 sm:mb-8 flex-shrink-0">
           <div className="flex items-center gap-4">
+            {!isHistoryView && !isLoadedConversation && (
+              <button
+                onClick={handleBackToProjects}
+                className="p-2 rounded-lg bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 transition-all duration-200 backdrop-blur-sm shadow-sm hover:shadow-md"
+                aria-label="Back to project selection"
+              >
+                <ChevronLeftIcon className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+              </button>
+            )}
             {isHistoryView && (
               <button
                 onClick={handleBackToChat}
