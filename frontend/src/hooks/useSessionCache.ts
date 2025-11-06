@@ -1,8 +1,9 @@
 import { useState, useCallback, useRef } from "react";
-import type { ConversationHistory, AllMessage } from "../types";
+import type { ConversationHistory } from "../types";
+import type { AllMessage as FrontendAllMessage } from "../types";
 
 interface CachedSession {
-  messages: AllMessage[];
+  messages: FrontendAllMessage[];
   sessionId: string;
   timestamp: number;
   projectPath: string;
@@ -17,7 +18,7 @@ interface SessionCacheHook {
   setCachedSession: (
     projectPath: string,
     sessionId: string,
-    messages: AllMessage[],
+    messages: FrontendAllMessage[],
     scrollPosition?: number,
   ) => void;
   updateScrollPosition: (
@@ -95,7 +96,7 @@ export function useSessionCache(): SessionCacheHook {
     (
       projectPath: string,
       sessionId: string,
-      messages: AllMessage[],
+      messages: FrontendAllMessage[],
       scrollPosition?: number,
     ) => {
       cleanExpiredCache();
@@ -151,7 +152,7 @@ export function useSessionCache(): SessionCacheHook {
         );
         if (response.ok) {
           const data: ConversationHistory = await response.json();
-          setCachedSession(projectPath, sessionId, data.messages);
+          setCachedSession(projectPath, sessionId, data.messages as FrontendAllMessage[]);
         }
       } catch (error) {
         console.error("Failed to preload session:", error);

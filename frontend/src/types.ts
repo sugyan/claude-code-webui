@@ -218,6 +218,8 @@ export type {
   ChatRequest,
   ProjectsResponse,
   ProjectInfo,
+  ConversationSummary,
+  ConversationHistory,
 } from "../../shared/types";
 
 // Re-export SDK types

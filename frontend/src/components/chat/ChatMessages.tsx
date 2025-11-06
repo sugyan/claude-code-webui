@@ -40,7 +40,7 @@ export function ChatMessages({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const isRestoringScroll = useRef(false);
-  const scrollTimeout = useRef<NodeJS.Timeout>();
+  const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
 
   // Auto-scroll to bottom
   const scrollToBottom = () => {

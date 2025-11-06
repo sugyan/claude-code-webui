@@ -30,7 +30,6 @@ import {
   CheckCheck,
   RotateCcw,
   Loader,
-  MessageSquare,
 } from "lucide-react";
 
 // ANSI escape sequence regex for cleaning hooks messages

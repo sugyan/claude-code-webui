@@ -16,6 +16,7 @@ import type {
   ChatRequest,
   ChatMessage,
   PermissionMode,
+  AllMessage,
 } from "../types";
 import { getProjectsUrl, getHistoriesUrl, getChatUrl } from "../config/api";
 import { useClaudeStreaming } from "../hooks/useClaudeStreaming";
@@ -332,7 +333,7 @@ export function SplitView() {
         const streamingContext: StreamingContext = {
           currentAssistantMessage,
           setCurrentAssistantMessage,
-          addMessage: (msg: ChatMessage) => {
+          addMessage: (msg: AllMessage) => {
             addMessage(msg);
             // Update cache when new messages are added during streaming
             if (currentSessionId && selectedProject) {
@@ -344,17 +345,24 @@ export function SplitView() {
               );
             }
           },
-          updateLastMessage: (msg: ChatMessage) => {
-            updateLastMessage(msg);
+          updateLastMessage: (content: string) => {
+            // The streaming context expects us to update with content string
+            updateLastMessage(content);
             // Update cache when messages are updated during streaming
             if (currentSessionId && selectedProject) {
               const updatedMessages = [...messages];
-              updatedMessages[updatedMessages.length - 1] = msg;
-              setCachedSession(
-                selectedProject,
-                currentSessionId,
-                updatedMessages,
-              );
+              const lastMessage = updatedMessages[updatedMessages.length - 1];
+              if (lastMessage && 'content' in lastMessage) {
+                updatedMessages[updatedMessages.length - 1] = {
+                  ...lastMessage,
+                  content
+                } as AllMessage;
+                setCachedSession(
+                  selectedProject,
+                  currentSessionId,
+                  updatedMessages,
+                );
+              }
             }
           },
           onSessionId: (sessionId: string) => {
