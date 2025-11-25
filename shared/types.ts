@@ -26,6 +26,23 @@ export interface ProjectsResponse {
   projects: ProjectInfo[];
 }
 
+// Claude projects discovery types
+export interface ClaudeProject {
+  encodedName: string;
+  displayName: string;
+  path: string; // The actual file system path
+  conversationCount: number;
+  lastModified?: string;
+}
+
+export interface ClaudeProjectsResponse {
+  projects: ClaudeProject[];
+}
+
+export interface ProjectConversationsResponse {
+  conversations: ConversationSummary[];
+}
+
 // Conversation history types
 export interface ConversationSummary {
   sessionId: string;
