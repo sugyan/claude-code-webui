@@ -24,6 +24,7 @@ export interface AppConfig {
   debugMode: boolean;
   staticPath: string;
   cliPath: string; // Actual CLI script path detected by validateClaudeCli
+  claudeArgs: string[]; // Additional CLI arguments to pass to claude-code
 }
 
 export function createApp(
@@ -52,6 +53,7 @@ export function createApp(
       debugMode: config.debugMode,
       runtime,
       cliPath: config.cliPath,
+      claudeArgs: config.claudeArgs,
     }),
   );
 

@@ -11,6 +11,7 @@ export interface ChatRequest {
   allowedTools?: string[];
   workingDirectory?: string;
   permissionMode?: "default" | "plan" | "acceptEdits";
+  claudeArgs?: string[];
 }
 
 export interface AbortRequest {

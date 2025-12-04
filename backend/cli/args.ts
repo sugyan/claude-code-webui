@@ -13,6 +13,7 @@ export interface ParsedArgs {
   port: number;
   host: string;
   claudePath?: string;
+  claudeArgs: string[];
 }
 
 export function parseCliArgs(): ParsedArgs {
@@ -48,7 +49,12 @@ export function parseCliArgs(): ParsedArgs {
       "--claude-path <path>",
       "Path to claude executable (overrides automatic detection)",
     )
-    .option("-d, --debug", "Enable debug mode", false);
+    .option("-d, --debug", "Enable debug mode", false)
+    .option(
+      "--claude-arg <arg...>",
+      "Pass additional arguments to claude-code CLI (can be used multiple times)",
+      [],
+    );
 
   // Parse arguments - Commander.js v14 handles this automatically
   program.parse(getArgs(), { from: "user" });
@@ -63,5 +69,6 @@ export function parseCliArgs(): ParsedArgs {
     port: options.port,
     host: options.host,
     claudePath: options.claudePath,
+    claudeArgs: options.claudeArg || [],
   };
 }
