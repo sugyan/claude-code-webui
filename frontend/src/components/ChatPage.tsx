@@ -434,7 +434,7 @@ export function ChatPage() {
   }, [isLoading, currentRequestId, handleAbort]);
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
+    <div className="min-h-screen transition-colors duration-300" style={{ backgroundColor: "#0D0D0D" }}>
       <div className="max-w-6xl mx-auto p-3 sm:p-6 h-screen flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between mb-4 sm:mb-8 flex-shrink-0">
@@ -465,7 +465,7 @@ export function ChatPage() {
                     className="text-slate-800 dark:text-slate-100 text-lg sm:text-3xl font-bold tracking-tight hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 rounded-md px-1 -mx-1"
                     aria-label="Back to project selection"
                   >
-                    Claude Code Web UI
+                    Jace HQ
                   </button>
                   {(isHistoryView || sessionId) && (
                     <>

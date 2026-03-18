@@ -2,7 +2,7 @@
 !.claude/settings.json
 
 # Build artifacts
-dist/
+dist
 backend/dist/
 
 # Demo recordings and Playwright artifacts
