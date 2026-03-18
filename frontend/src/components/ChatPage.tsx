@@ -465,7 +465,7 @@ export function ChatPage() {
                     className="text-slate-800 dark:text-slate-100 text-lg sm:text-3xl font-bold tracking-tight hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 rounded-md px-1 -mx-1"
                     aria-label="Back to project selection"
                   >
-                    Claude Code Web UI
+                    Jace HQ
                   </button>
                   {(isHistoryView || sessionId) && (
                     <>
