@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <title>Claude Code Web UI</title>
+    <script>
+      // Prevent flash of unstyled content by setting theme class early
+      (function () {
+        const storedTheme = localStorage.getItem("claude-code-webui-theme");
+        let theme = null;
+        try {
+          theme = storedTheme ? JSON.parse(storedTheme) : null;
+        } catch {
+          // If parsing fails, fall back to null
+          theme = null;
+        }
+        
+        if (
+          theme === "dark" ||
+          (!theme && window.matchMedia("(prefers-color-scheme: dark)").matches)
+        ) {
+          document.documentElement.classList.add("dark");
+        } else {
+          document.documentElement.classList.remove("dark");
+        }
+      })();
+    </script>
+    <script type="module" crossorigin src="/assets/index-DV-4T2oH.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-D1U1I1cm.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
