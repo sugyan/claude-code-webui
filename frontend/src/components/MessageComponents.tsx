@@ -57,7 +57,7 @@ export function ChatMessageComponent({ message }: ChatMessageComponentProps) {
             isUser ? "text-blue-100" : "text-slate-600 dark:text-slate-400"
           }`}
         >
-          {isUser ? "User" : "Claude"}
+          {isUser ? "Belle" : "Jace"}
         </div>
         <TimestampComponent
           timestamp={message.timestamp}
