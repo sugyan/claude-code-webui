@@ -37,18 +37,6 @@ export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
     }
   };
 
-  // Check if user is near bottom of messages (unused but kept for future use)
-  // const isNearBottom = () => {
-  //   const container = messagesContainerRef.current;
-  //   if (!container) return true;
-
-  //   const { scrollTop, scrollHeight, clientHeight } = container;
-  //   return (
-  //     scrollHeight - scrollTop - clientHeight <
-  //     UI_CONSTANTS.NEAR_BOTTOM_THRESHOLD_PX
-  //   );
-  // };
-
   // Auto-scroll when messages change
   useEffect(() => {
     scrollToBottom();
@@ -79,7 +67,8 @@ export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
   return (
     <div
       ref={messagesContainerRef}
-      className="flex-1 overflow-y-auto bg-white/70 dark:bg-slate-800/70 border border-slate-200/60 dark:border-slate-700/60 p-3 sm:p-6 mb-3 sm:mb-6 rounded-2xl shadow-sm backdrop-blur-sm flex flex-col"
+      className="flex-1 overflow-y-auto p-3 sm:p-6 mb-3 sm:mb-6 rounded-2xl flex flex-col"
+      style={{ backgroundColor: "#0D0D0D", border: "1px solid #BA9731" }}
     >
       {messages.length === 0 ? (
         <EmptyState />
@@ -98,17 +87,15 @@ export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
 
 function EmptyState() {
   return (
-    <div className="flex-1 flex items-center justify-center text-center text-slate-500 dark:text-slate-400">
+    <div className="flex-1 flex items-center justify-center text-center" style={{ color: "#BA9731" }}>
       <div>
         <div className="text-6xl mb-6 opacity-60">
           <span role="img" aria-label="chat icon">
             💬
           </span>
         </div>
-        <p className="text-lg font-medium">Start a conversation with Claude</p>
-        <p className="text-sm mt-2 opacity-80">
-          Type your message below to begin
-        </p>
+        <p className="text-lg font-medium">Jace is here.</p>
+        <p className="text-sm mt-2 opacity-80">Say something.</p>
       </div>
     </div>
   );
