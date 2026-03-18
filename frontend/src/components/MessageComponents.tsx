@@ -43,8 +43,8 @@ interface ChatMessageComponentProps {
 export function ChatMessageComponent({ message }: ChatMessageComponentProps) {
   const isUser = message.role === "user";
   const colorScheme = isUser
-    ? "bg-blue-600 text-white"
-    : "bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-100";
+    ? "bg-[#DACE84] text-[#0D0D0D]"
+    : "bg-[#BA9731] text-[#F2F2F2]";
 
   return (
     <MessageContainer
@@ -54,7 +54,7 @@ export function ChatMessageComponent({ message }: ChatMessageComponentProps) {
       <div className="mb-2 flex items-center justify-between gap-4">
         <div
           className={`text-xs font-semibold opacity-90 ${
-            isUser ? "text-blue-100" : "text-slate-600 dark:text-slate-400"
+            isUser ? "text-[#0D0D0D]" : "text-[#F2F2F2]"
           }`}
         >
           {isUser ? "Belle" : "Jace"}
@@ -62,7 +62,7 @@ export function ChatMessageComponent({ message }: ChatMessageComponentProps) {
         <TimestampComponent
           timestamp={message.timestamp}
           className={`text-xs opacity-70 ${
-            isUser ? "text-blue-200" : "text-slate-500 dark:text-slate-500"
+            isUser ? "text-[#0D0D0D]/70" : "text-[#F2F2F2]/70"
           }`}
         />
       </div>
@@ -283,15 +283,15 @@ export function ThinkingMessageComponent({
 }: ThinkingMessageComponentProps) {
   return (
     <CollapsibleDetails
-      label="Claude's Reasoning"
+      label="Jace's Reasoning"
       details={message.content}
       badge="thinking"
-      icon={<span className="bg-purple-400 dark:bg-purple-500">💭</span>}
+      icon={<span className="bg-[#BA9731]">💭</span>}
       colorScheme={{
-        header: "text-purple-700 dark:text-purple-300",
-        content: "text-purple-600 dark:text-purple-400 italic",
-        border: "border-purple-200 dark:border-purple-700",
-        bg: "bg-purple-50/60 dark:bg-purple-900/15 border border-purple-200 dark:border-purple-800",
+        header: "text-[#BA9731]",
+        content: "text-[#F2F2F2] italic",
+        border: "border-[#BA9731]",
+        bg: "bg-[#0D0D0D] border border-[#BA9731]",
       }}
       defaultExpanded={true}
     />
@@ -386,10 +386,10 @@ export function LoadingComponent() {
   return (
     <MessageContainer
       alignment="left"
-      colorScheme="bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-100"
+      colorScheme="bg-[#BA9731] text-[#F2F2F2]"
     >
-      <div className="text-xs font-semibold mb-2 opacity-90 text-slate-600 dark:text-slate-400">
-        Jace 
+      <div className="text-xs font-semibold mb-2 opacity-90 text-[#F2F2F2]">
+        Jace
       </div>
       <div className="flex items-center gap-2 text-sm">
         <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
