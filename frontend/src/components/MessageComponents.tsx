@@ -42,28 +42,22 @@ interface ChatMessageComponentProps {
 
 export function ChatMessageComponent({ message }: ChatMessageComponentProps) {
   const isUser = message.role === "user";
-  const colorScheme = isUser
-    ? "bg-[#DACE84] text-[#0D0D0D]"
-    : "bg-[#BA9731] text-[#F2F2F2]";
-
   return (
     <MessageContainer
       alignment={isUser ? "right" : "left"}
-      colorScheme={colorScheme}
+      colorScheme=""
+      style={{ backgroundColor: isUser ? "#DACE84" : "#BA9731", color: isUser ? "#0D0D0D" : "#F2F2F2" }}
     >
       <div className="mb-2 flex items-center justify-between gap-4">
         <div
-          className={`text-xs font-semibold opacity-90 ${
-            isUser ? "text-[#0D0D0D]" : "text-[#F2F2F2]"
-          }`}
+          className="text-xs font-semibold opacity-90"
+          style={{ color: isUser ? "#0D0D0D" : "#F2F2F2" }}
         >
           {isUser ? "Belle" : "Jace"}
         </div>
         <TimestampComponent
           timestamp={message.timestamp}
-          className={`text-xs opacity-70 ${
-            isUser ? "text-[#0D0D0D]/70" : "text-[#F2F2F2]/70"
-          }`}
+          className="text-xs opacity-70"
         />
       </div>
       <pre className="whitespace-pre-wrap text-sm font-mono leading-relaxed">
@@ -386,9 +380,10 @@ export function LoadingComponent() {
   return (
     <MessageContainer
       alignment="left"
-      colorScheme="bg-[#BA9731] text-[#F2F2F2]"
+      colorScheme=""
+      style={{ backgroundColor: "#BA9731", color: "#F2F2F2" }}
     >
-      <div className="text-xs font-semibold mb-2 opacity-90 text-[#F2F2F2]">
+      <div className="text-xs font-semibold mb-2 opacity-90" style={{ color: "#F2F2F2" }}>
         Jace
       </div>
       <div className="flex items-center gap-2 text-sm">
