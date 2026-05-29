@@ -13,6 +13,7 @@ import { logger } from "../utils/logger.ts";
  * @param allowedTools - Optional array of allowed tool names
  * @param workingDirectory - Optional working directory for Claude execution
  * @param permissionMode - Optional permission mode for Claude execution
+ * @param claudeArgs - Optional additional CLI arguments to pass to claude-code
  * @returns AsyncGenerator yielding StreamResponse objects
  */
 async function* executeClaudeCommand(
@@ -24,6 +25,7 @@ async function* executeClaudeCommand(
   allowedTools?: string[],
   workingDirectory?: string,
   permissionMode?: PermissionMode,
+  claudeArgs?: string[],
 ): AsyncGenerator<StreamResponse> {
   let abortController: AbortController;
 
@@ -44,7 +46,7 @@ async function* executeClaudeCommand(
       options: {
         abortController,
         executable: "node" as const,
-        executableArgs: [],
+        executableArgs: claudeArgs || [],
         pathToClaudeCodeExecutable: cliPath,
         ...(sessionId ? { resume: sessionId } : {}),
         ...(allowedTools ? { allowedTools } : {}),
@@ -94,12 +96,18 @@ export async function handleChatRequest(
   requestAbortControllers: Map<string, AbortController>,
 ) {
   const chatRequest: ChatRequest = await c.req.json();
-  const { cliPath } = c.var.config;
+  const { cliPath, claudeArgs: globalClaudeArgs } = c.var.config;
 
   logger.chat.debug(
     "Received chat request {*}",
     chatRequest as unknown as Record<string, unknown>,
   );
+
+  // Merge global claudeArgs with request-specific claudeArgs (if any)
+  const mergedClaudeArgs = [
+    ...(globalClaudeArgs || []),
+    ...(chatRequest.claudeArgs || []),
+  ];
 
   const stream = new ReadableStream({
     async start(controller) {
@@ -113,6 +121,7 @@ export async function handleChatRequest(
           chatRequest.allowedTools,
           chatRequest.workingDirectory,
           chatRequest.permissionMode,
+          mergedClaudeArgs,
         )) {
           const data = JSON.stringify(chunk) + "\n";
           controller.enqueue(new TextEncoder().encode(data));
