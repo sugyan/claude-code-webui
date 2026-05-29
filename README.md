@@ -6,6 +6,9 @@
 [![CI](https://github.com/sugyan/claude-code-webui/actions/workflows/ci.yml/badge.svg)](https://github.com/sugyan/claude-code-webui/actions/workflows/ci.yml)
 [![GitHub Release](https://img.shields.io/github/v/release/sugyan/claude-code-webui)](https://github.com/sugyan/claude-code-webui/releases)
 
+> [!WARNING]
+> **This project is no longer actively maintained.** Issues and pull requests are unlikely to receive responses. The repository has been archived and is kept available for reference. Feel free to fork it if you'd like to continue development.
+
 > **A modern web interface for Claude Code CLI** - Transform your command-line coding experience into an intuitive web-based chat interface
 
 [🎬 **View Demo**](https://github.com/user-attachments/assets/33e769b0-b17e-470b-8163-c71ef186b5af)
